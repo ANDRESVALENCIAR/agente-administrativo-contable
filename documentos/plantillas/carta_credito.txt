@@ -1,0 +1,22 @@
+{{NOMBRE_EMPRESA}}
+NIT: {{NIT}}
+{{CIUDAD_EMPRESA}}, {{FECHA}}
+
+Señores
+{{CLIENTE}}
+NIT: {{NIT_CLIENTE}}
+
+Asunto: Respuesta a solicitud de crédito comercial
+
+Cordial saludo,
+
+Por medio de la presente nos permitimos informarle sobre el estudio de su solicitud de crédito
+por un cupo de ${{CUPO_SOLICITADO}}.
+
+{{TEXTO_CLAUDE}}
+
+Atentamente,
+
+_______________________________
+Representante Legal
+{{NOMBRE_EMPRESA}}

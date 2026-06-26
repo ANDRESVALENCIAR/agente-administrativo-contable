@@ -1,0 +1,18 @@
+CERTIFICACIÓN LABORAL
+
+{{NOMBRE_EMPRESA}}
+NIT: {{NIT}}
+{{CIUDAD_EMPRESA}}
+
+CERTIFICA QUE:
+
+El(la) señor(a) {{NOMBRE_EMPLEADO}}, identificado(a) con cédula de ciudadanía No. {{CEDULA}},
+labora/laboró en esta empresa desempeñando el cargo de {{CARGO}}.
+
+{{TEXTO_CLAUDE}}
+
+Se expide a solicitud del interesado en {{CIUDAD_EMPRESA}}, {{FECHA}}.
+
+_______________________________
+Recursos Humanos
+{{NOMBRE_EMPRESA}}

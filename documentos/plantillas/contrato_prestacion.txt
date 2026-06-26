@@ -1,0 +1,14 @@
+CONTRATO DE PRESTACIÓN DE SERVICIOS
+
+Entre {{NOMBRE_EMPRESA}}, NIT {{NIT}}, y {{NOMBRE_CONTRATISTA}}, identificado con
+{{DOCUMENTO}}, se acuerda la prestación de servicios profesionales en {{CIUDAD_EMPRESA}}.
+
+OBJETO: {{OBJETO_CONTRATO}}
+VALOR: ${{VALOR_CONTRATO}}
+PLAZO: {{PLAZO}}
+
+{{TEXTO_CLAUDE}}
+
+Firmado en {{CIUDAD_EMPRESA}}, {{FECHA}}.
+
+CONTRATANTE: _________________       CONTRATISTA: _________________

@@ -1,0 +1,11 @@
+.env
+*.json
+!railway.json
+agente.db
+agente.log
+__pycache__/
+*.pyc
+.venv/
+.streamlit/
+documentos/generados/
+!documentos/generados/.gitkeep

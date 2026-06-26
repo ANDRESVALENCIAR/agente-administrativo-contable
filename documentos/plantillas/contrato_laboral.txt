@@ -1,0 +1,18 @@
+CONTRATO DE TRABAJO A TÉRMINO {{TIPO_PLAZO}}
+
+Entre {{NOMBRE_EMPRESA}}, NIT {{NIT}}, y el(la) señor(a) {{NOMBRE_EMPLEADO}},
+identificado(a) con cédula {{CEDULA}}, se celebra el presente contrato de trabajo
+conforme al Código Sustantivo del Trabajo colombiano.
+
+CLÁUSULAS:
+
+1. CARGO: {{CARGO}}
+2. SALARIO: ${{SALARIO}} mensuales
+3. FECHA INICIO: {{FECHA_INICIO}}
+4. FECHA FIN: {{FECHA_FIN}}
+
+{{TEXTO_CLAUDE}}
+
+Firmado en {{CIUDAD_EMPRESA}}, {{FECHA}}.
+
+EMPLEADOR: _________________          TRABAJADOR: _________________
