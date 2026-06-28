@@ -145,6 +145,8 @@ def inicializar_db() -> None:
     """)
     conn.commit()
     conn.close()
+    from database_modulos import inicializar_tablas_modulos
+    inicializar_tablas_modulos()
     logger.info("Base de datos inicializada correctamente.")
 
 
@@ -408,6 +410,21 @@ def cargar_datos_demo() -> None:
         (message_id, origen, remitente, asunto, categoria, destino_reenvio, accion)
         VALUES (?,?,?,?,?,?,?)""",
         ("demo-001", "GMAIL", "facturas@proveedor.com", "Factura #1234", "factura", "contabilidad@empresa.com", "REENVIADO"),
+    )
+    c.execute(
+        """INSERT INTO creditos_analizados
+        (cliente, nit, cupo_solicitado, cupo_aprobado, decision, condiciones, justificacion, estado_habilitacion)
+        VALUES (?,?,?,?,?,?,?,?)""",
+        (
+            "Distribuidora Norte",
+            "901555666-7",
+            5000000,
+            4000000,
+            "CONDICIONAL",
+            "Garantía bancaria 20%",
+            "Capacidad de pago aceptable con condiciones.",
+            "PENDIENTE",
+        ),
     )
     conn.commit()
     conn.close()

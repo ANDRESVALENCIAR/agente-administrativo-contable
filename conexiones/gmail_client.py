@@ -103,7 +103,7 @@ def reenviar_correo(message_id: str, destino: str, nota: str = "") -> bool:
         mime_msg = MIMEMultipart()
         mime_msg["To"] = destino
         if nota:
-            mime_msg.attach(MIMEText(f"[Agente Admin]: {nota}\n\n--- Correo original ---\n", "plain"))
+            mime_msg.attach(MIMEText(f"[AGENTE ADMIN SHAKI]: {nota}\n\n--- Correo original ---\n", "plain"))
         encoded = base64.urlsafe_b64encode(mime_msg.as_bytes()).decode()
         service.users().messages().send(userId="me", body={"raw": encoded}).execute()
         marcar_como_leido(message_id)

@@ -6,7 +6,7 @@ import unittest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from database import inicializar_db
-from modulos.correos import PROMPT_CLASIFICACION
+from modulos.correos import PROMPT_CLASIFICACION, normalizar_categoria
 
 
 class TestCorreos(unittest.TestCase):
@@ -25,6 +25,13 @@ class TestCorreos(unittest.TestCase):
         )
         self.assertIn("Factura 123", prompt)
         self.assertIn("factura", prompt.lower())
+
+    def test_normalizar_categoria_v2(self) -> None:
+        """Alias y categorías del prompt maestro v2."""
+        self.assertEqual(normalizar_categoria("pago"), "solicitud_pago")
+        self.assertEqual(normalizar_categoria("extracto_bancario"), "extracto_bancario")
+        self.assertEqual(normalizar_categoria("cobranza"), "cobranza")
+        self.assertEqual(normalizar_categoria("desconocido"), "otro")
 
 
 if __name__ == "__main__":

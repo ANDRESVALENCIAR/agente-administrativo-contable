@@ -6,6 +6,8 @@ agente.log
 __pycache__/
 *.pyc
 .venv/
-.streamlit/
+.streamlit/secrets.toml
+.streamlit/credentials.toml
 documentos/generados/
 !documentos/generados/.gitkeep
+reportes/

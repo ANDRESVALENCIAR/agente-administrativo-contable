@@ -39,27 +39,38 @@ class Config:
     EMAIL_CONTABILIDAD = os.getenv("EMAIL_CONTABILIDAD")
     EMAIL_SERVICIO = os.getenv("EMAIL_SERVICIO")
     EMAIL_TESORERIA = os.getenv("EMAIL_TESORERIA")
+    EMAIL_PAGOS = os.getenv("EMAIL_PAGOS") or os.getenv("EMAIL_TESORERIA")
     EMAIL_COMPRAS = os.getenv("EMAIL_COMPRAS")
+    EMAIL_CARTERA = os.getenv("EMAIL_CARTERA")
     EMAIL_GERENCIA = os.getenv("EMAIL_GERENCIA")
     EMAIL_RRHH = os.getenv("EMAIL_RRHH")
     EMAIL_JURIDICO = os.getenv("EMAIL_JURIDICO")
+    EMAIL_LEGAL = os.getenv("EMAIL_LEGAL") or os.getenv("EMAIL_JURIDICO")
     EMAIL_ALERTAS = os.getenv("EMAIL_ALERTAS")
 
     # Empresa
-    NOMBRE_EMPRESA = os.getenv("NOMBRE_EMPRESA", "Empresa S.A.S.")
+    NOMBRE_EMPRESA = os.getenv("NOMBRE_EMPRESA", "EIF SAS")
     NIT_EMPRESA = os.getenv("NIT_EMPRESA", "900.000.000-0")
     CIUDAD_EMPRESA = os.getenv("CIUDAD_EMPRESA", "Cali")
     DATABASE_PATH = os.getenv("DATABASE_PATH", "agente.db")
 
-    # Destinos de correo por categoría
+    # Destinos de correo por categoría (PROMPT_MAESTRO_SHAKI_v2)
     DESTINOS_CORREO = {
         "factura": os.getenv("EMAIL_CONTABILIDAD"),
         "pqr": os.getenv("EMAIL_SERVICIO"),
-        "pago": os.getenv("EMAIL_TESORERIA"),
+        "registro_proveedor": os.getenv("EMAIL_COMPRAS"),
+        "solicitud_pago": EMAIL_PAGOS,
+        "cobranza": EMAIL_CARTERA,
+        "juridico": EMAIL_LEGAL,
+        "extracto_bancario": os.getenv("EMAIL_CONTABILIDAD"),
+        "comunicacion_interna": os.getenv("EMAIL_GERENCIA"),
+        "nomina": os.getenv("EMAIL_RRHH"),
+        "incapacidad": os.getenv("EMAIL_RRHH"),
+        "otro": os.getenv("EMAIL_GERENCIA"),
+        # Alias compatibles con versiones anteriores
+        "pago": EMAIL_PAGOS,
         "proveedor": os.getenv("EMAIL_COMPRAS"),
         "comunicacion": os.getenv("EMAIL_GERENCIA"),
-        "incapacidad": os.getenv("EMAIL_RRHH"),
-        "juridico": os.getenv("EMAIL_JURIDICO"),
     }
 
 

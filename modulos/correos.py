@@ -18,14 +18,87 @@ from database import crear_alerta, registrar_accion
 
 logger = logging.getLogger(__name__)
 
+CATEGORIAS_CORREO = [
+    "factura",
+    "pqr",
+    "solicitud_pago",
+    "registro_proveedor",
+    "cobranza",
+    "comunicacion_interna",
+    "nomina",
+    "juridico",
+    "extracto_bancario",
+    "incapacidad",
+    "otro",
+    "spam",
+]
+
+_ALIASES_CATEGORIA = {
+    "pago": "solicitud_pago",
+    "proveedor": "registro_proveedor",
+    "comunicacion": "comunicacion_interna",
+    "registro_prov": "registro_proveedor",
+    "registro_proveedor": "registro_proveedor",
+    "solicitud_pago": "solicitud_pago",
+    "extracto_bancario": "extracto_bancario",
+}
+
+
+def normalizar_categoria(categoria: str) -> str:
+    """Unifica categorías del clasificador con reglas PROMPT_MAESTRO_SHAKI_v2."""
+    cat = (categoria or "").strip().lower().replace(" ", "_")
+    cat = _ALIASES_CATEGORIA.get(cat, cat)
+    if cat in CATEGORIAS_CORREO:
+        return cat
+    return "otro"
+
+
+def obtener_destinos_correo() -> dict[str, str | None]:
+    """
+    Destinos por categoría: primero reglas activas en BD, luego config (.env).
+    """
+    destinos = dict(cfg.DESTINOS_CORREO)
+    conn = sqlite3.connect(cfg.DATABASE_PATH)
+    c = conn.cursor()
+    c.execute("SELECT categoria, destino FROM reglas_correo WHERE activo=1")
+    for categoria, destino in c.fetchall():
+        if destino:
+            destinos[categoria.lower()] = destino
+    conn.close()
+    return destinos
+
+
+def sincronizar_reglas_desde_config() -> int:
+    """Inserta/actualiza reglas_correo desde DESTINOS_CORREO del .env."""
+    conn = sqlite3.connect(cfg.DATABASE_PATH)
+    c = conn.cursor()
+    n = 0
+    for categoria, destino in cfg.DESTINOS_CORREO.items():
+        if not destino:
+            continue
+        c.execute(
+            """INSERT INTO reglas_correo (categoria, destino, activo) VALUES (?,?,1)
+               ON CONFLICT(categoria) DO UPDATE SET destino=excluded.destino, activo=1""",
+            (categoria, destino),
+        )
+        n += 1
+    conn.commit()
+    conn.close()
+    return n
+
+
 PROMPT_CLASIFICACION = """Clasifica este correo en UNA de estas categorías:
 - factura: facturas, cuentas de cobro, documentos de cobro
 - pqr: peticiones, quejas, reclamos de clientes
-- pago: solicitudes de pago, confirmaciones, referencias bancarias
-- proveedor: registro de proveedores, cotizaciones, ofertas
-- comunicacion: comunicaciones internas, circulares
-- incapacidad: incapacidades médicas para radicar en EPS
+- solicitud_pago: solicitudes de pago, confirmaciones, referencias bancarias
+- registro_proveedor: registro de proveedores, cotizaciones, ofertas
+- cobranza: gestión de cartera, recordatorios de pago, mora
+- comunicacion_interna: comunicaciones internas, circulares
+- nomina: nómina, prestaciones, seguridad social
 - juridico: contratos, demandas, requerimientos legales
+- extracto_bancario: extractos y movimientos bancarios
+- incapacidad: incapacidades médicas para radicar en EPS
+- otro: no encaja en las anteriores
 - spam: publicidad, newsletters no solicitados, irrelevantes
 
 Asunto: {asunto}
@@ -58,22 +131,9 @@ def procesar_correos() -> None:
                 remitente=correo["remitente"],
                 cuerpo=correo["cuerpo"],
             )
-            categoria = llamar_claude_simple(prompt, modulo="correos").strip().lower()
+            categoria = normalizar_categoria(llamar_claude_simple(prompt, modulo="correos"))
 
-            cats_validas = [
-                "factura",
-                "pqr",
-                "pago",
-                "proveedor",
-                "comunicacion",
-                "incapacidad",
-                "juridico",
-                "spam",
-            ]
-            if categoria not in cats_validas:
-                categoria = "comunicacion"
-
-            destino = cfg.DESTINOS_CORREO.get(categoria)
+            destino = obtener_destinos_correo().get(categoria)
             accion = ""
 
             if categoria == "spam":
@@ -147,7 +207,7 @@ def generar_resumen_diario_correos() -> None:
         <tr><th>Categoría</th><th>Cantidad</th></tr>
         {tabla}
     </table>
-    <p><em>Generado automáticamente por el Agente Administrativo</em></p>
+    <p><em>Generado automáticamente por AGENTE ADMIN SHAKI — EIF SAS</em></p>
     """
     destino = cfg.EMAIL_GERENCIA or "gerencia@empresa.com"
     enviar_correo(

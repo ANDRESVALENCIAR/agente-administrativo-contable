@@ -1,6 +1,7 @@
 """
 Cliente Claude API con prompt caching, Batch API y registro de tokens.
 """
+import hashlib
 import anthropic
 import json
 import time
@@ -47,6 +48,33 @@ def _respuesta_demo(prompt: str, modulo: str) -> str:
     )
 
 
+def _cache_get(clave: str) -> str | None:
+    """Retorna respuesta cacheada si tiene menos de 1 hora."""
+    from database import get_conn
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute(
+        "SELECT respuesta FROM cache_api WHERE clave=? AND timestamp >= datetime('now','-1 hour')",
+        (clave,),
+    )
+    row = c.fetchone()
+    conn.close()
+    return row[0] if row else None
+
+
+def _cache_set(clave: str, respuesta: str) -> None:
+    """Guarda respuesta en caché API."""
+    from database import get_conn
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute(
+        "INSERT INTO cache_api (clave, respuesta) VALUES (?,?) ON CONFLICT(clave) DO UPDATE SET respuesta=excluded.respuesta, timestamp=CURRENT_TIMESTAMP",
+        (clave, respuesta),
+    )
+    conn.commit()
+    conn.close()
+
+
 def llamar_claude(
     prompt: str,
     modelo: str | None = None,
@@ -69,6 +97,13 @@ def llamar_claude(
     """
     if modelo is None:
         modelo = cfg.MODELO_COMPLEJO
+
+    clave_cache = hashlib.md5(f"{modelo}:{prompt}".encode()).hexdigest()
+    if usar_cache:
+        cached = _cache_get(clave_cache)
+        if cached:
+            logger.info("Cache hit para módulo %s", modulo)
+            return cached
 
     client = _get_client()
     if client is None:
@@ -98,7 +133,10 @@ def llamar_claude(
                 tokens_input=tokens_in,
                 tokens_output=tokens_out,
             )
-            return respuesta.content[0].text
+            texto = respuesta.content[0].text
+            if usar_cache:
+                _cache_set(clave_cache, texto)
+            return texto
 
         except anthropic.RateLimitError:
             espera = (intento + 1) * 10
