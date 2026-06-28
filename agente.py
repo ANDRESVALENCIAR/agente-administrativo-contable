@@ -10,11 +10,14 @@ import schedule
 
 from database import cargar_datos_demo, crear_alerta, inicializar_db
 from config import cfg, en_modo_demo
+from core.registro_libs import verificar_librerias
+from core.db_sqlalchemy import get_engine
 from modulos.contable import verificar_conciliacion_bancaria
 from modulos.correos import generar_resumen_diario_correos, procesar_correos
 from modulos.creditos import revisar_mora_clientes
 from modulos.cxp_cxc import preparar_reunion_semanal
 from modulos.impuestos import revisar_vencimientos, vigilar_dian
+from modulos.impuestos_calendario import enviar_recordatorios_vencimientos, sincronizar_calendario_opendata
 from modulos.juridico import revisar_normatividad
 from modulos.pagos import revisar_cxp_diario, revision_nomina
 from modulos.personal import actualizar_novedades_diarias, revisar_contratos
@@ -56,8 +59,11 @@ def solo_mes_dia(mes: int, dia: int, fn, nombre: str) -> None:
 
 
 schedule.every(30).minutes.do(lambda: run(procesar_correos, "Procesar correos"))
+schedule.every(2).hours.do(lambda: run(enviar_recordatorios_vencimientos, "Recordatorios impuestos (cada 2h)"))
 
 schedule.every().day.at("07:00").do(lambda: run(revisar_vencimientos, "Vencimientos impuestos"))
+schedule.every().day.at("07:02").do(lambda: run(enviar_recordatorios_vencimientos, "Recordatorios 48h/24h impuestos"))
+schedule.every().monday.at("06:30").do(lambda: run(lambda: sincronizar_calendario_opendata(), "Sync open data impuestos"))
 schedule.every().day.at("07:05").do(lambda: run(revisar_cxp_diario, "CXP administrativos"))
 schedule.every().day.at("08:00").do(lambda: run(actualizar_novedades_diarias, "Novedades personal"))
 schedule.every().day.at("18:00").do(lambda: run(generar_resumen_diario_correos, "Resumen correos"))
@@ -82,6 +88,8 @@ schedule.every().monday.at("09:00").do(
 
 if __name__ == "__main__":
     inicializar_db()
+    get_engine()
+    resumen_libs = verificar_librerias()
     if en_modo_demo():
         cargar_datos_demo()
         logger.warning("Modo DEMO activo — configure .env con credenciales reales.")
@@ -89,6 +97,7 @@ if __name__ == "__main__":
     logger.info("=" * 60)
     logger.info("AGENTE ADMINISTRATIVO INICIADO — %s", datetime.now())
     logger.info("Empresa: %s", cfg.NOMBRE_EMPRESA)
+    logger.info("Librerías activas: %s", len(resumen_libs["activas"]))
     logger.info("=" * 60)
 
     run(revisar_vencimientos, "Revisión inicial impuestos")

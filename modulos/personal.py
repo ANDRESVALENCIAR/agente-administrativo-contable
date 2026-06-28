@@ -8,6 +8,8 @@ from datetime import datetime, date
 import pandas as pd
 
 from config import cfg
+from core.calendario_col import es_dia_habil
+from core.formato_col import numero_a_letras, valor_pesos
 from conexiones.claude_client import llamar_claude
 from conexiones.gmail_client import enviar_correo
 from conexiones.onedrive_client import leer_excel, escribir_excel
@@ -82,7 +84,15 @@ def calcular_prima(empleado_id: str, periodo: str) -> dict:
         if not fila.empty:
             salario = float(fila.iloc[0].get("SALARIO", salario))
     prima = salario / 2
-    return {"empleado_id": empleado_id, "periodo": periodo, "salario": salario, "prima": prima}
+    return {
+        "empleado_id": empleado_id,
+        "periodo": periodo,
+        "salario": salario,
+        "prima": prima,
+        "prima_formato": valor_pesos(prima),
+        "prima_letras": numero_a_letras(prima),
+        "dia_habil": es_dia_habil(),
+    }
 
 
 def calcular_vacaciones(empleado_id: str) -> dict:

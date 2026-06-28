@@ -47,11 +47,20 @@ class Config:
     EMAIL_JURIDICO = os.getenv("EMAIL_JURIDICO")
     EMAIL_LEGAL = os.getenv("EMAIL_LEGAL") or os.getenv("EMAIL_JURIDICO")
     EMAIL_ALERTAS = os.getenv("EMAIL_ALERTAS")
+    EMAIL_CONTADOR = os.getenv("EMAIL_CONTADOR") or os.getenv("EMAIL_CONTABILIDAD")
+    EMAIL_REVISORIA_FISCAL = os.getenv("EMAIL_REVISORIA_FISCAL")
 
-    # Empresa
+    # WhatsApp (Twilio) — recordatorios impuestos 24h
+    TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
+    TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
+    TWILIO_WHATSAPP_FROM = os.getenv("TWILIO_WHATSAPP_FROM")
+    WHATSAPP_DESTINATARIOS = os.getenv("WHATSAPP_DESTINATARIOS")
+
+    # Open data impuestos
+    PERFIL_TRIBUTARIO = os.getenv("PERFIL_TRIBUTARIO", "personas-juridicas")
     NOMBRE_EMPRESA = os.getenv("NOMBRE_EMPRESA", "EIF SAS")
-    NIT_EMPRESA = os.getenv("NIT_EMPRESA", "900.000.000-0")
-    CIUDAD_EMPRESA = os.getenv("CIUDAD_EMPRESA", "Cali")
+    NIT_EMPRESA = os.getenv("NIT_EMPRESA", "901146454-6")
+    CIUDAD_EMPRESA = os.getenv("CIUDAD_EMPRESA", "Bogotá D.C.")
     DATABASE_PATH = os.getenv("DATABASE_PATH", "agente.db")
 
     # Destinos de correo por categoría (PROMPT_MAESTRO_SHAKI_v2)

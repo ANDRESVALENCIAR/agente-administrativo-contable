@@ -2,6 +2,7 @@
 import streamlit as st
 import plotly.express as px
 
+from core.registro_libs import LIBRERIAS_POR_MODULO, librerias_disponibles
 from dashboard.utils.db_helper import query_df
 
 
@@ -39,3 +40,9 @@ def render() -> None:
 
     cache = query_df("SELECT COUNT(*) as entradas FROM cache_api")
     st.metric("Consultas en caché API", int(cache.iloc[0]["entradas"]) if not cache.empty else 0)
+
+    st.markdown("#### Librerías conectadas al agente")
+    estado = librerias_disponibles()
+    for modulo, libs in LIBRERIAS_POR_MODULO.items():
+        activas = [lib for lib in libs if estado.get(lib, False)]
+        st.caption(f"**{modulo.title()}**: {', '.join(activas) or '— sin libs instaladas —'}")

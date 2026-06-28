@@ -1,66 +1,41 @@
 """
 Motor del chat conversacional con Claude.
-Mantiene el contexto de la conversación y tiene acceso a los datos del sistema.
+Consulta todos los módulos y ejecuta acciones (pagos, alertas, correos, cartera, etc.).
 """
 import logging
 from datetime import datetime
-from typing import Any
-
-import anthropic
 
 from config import cfg, en_modo_demo
 from conexiones.claude_client import llamar_claude
+from core.ia_engine import chat_completar, ia_disponible
 from database import (
     guardar_mensaje_chat,
-    obtener_alertas_activas,
     obtener_estadisticas_hoy,
     obtener_historial_chat,
-    obtener_pagos_pendientes,
 )
+from modulos.chat_interactivo import ACCIONES_AYUDA, detectar_intencion, ejecutar_accion, procesar_mensaje_interactivo
 
 logger = logging.getLogger(__name__)
 
-SYSTEM_CHAT = f"""Eres el asistente administrativo de {cfg.NOMBRE_EMPRESA}.
-Tienes acceso en tiempo real a todos los datos del sistema.
-Cuando el usuario pregunta sobre datos, consultas las estadísticas y datos reales del sistema.
-Cuando el usuario pide ejecutar una acción (aprobar pago, bloquear cliente, generar documento),
-describes exactamente lo que harás y pides confirmación antes de ejecutar.
-Responde siempre en español colombiano. Sé conciso pero completo.
-Fecha y hora actual: {{fecha_hora}}
+SYSTEM_CHAT = f"""Eres AGENTE ADMIN SHAKI, asistente administrativo-contable de {cfg.NOMBRE_EMPRESA} (NIT {cfg.NIT_EMPRESA}).
+Tienes acceso en tiempo real a todos los módulos: Alertas, Pagos, Correos, Impuestos, Contabilidad,
+CXP/CXC, Créditos, Comisiones, Personal, Presupuesto y Jurídico.
 
-DATOS DEL SISTEMA EN TIEMPO REAL:
+Cuando el usuario pide una ACCIÓN (aprobar pago, procesar correos, verificar alertas, bloquear cliente),
+el sistema ya la ejecutó antes de tu respuesta — confirma el resultado con claridad.
+Para consultas, usa SOLO los datos del contexto; no inventes cifras.
+Responde en español colombiano, conciso y profesional.
+Fecha y hora: {{fecha_hora}}
+
+{{acciones_disponibles}}
+
+DATOS POR MÓDULO:
 {{datos_sistema}}
 
-HISTORIAL RECIENTE DE ACCIONES:
-{{historial_acciones}}"""
+ÚLTIMAS ACCIONES DEL AGENTE:
+{{historial_acciones}}
 
-
-def construir_contexto_sistema() -> str:
-    """Construye el contexto con datos reales del sistema para el chat."""
-    stats = obtener_estadisticas_hoy()
-    alertas = obtener_alertas_activas()[:5]
-    pagos = obtener_pagos_pendientes()[:5]
-
-    alertas_texto = "\n".join([f"- [{a[3]}] {a[4]}: {a[5]}" for a in alertas]) or "Sin alertas activas."
-
-    pagos_texto = "\n".join([f"- {p[2]}: ${p[4]:,.0f} ({p[7]})" for p in pagos]) or "Sin pagos pendientes."
-
-    return f"""
-ESTADÍSTICAS HOY:
-- Correos procesados: {stats['correos_hoy']}
-- Alertas activas: {stats['alertas_activas']}
-- Pagos pendientes de aprobación: {stats['pagos_pendientes']}
-- Documentos generados hoy: {stats['documentos_hoy']}
-- Costo API hoy: ${stats['costo_hoy']}
-- Costo API este mes: ${stats['costo_mes']}
-- Tareas completadas hoy: {stats['tareas_completadas_hoy']}
-
-ALERTAS ACTIVAS:
-{alertas_texto}
-
-PAGOS PENDIENTES:
-{pagos_texto}
-"""
+{{resultado_accion}}"""
 
 
 def chat_responder(mensaje_usuario: str, historial: list[dict[str, str]] | None = None) -> tuple[str, list[dict[str, str]]]:
@@ -69,7 +44,7 @@ def chat_responder(mensaje_usuario: str, historial: list[dict[str, str]] | None 
 
     Args:
         mensaje_usuario: Texto del usuario.
-        historial: Lista de mensajes previos {role, content}.
+        historial: Lista de mensajes previos {{role, content}}.
 
     Returns:
         Tupla (respuesta_texto, historial_actualizado).
@@ -79,14 +54,37 @@ def chat_responder(mensaje_usuario: str, historial: list[dict[str, str]] | None 
 
     guardar_mensaje_chat("user", mensaje_usuario)
 
-    contexto = construir_contexto_sistema()
+    intencion = detectar_intencion(mensaje_usuario)
+    resultado_accion_txt = ""
+    if intencion:
+        acc = ejecutar_accion(intencion, mensaje_usuario)
+        resultado_accion_txt = f"ACCIÓN EJECUTADA ({acc['modulo']}):\n{acc['resultado']}"
+        if intencion in ("ayuda", "aprobar_pago", "rechazar_pago", "listar_pagos", "verificar_alertas",
+                         "resolver_alerta", "procesar_correos", "sincronizar_reglas",
+                         "impuestos_vencimientos", "sincronizar_calendario", "recordatorios_impuestos",
+                         "cartera_mora", "bloquear_cliente"):
+            if acc["ejecutada"] or intencion == "ayuda":
+                respuesta = acc["resultado"]
+                guardar_mensaje_chat("assistant", respuesta)
+                historial.append({"role": "user", "content": mensaje_usuario})
+                historial.append({"role": "assistant", "content": respuesta})
+                return respuesta, historial
+
+    contexto = procesar_mensaje_interactivo(mensaje_usuario)[1]
+    stats = obtener_estadisticas_hoy()
     historial_db = obtener_historial_chat(limite=10)
     historial_texto = "\n".join([f"{r[0].upper()}: {r[1][:200]}" for r in historial_db[-6:]])
+    if stats.get("ultimas_acciones"):
+        historial_texto += "\n" + "\n".join(
+            f"- [{a[4]}] {a[0]}.{a[1]}: {a[2]}" for a in stats["ultimas_acciones"][:5]
+        )
 
     system = SYSTEM_CHAT.format(
         fecha_hora=datetime.now().strftime("%A %d de %B de %Y, %H:%M"),
+        acciones_disponibles=ACCIONES_AYUDA.strip(),
         datos_sistema=contexto,
-        historial_acciones=historial_texto,
+        historial_acciones=historial_texto or "Sin acciones recientes.",
+        resultado_accion=resultado_accion_txt or "Ninguna acción ejecutada en este turno.",
     )
 
     mensajes: list[dict[str, str]] = []
@@ -95,19 +93,28 @@ def chat_responder(mensaje_usuario: str, historial: list[dict[str, str]] | None 
     mensajes.append({"role": "user", "content": mensaje_usuario})
 
     if en_modo_demo():
-        respuesta = llamar_claude(mensaje_usuario + "\n\n" + contexto, modulo="chat")
+        respuesta = llamar_claude(
+            f"{mensaje_usuario}\n\nContexto del sistema:\n{contexto}\n\n{resultado_accion_txt}",
+            modulo="chat",
+        )
         tokens = 0
     else:
         try:
-            client = anthropic.Anthropic(api_key=cfg.ANTHROPIC_API_KEY)
-            resp = client.messages.create(
-                model=cfg.MODELO_COMPLEJO,
-                max_tokens=1500,
-                system=system,
-                messages=mensajes,
-            )
-            respuesta = resp.content[0].text
-            tokens = resp.usage.input_tokens + resp.usage.output_tokens
+            stack = ia_disponible()
+            if stack.get("langchain"):
+                respuesta = chat_completar(system, mensaje_usuario, historial)
+            else:
+                import anthropic
+
+                client = anthropic.Anthropic(api_key=cfg.ANTHROPIC_API_KEY)
+                resp = client.messages.create(
+                    model=cfg.MODELO_COMPLEJO,
+                    max_tokens=1500,
+                    system=system,
+                    messages=mensajes,
+                )
+                respuesta = resp.content[0].text
+            tokens = 0
         except Exception as e:
             logger.error("Error en chat: %s", e)
             respuesta = f"Disculpa, tuve un problema al procesar tu mensaje: {str(e)}"

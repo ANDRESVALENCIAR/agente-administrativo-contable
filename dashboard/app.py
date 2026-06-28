@@ -29,6 +29,8 @@ from dashboard.paginas import (
     presupuesto,
 )
 from dashboard.utils.alertas_globales import verificar_alertas_globales
+from core.db_sqlalchemy import get_engine
+from core.registro_libs import librerias_disponibles
 from database import cargar_datos_demo, inicializar_db, obtener_estadisticas_hoy
 
 PAGINAS = {
@@ -57,6 +59,7 @@ st.set_page_config(
 
 st.markdown(CSS, unsafe_allow_html=True)
 inicializar_db()
+get_engine()
 if en_modo_demo():
     cargar_datos_demo()
 
@@ -89,6 +92,8 @@ with st.sidebar:
     st.divider()
     st.caption(f"Costo API hoy: **${stats['costo_hoy']}**")
     st.caption(f"Costo API mes: **${stats['costo_mes']}**")
+    libs_ok = sum(1 for v in librerias_disponibles().values() if v)
+    st.caption(f"Librerías core: **{libs_ok}** activas")
 
 col_dashboard, col_chat = st.columns([2, 1])
 
@@ -104,13 +109,17 @@ with col_chat:
     st.divider()
     preguntas = [
         "¿Qué alertas hay hoy?",
-        "¿Qué pagos hay pendientes?",
-        "Estado de impuestos",
-        "Resumen de cartera vencida",
+        "Pagos pendientes",
+        "Verificar alertas",
+        "Procesar correos",
+        "Cartera en mora",
+        "Impuestos próximos",
+        "¿Qué puedes hacer?",
     ]
-    q1, q2 = st.columns(2)
+    q1, q2, q3 = st.columns(3)
+    cols = [q1, q2, q3]
     for i, p in enumerate(preguntas):
-        col = q1 if i % 2 == 0 else q2
+        col = cols[i % 3]
         if col.button(p, key=f"qr_{i}", use_container_width=True):
             st.session_state.chat_mensajes_ui.append({"rol": "user", "texto": p})
             with st.spinner("Consultando..."):

@@ -1,0 +1,5 @@
+{{ empresa }} — {{ titulo }}
+
+Fecha: {{ fecha }}
+
+{{ cuerpo }}

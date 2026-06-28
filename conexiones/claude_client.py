@@ -8,6 +8,13 @@ import time
 import logging
 from typing import Any
 
+try:
+    from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+
+    _HAS_TENACITY = True
+except ImportError:
+    _HAS_TENACITY = False
+
 from config import cfg, en_modo_demo
 from database import registrar_accion
 
@@ -115,47 +122,71 @@ def llamar_claude(
     if usar_cache:
         system_content[0]["cache_control"] = {"type": "ephemeral"}
 
-    for intento in range(3):
+    def _llamar_api() -> Any:
+        return client.messages.create(
+            model=modelo,
+            max_tokens=max_tokens,
+            system=system_content,
+            messages=[{"role": "user", "content": prompt}],
+        )
+
+    if _HAS_TENACITY:
+        from core.registro_libs import registrar_uso_libreria
+
+        registrar_uso_libreria("chat", "tenacity")
+
+        @retry(
+            stop=stop_after_attempt(3),
+            wait=wait_exponential(multiplier=1, min=5, max=30),
+            retry=retry_if_exception_type(anthropic.RateLimitError),
+            reraise=True,
+        )
+        def _llamar_con_reintentos() -> Any:
+            return _llamar_api()
+
         try:
-            respuesta = client.messages.create(
-                model=modelo,
-                max_tokens=max_tokens,
-                system=system_content,
-                messages=[{"role": "user", "content": prompt}],
-            )
-            tokens_in = respuesta.usage.input_tokens
-            tokens_out = respuesta.usage.output_tokens
-            registrar_accion(
-                modulo,
-                "llamar_claude",
-                f"Modelo: {modelo} | Tokens: {tokens_in}in/{tokens_out}out",
-                "EXITOSO",
-                tokens_input=tokens_in,
-                tokens_output=tokens_out,
-            )
-            texto = respuesta.content[0].text
-            if usar_cache:
-                _cache_set(clave_cache, texto)
-            return texto
-
-        except anthropic.RateLimitError:
-            espera = (intento + 1) * 10
-            logger.warning("Rate limit. Esperando %ss...", espera)
-            time.sleep(espera)
+            respuesta = _llamar_con_reintentos()
         except anthropic.APIError as e:
-            logger.error("Error API Claude (intento %s): %s", intento + 1, e)
-            if intento == 2:
-                registrar_accion(
-                    modulo,
-                    "llamar_claude",
-                    f"Error después de 3 intentos: {str(e)}",
-                    "ERROR",
-                    detalle_error=str(e),
-                )
-                return f"Error al consultar el asistente: {str(e)}"
-            time.sleep(5)
+            registrar_accion(modulo, "llamar_claude", str(e), "ERROR", detalle_error=str(e))
+            return f"Error al consultar el asistente: {str(e)}"
+    else:
+        for intento in range(3):
+            try:
+                respuesta = _llamar_api()
+                break
+            except anthropic.RateLimitError:
+                espera = (intento + 1) * 10
+                logger.warning("Rate limit. Esperando %ss...", espera)
+                time.sleep(espera)
+            except anthropic.APIError as e:
+                logger.error("Error API Claude (intento %s): %s", intento + 1, e)
+                if intento == 2:
+                    registrar_accion(
+                        modulo,
+                        "llamar_claude",
+                        f"Error después de 3 intentos: {str(e)}",
+                        "ERROR",
+                        detalle_error=str(e),
+                    )
+                    return f"Error al consultar el asistente: {str(e)}"
+                time.sleep(5)
+        else:
+            return "Error desconocido al consultar Claude."
 
-    return "Error desconocido al consultar Claude."
+    tokens_in = respuesta.usage.input_tokens
+    tokens_out = respuesta.usage.output_tokens
+    registrar_accion(
+        modulo,
+        "llamar_claude",
+        f"Modelo: {modelo} | Tokens: {tokens_in}in/{tokens_out}out",
+        "EXITOSO",
+        tokens_input=tokens_in,
+        tokens_output=tokens_out,
+    )
+    texto = respuesta.content[0].text
+    if usar_cache:
+        _cache_set(clave_cache, texto)
+    return texto
 
 
 def llamar_claude_simple(prompt: str, modulo: str = "clasificacion") -> str:

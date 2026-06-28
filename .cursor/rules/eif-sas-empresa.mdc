@@ -1,0 +1,19 @@
+---
+description: Datos fijos de empresa EIF SAS para AGENTE ADMIN SHAKI
+alwaysApply: true
+---
+
+# EIF SAS — datos de empresa (memoria del proyecto)
+
+Usar siempre estos valores salvo que el usuario indique otro explícitamente:
+
+| Campo | Valor |
+|-------|--------|
+| **Razón social** | EIF SAS |
+| **NIT** | **901146454-6** |
+| **Último dígito NIT** | 6 (plazos DIAN según dígito 6) |
+| **Ciudad** | Bogotá D.C. |
+| **Agente** | AGENTE ADMIN SHAKI |
+
+Proyecto: `agente-administrativo-contable`  
+Impuestos distritales: SHD Bogotá aplica (ICA, predial, vehículos).

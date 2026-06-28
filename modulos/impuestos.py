@@ -6,10 +6,9 @@ import sqlite3
 from datetime import datetime, date
 
 import pandas as pd
-import requests
-from bs4 import BeautifulSoup
 
 from config import cfg
+from core.http_cliente import fetch_url
 from conexiones.claude_client import llamar_claude
 from conexiones.gmail_client import enviar_correo
 from conexiones.onedrive_client import actualizar_celda, leer_excel
@@ -117,9 +116,12 @@ def vigilar_dian() -> None:
     logger.info("Vigilando sitio DIAN...")
     cambios_detectados = False
     try:
-        resp = requests.get("https://www.dian.gov.co", timeout=20, headers={"User-Agent": "AgenteAdmin/1.0"})
-        resp.raise_for_status()
-        soup = BeautifulSoup(resp.text, "lxml")
+        html = fetch_url("https://www.dian.gov.co", timeout=20, headers={"User-Agent": "AgenteAdminShaki/2.0"})
+        from bs4 import BeautifulSoup
+        from core.registro_libs import registrar_uso_libreria
+
+        registrar_uso_libreria("impuestos", "beautifulsoup4")
+        soup = BeautifulSoup(html, "lxml")
         tablas = soup.find_all("table")
         if tablas:
             logger.info("DIAN: %s tablas encontradas en la página principal.", len(tablas))

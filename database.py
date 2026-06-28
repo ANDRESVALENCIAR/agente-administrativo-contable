@@ -146,7 +146,10 @@ def inicializar_db() -> None:
     conn.commit()
     conn.close()
     from database_modulos import inicializar_tablas_modulos
+    from modulos.impuestos_calendario import inicializar_tablas_calendario
+
     inicializar_tablas_modulos()
+    inicializar_tablas_calendario()
     logger.info("Base de datos inicializada correctamente.")
 
 
