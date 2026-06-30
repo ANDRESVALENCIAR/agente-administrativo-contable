@@ -1,0 +1,2539 @@
+{
+  "fecha_analisis": "2026-06-29T15:48:48.918578",
+  "ruta_base": "c:\\Users\\micro\\OneDrive - viaindustrial.com\\16. RRHH PERSONAL FUNCIONES\\PERSONAL ACTIVO",
+  "total_empleados": 20,
+  "empleados": [
+    {
+      "empleado": "ANDRES FELIPE VALENVIA RESTREPO",
+      "total_pdfs": 8,
+      "escaneados_sin_texto": 5,
+      "categorias": {
+        "cedula": 3,
+        "certificacion_otra": 2,
+        "otro": 3
+      },
+      "documentos": [
+        {
+          "archivo": "CC ANDRES FELIPE VALENCIA RESTREPO.pdf",
+          "categoria": "cedula",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "CERTIFICADO ANDRES FELIPE VALENCIA RESTREPO.pdf",
+          "categoria": "certificacion_otra",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "901146454",
+            "menciona_eif": true
+          },
+          "preview": "EQUIPOS INDUSTRIALES FENIX SAS\nNIT: 901.146.454 - 6\nBogotá, 05 de marzo de 2025\nREF: CERTIFICACION\nEQUIPOS INDUSTRIALES FENIX S.A.S con NIT: 901.146.454-6. Certifica que el\nseñor ANDRES FELIPE VALENCIA RESTREPO, Identificado con cedula de\nciudadanía No. 16.456.336 de Yumbo, labora para la compañía como\nDIRECTOR OPERATIVO, desde el 01 de junio de 2023. Con un sueldo mensual\nde $10.000.000, más pres…"
+        },
+        {
+          "archivo": "certificado_16456336 ANDRES F. VALENXIA.pdf",
+          "categoria": "certificacion_otra",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "800170043"
+          },
+          "preview": "SOCIEDAD ADMINISTRADORA DE FONDOS DE PENSIONES Y CESANTÍAS PORVENIR\nPORVENIR S.A.\nEn su condición de administradora del\nFONDO DE CESANTÍAS PORVENIR\nNIT 800.170.043-7\nCERTIFICA QUE:\nANDRES FELIPE VALENCIA RESTREPO, identificado(a) con cédula de ciudadanía 16.456.336, se encuentra\nafiliado(a) al AL FONDO DE CESANTÍAS PORVENIR.\nLa presente certificación se expide el 17 de Enero del 2024.\nCordialmente…"
+        },
+        {
+          "archivo": "DOCUMENTOS GENERALES ANDRES FELIPE VALENCIA RESTREPO.PDF",
+          "categoria": "otro",
+          "paginas": 11,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "FOTOC  CEDULA ANDRES VALENCIA.pdf",
+          "categoria": "cedula",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "SOLICITUD COMPENSAR.pdf",
+          "categoria": "otro",
+          "paginas": 10,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "TARJETA DE IDENTIDAD ANDRES JUAN VALENCIA.pdf",
+          "categoria": "cedula",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {},
+          "preview": "PRIMERA VEZ TI\n1.027.290.835\nAPELLIDOS / NOMBRES\nVALENCIA VILLATE\nANDRES JUAN\nFECHA Y LUGAR DE NACIMIENTO\n20-MAY-2013\nBOGOTA D.C. - CUNDINAMARCA\nFECHA DE EXPEDICIÓN\n11-NOV-2021\nSEXO\nMASCULINO\nLUGAR DE PREPARACIÓN\nCALI - AUXILIAR 2 PASO ANCHO\nOFICINA DE ENTREGA\nCALI - AUXILIAR 2 PASO ANCHO\nESTE COMPROBANTE ES 8503391953\nVÁLIDO HASTA EL 11-MAY-2022 11-NOV-2021"
+        },
+        {
+          "archivo": "TI JUAN ESTEBAN.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        }
+      ]
+    },
+    {
+      "empleado": "ANGELA VALENCIA RESTREPO",
+      "total_pdfs": 18,
+      "escaneados_sin_texto": 4,
+      "categorias": {
+        "eps": 3,
+        "cedula": 2,
+        "certificacion_otra": 2,
+        "otro": 6,
+        "policia_procuraduria": 2,
+        "contrato": 3
+      },
+      "documentos": [
+        {
+          "archivo": "CARNET  EPS ANGELA VALENCIA.pdf",
+          "categoria": "eps",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {},
+          "preview": "ANGELA LORENA VALENCIA RESTREPO\nC.C. 31577828\nIdentificación: 901146454\nRazón Social: EQUIPOS INDUSTRIALES FENIX SAS\nNo. Afiliación: 9004713\nNUEVA E.P.S. S.A."
+        },
+        {
+          "archivo": "CC ANGELA VALENCIA RESTREPO.pdf",
+          "categoria": "cedula",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "CEDULA ANGELA L VALENCIA R.pdf",
+          "categoria": "cedula",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "CERTIFICACION ARL ANGELA VALENCIA.pdf",
+          "categoria": "certificacion_otra",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "901146454",
+            "salario_mencion": "1,300,000",
+            "fechas_encontradas": [
+              "01/06/2024",
+              "31/05/2024"
+            ]
+          },
+          "preview": "INGRESO EMPLEADO\nDATOS DE LA EMPRESA\nTipo de Identificación: NIT\nNúmero de documento: 901146454\nNúmero Afiliación: 9004713\nRazón social: EQUIPOS INDUSTRIALES FENIX SAS\nDATOS DEL EMPLEADO:\nTipo de documento: CÉDULA\nNúmero de Documento 31577828\nNombre: ANGELA LORENA VALENCIA RESTREPO\nFecha Ingreso: 01/06/2024\nSalario básico: 1,300,000\nNit empresa en misión: 0\nCódigo Sucursal: 11001\nCentro de trabajo…"
+        },
+        {
+          "archivo": "CERTIFICACION BANCARIA ANGELA VALENCIA.pdf",
+          "categoria": "certificacion_otra",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "31577828"
+          },
+          "preview": "Martes, 21 de mayo de 2024\nA quien pueda interesar\nBancolombia S.A. se permite informar que ANGELA LORENA VALENCIA RESTREPO\nidentificado(a) con CC 31577828, a la fecha de expedición de esta certificación, tiene con\nel Banco los siguientes productos:\nCuenta Ahorros / A la mano 02925796908 2021-09-04 ACTIVO *****\n*Importante: Esta constancia solo hace referencia a los productos mencionados anteriorm…"
+        },
+        {
+          "archivo": "COMFANDI-ANGELA LORENA VALENCIA RESTREPO.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "31577828"
+          },
+          "preview": "Página 1/1\nSantiago de Cali, septiembre 30 de 2024\nCAJA DE COMPENSACION FAMILIAR DEL VALLE DEL CAUCA\nCOMFAMILIAR ANDI - COMFANDI\nHACE CONSTAR QUE:\nANGELA LORENA VALENCIA RESTREPO identificado(a) con Cédula de Ciudadanía 31577828\nse encuentra afiliado(a) en la Caja de Compensación Familiar del Valle del Cauca - Comfamiliar\nAndi - Comfandi, por la empresa EQUIPOS INDUSTRIALES FENIX SAS con NIT 90114…"
+        },
+        {
+          "archivo": "CONSULTA RUAF.pdf",
+          "categoria": "policia_procuraduria",
+          "paginas": 2,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "31577828",
+            "fechas_encontradas": [
+              "01/08/2008",
+              "6/24/2024",
+              "6/24/2024"
+            ]
+          },
+          "preview": "Afiliaciones de una Persona en el Sistema\nINFORMACIÓN BASICA Fecha de Corte: 2024-06-21\nNúmero de Identificación Primer Nombre Segundo Nombre Primer Apellido Segundo Apellido Sexo\nCC 31577828 ANGELA LORENA VALENCIA RESTREPO F\nAFILIACIÓN A SALUD Fecha de Corte: 2024-06-21\nAdministradora Régimen Fecha Afiliacion Estado de Afiliación Tipo de Afiliado Departamento -> Municipio\nNUEVA EPS S.A. Contribut…"
+        },
+        {
+          "archivo": "CONTRALORIA ANGELA VALENCIA.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "111071"
+          },
+          "preview": "LA CONTRALORÍA DELEGADA PARA RESPONSABILIDAD FISCAL ,\nINTERVENCIÓN JUDICIAL Y COBRO COACTIVO\nCERTIFICA:\nQue una vez consultado el Sistema de Información del Boletín de Responsables Fiscales 'SIBOR', hoy martes 25 de\njunio de 2024, a las 11:08:33, el número de identificación, relacionado a continuación, NO SE ENCUENTRA\nREPORTADO COMO RESPONSABLE FISCAL.\nTipo Documento Cédula de Ciudadanía\nNo. Ident…"
+        },
+        {
+          "archivo": "CONTRATO FIRMADO ANGELA VALENCIA.pdf",
+          "categoria": "contrato",
+          "paginas": 6,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "901146454",
+            "salario_mencion": "$ 1.300.000",
+            "cargo_mencion": "SALARIO",
+            "fechas_encontradas": [
+              "01/06/2024",
+              "01/09/2024"
+            ]
+          },
+          "preview": "CONTRATO DE TRABAJO A TERMINO FIJO INFERIOR A UN AÑO\nNOMBRE DEL EMPLEADOR: EQUIPOS INDUSTRIALES FENIX S.A.S.\nDOCUMENTO DE IDENTIFICACIÓN NIT.901.146.454-6\nDOMICILIO DEL EMPLEADOR Bogota\nNOMBRE DEL TRABAJADOR ANGELA LORENA VALENCIA RESTREPO\nDOCUMENTO DE IDENTIDAD 31.577.828\nCIUDAD Y FECHA DE EXPEDICIÓN CALI 28 DE SEPTIEMBRE DE 1999\nDIRECCIÓN DE RESIDENCIA - BARRIO Carrera 4 Norte # 7-50 San José en…"
+        },
+        {
+          "archivo": "CONTRATO LABORAL ANGELA L VALENCIA.pdf",
+          "categoria": "contrato",
+          "paginas": 5,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "901146454",
+            "salario_mencion": "$ 1.300.000",
+            "cargo_mencion": "SALARIO",
+            "fechas_encontradas": [
+              "01/06/2024",
+              "01/09/2024"
+            ]
+          },
+          "preview": "CONTRATO DE TRABAJO A TERMINO FIJO INFERIOR A UN AÑO\nNOMBRE DEL EMPLEADOR: EQUIPOS INDUSTRIALES FENIX S.A.S.\nDOCUMENTO DE IDENTIFICACIÓN NIT.901.146.454-6\nDOMICILIO DEL EMPLEADOR Bogota\nNOMBRE DEL TRABAJADOR ANGELA LORENA VALENCIA RESTREPO\nDOCUMENTO DE IDENTIDAD 31.577.828\nCIUDAD Y FECHA DE EXPEDICIÓN CALI 28 DE SEPTIEMBRE DE 1999\nDIRECCIÓN DE RESIDENCIA - BARRIO Carrera 4 Norte # 7-50 San José en…"
+        },
+        {
+          "archivo": "CONTRATO LOREN.pdf",
+          "categoria": "contrato",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "EPS ANGELA LORENA VALENCIA INDEPENDIENTE.pdf",
+          "categoria": "eps",
+          "paginas": 2,
+          "texto_extraible": true,
+          "campos": {
+            "cargo_mencion": "SALARIO\nDÍA MES AÑO\nB"
+          },
+          "preview": "O.P. 280235 04/16\n- ORIGINAL: E.P.S. - - 1a. COPIA: EMPLEADOR O ENTE TERRITORIAL -\nFORMULARIO ÚNICO DE AFILIACIÓN Y\nREGISTRO DE NOVEDADES AL SGSSS\n“Código Únicamente para dependientes y afiliaciones al Régimen Subsidiado”\nFORMULARIO VÍA WEB\nI. DATOS DEL TRÁMITE Lea atentamente las instrucciones antes de diligenciar este formulario\n1. TIPO DE TRÁMITE 2. TIPO DE AFILIACIÓN 3. RÉGIMEN\nX B. REPORTE DE…"
+        },
+        {
+          "archivo": "Liquidación Definitva Angela Lorena Valencia R.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "901146454",
+            "salario_mencion": "1.462.000",
+            "cargo_mencion": "Asesora Comercial\nSueldo Básico"
+          },
+          "preview": "EQUIPOS INDUSTRIALES FENIX SAS\nNIT. 901.146.454-6\nLIQUIDACIÓN DEFINITIVA DEL CONTRATO DE TRABAJO A TERMINO FIJO\nNombre del Empleado : Angela Lorena Valencia Restrepo\nDocumento de Identificación : C.C 31.577.828\nCargo : Asesora Comercial\nSueldo Básico : $ 1.300.000\nMotivo de Retiro : Renuncia Voluntaria\nTiempo Laborado : 150\nFecha de Ingreso : 01 de Junio de 2024\nFecha de Retiro : 31 de Octubre de …"
+        },
+        {
+          "archivo": "NUEVA EPS ANGELA VALENCIA.PDF",
+          "categoria": "eps",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "POLICIA ANGELA VALENCIA.pdf",
+          "categoria": "policia_procuraduria",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "fechas_encontradas": [
+              "25/6/24"
+            ]
+          },
+          "preview": "Apellidos y Nombres: VALENCIA RESTREPO ANGELA LORENA\n25/6/24, 11:06 a.m. Policía Nacional de Colombia\nNO TIENE ASUNTOS PENDIENTES CON LAS AUTORIDADES JUDICIALES\nde conformidad con lo establecido en el artículo 248 de la Constitución Política de Colombia.\nEn cumplimiento de la Sentencia SU-458 del 21 de junio de 2012, proferida por la Honorable\nCorte Constitucional, la leyenda “NO TIENE ASUNTOS PEN…"
+        },
+        {
+          "archivo": "RESPUESTA SOLICITUD ANGELA VALENCIA SEP 25 2024.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "901146454",
+            "menciona_eif": true
+          },
+          "preview": "EQUIPOS INDUSTRIALES FENIX S.A.S NIT:\n901.146.454 - 6\nBogotá, septiembre 25 de 2024\nSeñora:\nAngela Lorena Valencia Restrepo\nC.C. 31.577.828\nCiudad.\nReferencia: Contrato laboral\nEstimado colaborador,\nDe acuerdo con su comunicación formal en días pasados sobre aclarar los valores de comisiones por ventas y a su\nsolicitud de ampliación del contrato que venció el 1 de septiembre del presente año, por …"
+        },
+        {
+          "archivo": "RetiroIndividualEmpleadoDependiente.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "901146454",
+            "fechas_encontradas": [
+              "31/10/2024",
+              "01/11/2024"
+            ]
+          },
+          "preview": "RETIRO EMPLEADO\nDATOS DE LA EMPRESA\nTipo de Identificación: NIT\nNúmero de documento: 901146454\nNúmero Afiliación: 9004713\nRazón social: EQUIPOS INDUSTRIALES FENIX SAS\nDATOS DEL EMPLEADO:\nTipo de documento: CÉDULA\nNúmero de Doc.: 31577828\nNombre: ANGELA LORENA VALENCIA RESTREPO\nFecha Retiro: 31/10/2024\nFecha hora transacción: 01/11/2024 10:23:25 a. m.\nNit empresa en misión: 0\nCódigo Sucursal 11001\n…"
+        },
+        {
+          "archivo": "SOLICITUD DE ANTICIPOS.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {},
+          "preview": "Junio 19 de 2024\nSeñores.\nEquipos Industriales Fenix SAS\nAten. Administración\nCiudad\nRef. Anticipo por estos dos meses restantes, según contrato\nPor medio de la presente carta, solicito que me autoricen que por el mes de junio y julio que son mis\ndos meses restantes, de pago de mínimo según contrato, se pueda hacer un anticipo cada 21 de\ncada mes, por el valor de $1.000.000 Un millón de pesos m/ct…"
+        }
+      ]
+    },
+    {
+      "empleado": "DAVID SEBASTIAN VALENCIA RESTREPO",
+      "total_pdfs": 21,
+      "escaneados_sin_texto": 9,
+      "categorias": {
+        "cedula": 4,
+        "otro": 14,
+        "contrato": 2,
+        "examen_medico": 1
+      },
+      "documentos": [
+        {
+          "archivo": "CC DAVID SEBASTIAN VALENCIA RESTREPO.pdf",
+          "categoria": "cedula",
+          "paginas": 2,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "Cedula  Representante legal EIF SAS.pdf",
+          "categoria": "cedula",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "CEDULA DAVID VALENCIA F..pdf",
+          "categoria": "cedula",
+          "paginas": 2,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "CEDULA DAVID VALENCIA F.pdf",
+          "categoria": "cedula",
+          "paginas": 2,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "comp pago planilla DSV sep 2019.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {},
+          "preview": "(cid:54)(cid:70)(cid:68)(cid:81)(cid:81)(cid:72)(cid:71)(cid:3)(cid:90)(cid:76)(cid:87)(cid:75)(cid:3)(cid:38)(cid:68)(cid:80)(cid:54)(cid:70)(cid:68)(cid:81)(cid:81)(cid:72)(cid:85)"
+        },
+        {
+          "archivo": "comp pago planilla oct David V..pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "16288590"
+          },
+          "preview": "Comprobante\nde pago en línea\nCOMPENSAR-OI\nPago realizado por: Andres Felipe Valencia Restrepo\nNro. de recibo: 38168342\nDescripción del pago: MiPlanilla.com Pago Proteccion Social\nIdentificación del contribuyente: 186.84.20.79\nConcepto: CC\nRazón Social: 16288590\nFecha y hora de la transacción: Lunes 21 de Octubre de 2019 02:58:30 PM\nNro. de comprobante: 0000015016\nValor pagado: $ 580,500.00\nCuenta:…"
+        },
+        {
+          "archivo": "CONTRATO DAVID SEBASTIAN VALENCIA RESTREPO.pdf",
+          "categoria": "contrato",
+          "paginas": 2,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "CONTRATO POR PRESTACION DE SERVICIO.pdf",
+          "categoria": "contrato",
+          "paginas": 2,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "DAVID SEBASTIAN VALENCIA RESTREPO.PDF",
+          "categoria": "otro",
+          "paginas": 11,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "EXAMEN DE INGRESO DAVID SEBASTIAN VALENCIA RESTREPO.pdf",
+          "categoria": "examen_medico",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "PLANILLA AGOSTO DAVID VALENCIA.pdf",
+          "categoria": "otro",
+          "paginas": 2,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "16288590",
+            "fechas_encontradas": [
+              "13/09/2024",
+              "13/09/2024"
+            ]
+          },
+          "preview": "PLANILLA INTEGRADA DE AUTOLIQUIDACION DE APORTES\nPAG 1 de 2\nDATOS DEL APORTANTE DATOS DE LA PLANILLA\nTIPO NÚMERO NOMBRE APORTANTE DIRECCIÓN TELÉFONO CORREO PLANILLA FECHA PAGO ASOCIADA CANTIDAD\nASOCIADA (DIA/MES/AÑO)\nCC 16288590 DAVID SE R B E A S S T T R IA E N P O V ALENCIA CALL 8 E 0 2 1 6 T 0 O 6 R 0 R -0 E 7 1 APT 7570818 equiposindustr c ia o l m esfenix@gmail. E P X A O R N A E S F R I A S …"
+        },
+        {
+          "archivo": "planilla David Nov 2019.pdf",
+          "categoria": "otro",
+          "paginas": 2,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "16288590"
+          },
+          "preview": "PLANILLA INTEGRADA DE AUTOLIQUIDACION DE APORTES\n2019/11/22 524440137\nO\nC E O PS D NIT EPS C O O B T L I I Z G A A C T I O O R N ADI U C P IO C N AL No.AU IN T C O A R PACIDA V D A E L S OR No L .A IC U . T MATERNI V D A A L D OR CO N T E I T Z O A C I M NT O E R R A E U S P E C S C S O U T B IZ T A O C TA IO L N SALDO A O F B A L V IG OR COTIZ SALD A O D A IC F IO A N VO AL R UPC\nD\nA\n7\n3\nG\n1\n0\nA\n…"
+        },
+        {
+          "archivo": "Planilla David Valencia.pdf",
+          "categoria": "otro",
+          "paginas": 2,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "16288590"
+          },
+          "preview": "PLANILLA INTEGRADA DE AUTOLIQUIDACION DE APORTES\nPAG 1 de 2\nDATOS DEL APORTANTE DATOS DE LA PLANILLA\nTIPO NÚMERO NOMBRE APORTANTE DIRECCIÓN TELÉFONO CORREO PLANILLA FECHA PAGO ASOCIADA CANTIDAD\nASOCIADA (DIA/MES/AÑO)\nCC 16288590 DAVID SE R B E A S S T T R IA E N P O VALENCIA CALL 8 E 0 2 1 6 T 0 O 6 R 0 R -0 E 7 1 APT 7570818 equiposindustr c ia o l m esfenix@gmail. E P X A O R N A E S F R I A S A…"
+        },
+        {
+          "archivo": "PLANILLA DICIEMBRE DAVID VALENCIA.pdf",
+          "categoria": "otro",
+          "paginas": 2,
+          "texto_extraible": true,
+          "campos": {},
+          "preview": "nóicamrofnI\ned\nrodarepO\nrasnepmoC\ned\netrap\nrop\nODAVIRP\nomoc\nodacifisalc\nátse\notnemucod\netsE\nnóicamrofnI\ned\nrodarepO\nrasnepmoC\ned\netrap\nrop\nODAVIRP\nomoc\nodacifisalc\nátse\notnemucod\netsE"
+        },
+        {
+          "archivo": "PLANILLA ENERO 2025.pdf",
+          "categoria": "otro",
+          "paginas": 2,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "16288590",
+            "fechas_encontradas": [
+              "27/02/2025",
+              "27/02/2025"
+            ]
+          },
+          "preview": "PLANILLA INTEGRADA DE AUTOLIQUIDACION DE APORTES\nPAG 1 de 2\nDATOS DEL APORTANTE DATOS DE LA PLANILLA\nTIPO NÚMERO NOMBRE APORTANTE DIRECCIÓN TELÉFONO CORREO PLANILLA FECHA PAGO ASOCIADA CANTIDAD\nASOCIADA (DIA/MES/AÑO)\nCC 16288590 DAVID SE R B E A S S T T R IA E N P O V ALENCIA CALL 8 E 0 2 1 6 T 0 O 6 R 0 R -0 E 7 1 APT 7570818 equiposindustr c ia o l m esfenix@gmail. E P X A O R N A E S F R I A S …"
+        },
+        {
+          "archivo": "PLANILLA FEBRERO 2025.pdf",
+          "categoria": "otro",
+          "paginas": 2,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "PLANILLA JULIO DAVID VALENCIA.pdf",
+          "categoria": "otro",
+          "paginas": 2,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "16288590",
+            "fechas_encontradas": [
+              "14/08/2024",
+              "14/08/2024"
+            ]
+          },
+          "preview": "PLANILLA INTEGRADA DE AUTOLIQUIDACION DE APORTES\nPAG 1 de 2\nDATOS DEL APORTANTE DATOS DE LA PLANILLA\nTIPO NÚMERO NOMBRE APORTANTE DIRECCIÓN TELÉFONO CORREO PLANILLA FECHA PAGO ASOCIADA CANTIDAD\nASOCIADA (DIA/MES/AÑO)\nCC 16288590 DAVID SE R B E A S S T T R IA E N P O V ALENCIA CALL 8 E 0 2 1 6 T 0 O 6 R 0 R -0 E 7 1 APT 7570818 equiposindustr c ia o l m esfenix@gmail. E P X A O R N A E S F R I A S …"
+        },
+        {
+          "archivo": "PLANILLA JUNIO DAVID VALENCIA.pdf",
+          "categoria": "otro",
+          "paginas": 2,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "16288590",
+            "fechas_encontradas": [
+              "15/07/2024",
+              "15/07/2024"
+            ]
+          },
+          "preview": "PLANILLA INTEGRADA DE AUTOLIQUIDACION DE APORTES\nPAG 1 de 2\nDATOS DEL APORTANTE DATOS DE LA PLANILLA\nTIPO NÚMERO NOMBRE APORTANTE DIRECCIÓN TELÉFONO CORREO PLANILLA FECHA PAGO ASOCIADA CANTIDAD\nASOCIADA (DIA/MES/AÑO)\nCC 16288590 DAVID SE R B E A S S T T R IA E N P O V ALENCIA CALL 8 E 0 2 1 6 T 0 O 6 R 0 R -0 E 7 1 APT 7570818 equiposindustr c ia o l m esfenix@gmail. E P X A O R N A E S F R I A S …"
+        },
+        {
+          "archivo": "Planilla oct 2019 David Valencia.pdf",
+          "categoria": "otro",
+          "paginas": 2,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "16288590"
+          },
+          "preview": "PLANILLA INTEGRADA DE AUTOLIQUIDACION DE APORTES\nOO\nC E O PS D NIT EPS C O O B T L I I Z G A A C T I O O R N ADI U C P IO C N AL No.AU IN T C O A R PACIDA V D A E L S OR No L .A IC U . T MATERNI V D A A L D OR CO N T E I T Z O A C I M NT O E R R A E U S P E C S C S O U T B IZ T A O C TA IO L N SALDO A O F B A L V IG OR COTIZ SALD A O D A IC F IO A N VO AL R UPC\nDD\nAA\n66\n77\nGG\n55\n00\nAA\n66\n77\nPP\n00\n…"
+        },
+        {
+          "archivo": "PLANILLA OCTUBRE DAVID SEBASTIAN VALENCIA.pdf",
+          "categoria": "otro",
+          "paginas": 2,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "16288590",
+            "fechas_encontradas": [
+              "14/11/2024",
+              "14/11/2024"
+            ]
+          },
+          "preview": "PLANILLA INTEGRADA DE AUTOLIQUIDACION DE APORTES\nPAG 1 de 2\nDATOS DEL APORTANTE DATOS DE LA PLANILLA\nTIPO NÚMERO NOMBRE APORTANTE DIRECCIÓN TELÉFONO CORREO PLANILLA FECHA PAGO ASOCIADA CANTIDAD\nASOCIADA (DIA/MES/AÑO)\nCC 16288590 DAVID SE R B E A S S T T R IA E N P O V ALENCIA CALL 8 E 0 2 1 6 T 0 O 6 R 0 R -0 E 7 1 APT 7570818 equiposindustr c ia o l m esfenix@gmail. E P X A O R N A E S F R I A S …"
+        },
+        {
+          "archivo": "PLANILLA SEPTIEMBRE DAVID VALENCIA.pdf",
+          "categoria": "otro",
+          "paginas": 2,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "16288590",
+            "fechas_encontradas": [
+              "15/10/2024",
+              "15/10/2024"
+            ]
+          },
+          "preview": "PLANILLA INTEGRADA DE AUTOLIQUIDACION DE APORTES\nPAG 1 de 2\nDATOS DEL APORTANTE DATOS DE LA PLANILLA\nTIPO NÚMERO NOMBRE APORTANTE DIRECCIÓN TELÉFONO CORREO PLANILLA FECHA PAGO ASOCIADA CANTIDAD\nASOCIADA (DIA/MES/AÑO)\nCC 16288590 DAVID SE R B E A S S T T R IA E N P O V ALENCIA CALL 8 E 0 2 1 6 T 0 O 6 R 0 R -0 E 7 1 APT 7570818 equiposindustr c ia o l m esfenix@gmail. E P X A O R N A E S F R I A S …"
+        }
+      ]
+    },
+    {
+      "empleado": "ELKIN MAURICIO NIETO",
+      "total_pdfs": 8,
+      "escaneados_sin_texto": 6,
+      "categorias": {
+        "arl": 1,
+        "otro": 2,
+        "cedula": 1,
+        "certificacion_otra": 1,
+        "contrato": 2,
+        "examen_medico": 1
+      },
+      "documentos": [
+        {
+          "archivo": "ARL.pdf",
+          "categoria": "arl",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "AÑO 2024pptx.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {},
+          "preview": "QUE EL ANGEL MAS HERMOSO DEL CIELO CUIDE SUS PASOS Y\nQUE CADA ESTRELLA REFLEJE LA BELLEZA DE SU CORAZON.\nSIRLEY JOHANA OROZCO 23\nELKIN MAURICIO NIETO 24"
+        },
+        {
+          "archivo": "CC ELKIN NIETO.pdf",
+          "categoria": "cedula",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "CERTIFICACION BANCARIA.pdf",
+          "categoria": "certificacion_otra",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "CONTRATO ELKIN NIETO 18 MARZO 2024.pdf",
+          "categoria": "contrato",
+          "paginas": 5,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "901146454",
+            "salario_mencion": "$2.200.000",
+            "cargo_mencion": "Coordinador de Operaciones\nSALARIO"
+          },
+          "preview": "CONTRATO DE TRABAJO A TERMINO FIJO INFERIOR A UN AÑO\nNOMBRE DEL EMPLEADOR: EQUIPOS INDUSTRIALES FENIX S.A.S.\nDOCUMENTO DE IDENTIFICACIÓN NIT NIT.901.146.454-6\nDIRECCIÓN DEL EMPLEADOR Bogotá\nNOMBRE DEL TRABAJADOR ELKIN MAURICIO NIETO TORRES\nDOCUMENTO DE IDENTIDAD 80.010.701\nDIRECCIÓN DE RESIDENCIA Cra 101 #151- 33 Pinar de Suba Etapa 4,\nCuadra 9 Apto 103\nLUGAR, FECHA DE NACIMIENTO Bogotá, 24 de sep…"
+        },
+        {
+          "archivo": "CONTRATO FIRMADO ELKIN NIETO.pdf",
+          "categoria": "contrato",
+          "paginas": 5,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "DOCUMENTOS GENERALES ELKIN NIETO.PDF",
+          "categoria": "otro",
+          "paginas": 23,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "EXAMEN DE INGRESO ELKIN NIETO.pdf",
+          "categoria": "examen_medico",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        }
+      ]
+    },
+    {
+      "empleado": "ESTEFANIA GONZALEZ POSADA",
+      "total_pdfs": 1,
+      "escaneados_sin_texto": 1,
+      "categorias": {
+        "otro": 1
+      },
+      "documentos": [
+        {
+          "archivo": "DOCUMENTOS GENERALES ESTEFANIA GONZALES POSADA.pdf",
+          "categoria": "otro",
+          "paginas": 7,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        }
+      ]
+    },
+    {
+      "empleado": "HUGO VALENCIA RESTREPO",
+      "total_pdfs": 7,
+      "escaneados_sin_texto": 4,
+      "categorias": {
+        "arl": 1,
+        "cedula": 1,
+        "otro": 2,
+        "examen_medico": 3
+      },
+      "documentos": [
+        {
+          "archivo": "ARL HUGO.pdf",
+          "categoria": "arl",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "CC HUGO VALENCIA RESTREPO.pdf",
+          "categoria": "cedula",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "DOCUMENTOS GENERALES HUGO VALENCIA RESTREPO.PDF",
+          "categoria": "otro",
+          "paginas": 9,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "EXAMEN DE INGRESO.pdf",
+          "categoria": "examen_medico",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "EXAMEN PERIODICO-HUGO VALENCIA RESTREPO.pdf",
+          "categoria": "examen_medico",
+          "paginas": 2,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "94515772",
+            "fechas_encontradas": [
+              "9/11/24",
+              "9/11/24"
+            ]
+          },
+          "preview": "9/11/24, 8:57 a.m. Certificado medico HUGO VALENCIA RESTREPO\nCERTIFICADO MÉDICO DE CONTROL PERIODICO\nFecha: 2024-11-09\n1. INFORMACIÓN GENERAL\nEmpresa Usuaria: EQUIPOS INDUSTRIALES FENIX SAS Actividad económica: Comercio formal\nNombre: HUGO VALENCIA RESTREPO Documento: CC 94515772\nFecha de nacimiento: 1977-12-08 Lugar de nacimiento: CALI (VALLE )\nEdad: 46 años Identidad de Género: Masculino\nEstado …"
+        },
+        {
+          "archivo": "HUGO VALENCIA RESTREPO.pdf",
+          "categoria": "otro",
+          "paginas": 2,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "94515772",
+            "fechas_encontradas": [
+              "9/11/24",
+              "9/11/24"
+            ]
+          },
+          "preview": "9/11/24, 8:57 a.m. Certificado medico HUGO VALENCIA RESTREPO\nCERTIFICADO MÉDICO DE CONTROL PERIODICO\nFecha: 2024-11-09\n1. INFORMACIÓN GENERAL\nEmpresa Usuaria: EQUIPOS INDUSTRIALES FENIX SAS Actividad económica: Comercio formal\nNombre: HUGO VALENCIA RESTREPO Documento: CC 94515772\nFecha de nacimiento: 1977-12-08 Lugar de nacimiento: CALI (VALLE )\nEdad: 46 años Identidad de Género: Masculino\nEstado …"
+        },
+        {
+          "archivo": "RECOMENDACIONES-HUGO VALENCIA RESTREPO.pdf",
+          "categoria": "examen_medico",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "94515772",
+            "fechas_encontradas": [
+              "9/11/24"
+            ]
+          },
+          "preview": "9/11/24, 8:59 a.m. Formato de recomendaciones [historia_control] HUGO VALENCIA RESTREPO\nRECOMENDACIONES MÉDICAS OCUPACIONALES\nDerivadas de la valoración Ocupacional de Control\nFecha: 2024-11-09\nEn atención al Examen Médico Ocupacional que le fue realizado por Laboratorio Clínico Colmédicos IPS S.A.S. como\nproveedor de evaluaciones ocupacionales en el marco del Sistema de Gestión de la Seguridad y …"
+        }
+      ]
+    },
+    {
+      "empleado": "IVAN D VELASQUEZ MARTIN",
+      "total_pdfs": 11,
+      "escaneados_sin_texto": 10,
+      "categorias": {
+        "arl": 1,
+        "cedula": 1,
+        "certificacion_otra": 1,
+        "contrato": 2,
+        "otro": 4,
+        "cesantias": 1,
+        "hoja_vida": 1
+      },
+      "documentos": [
+        {
+          "archivo": "ARL COLPATRIA.pdf",
+          "categoria": "arl",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "860002183",
+            "fechas_encontradas": [
+              "01/03/2023"
+            ]
+          },
+          "preview": "AXA COLPATRIA SEGUROS DE VIDA S.A.\nADMINISTRADORA DE RIESGOS LABORALES\nNit. 860.002.183 – 9\nCERTIFICA\nQue el afiliado relacionado a continuación se encuentra vinculado con nuestra compañía bajo la afiliación No.\n9004713 correspondiente a la empresa Equipos Industriales Fenix Sas.\nNombre T. I Número de Fecha de Clase de Tasa de Centro de\nIdentificacion inicio Riesgo Riesgo Centro trabajo\ncobertura …"
+        },
+        {
+          "archivo": "CC IVAN D VELASQUEZ.pdf",
+          "categoria": "cedula",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "CERTIFICADOS DE ESTUDIO.pdf",
+          "categoria": "certificacion_otra",
+          "paginas": 7,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "CONTRATO FIRMADO IVAN VELASQUEZ.pdf",
+          "categoria": "contrato",
+          "paginas": 4,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "Contro firmado por Iván Velasquez .pdf",
+          "categoria": "otro",
+          "paginas": 5,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "CUMPLEANOS IVAN.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "DOCUEMNETOS GENERALES IVAN D VELASQUEZ MARTIN.PDF",
+          "categoria": "otro",
+          "paginas": 30,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "FONDO DE CESANTIAS.pdf",
+          "categoria": "cesantias",
+          "paginas": 2,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "HV IVAN D VELASQUEZ MARTIN.pdf",
+          "categoria": "hoja_vida",
+          "paginas": 2,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "OTRO SI IVAN DANILO VELASQUEZ.pdf",
+          "categoria": "otro",
+          "paginas": 2,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "OTRO SÍ AL CONTRATO DE TRABAJO A TÉRMINO FIJO INFERIOR A UN AÑO 2024-.pdf",
+          "categoria": "contrato",
+          "paginas": 2,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        }
+      ]
+    },
+    {
+      "empleado": "JULIO CESAR MALDONADO QUIROGA",
+      "total_pdfs": 22,
+      "escaneados_sin_texto": 2,
+      "categorias": {
+        "cedula": 2,
+        "otro": 11,
+        "hoja_vida": 1,
+        "eps": 1,
+        "certificacion_otra": 6,
+        "contrato": 1
+      },
+      "documentos": [
+        {
+          "archivo": "1. JULIO CESAR MALDONADO. Cedula ciudadania.pdf",
+          "categoria": "cedula",
+          "paginas": 2,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "2. JULIO CESAR MALDONADO Q. RUT. 14893328235.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "cargo_mencion": "Fecha generación documento PDF",
+            "fechas_encontradas": [
+              "02-02-2023"
+            ]
+          },
+          "preview": "2. Concepto 0 2 Actualización\n4. Número de formulario 14893328235\n5. Número de Identificación Tributaria (NIT) 6. DV 12. Dirección seccional 14. Buzón electrónico\n7 9 4 8 0 9 1 6 7 Impuestos de Bogotá 3 2\nIDENTIFICACIÓN\n24. Tipo de contribuyente 25. Tipo de documento 26. Número de Identificación 27. Fecha expedición\nPersona natural o suce sión ilíquida 2 Cédula de Ciuda danía 1 3 7 9 4 8 0 9 1 6 1…"
+        },
+        {
+          "archivo": "3. JULIO CESAR MALDONADO QUIROGA. Hoja de vida. 2024.docx.pdf",
+          "categoria": "hoja_vida",
+          "paginas": 4,
+          "texto_extraible": true,
+          "campos": {},
+          "preview": "JULIO CESAR MALDONADO QUIROGA\nCalle 12 A No. 71B 41 T2 Apto 201\n31345856361-8013587\njuliocmaldoq4@gmail.com\nPERFIL PROFESIONAL\nProfesional en Salud Ocupacional S.O - Seguridad y Salud en el Trabajo SST.\nAsesor y Consultor en Gestión de Riesgo.\nDiseño y Asesoría en el desarrollo de la Implementación y Mantenimiento del Sistema de\nGestión de Seguridad y Salud en el Trabajo.\nExperiencia en el diseño …"
+        },
+        {
+          "archivo": "4. JULIO CESAR MALDONADO QUIROGA. Licencia Profesional - SECRETARIA SALUD CUND.pdf",
+          "categoria": "eps",
+          "paginas": 2,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "5. JULIO CESAR MALDONADO QUIROGA. Certificado curso 50 horas. SENA.pdf",
+          "categoria": "certificacion_otra",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "79480916"
+          },
+          "preview": "S\nREGIONAL NARIÑO\nEL CENTRO INTERNACIONAL DE PRODUCCIÓN LIMPIA - LOPE\nCERTIFICA\nQue JULIO CESAR MALDONADO QUIROGA identificado(a) con Cedula de Ciudadania\nNo 79.480.916 de Bogotá, realizó y aprobó el curso de SISTEMA DE GESTION DE LA\nSEGURIDAD Y SALUD EN EL TRABAJO SG-SST con una intensidad horaria de\nCincuenta (50) y obtuvo una evaluación Apto (A) con una equivalencia de (4.5).\nEquivalencia de Ev…"
+        },
+        {
+          "archivo": "6. JULIO CESAR MALDONADO. Certificado curso 20 horas. SURA.pdf",
+          "categoria": "certificacion_otra",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {},
+          "preview": "ARL\nLa República de Colombia, el Ministerio de Trabajo y ARL SURA\nCERTIFICA QUE\nJULIO CESAR MALDONADO QUIROGA\nC79480916\nHA FINALIZADO CORRECTAMENTE LA FORMACIÓN\nACTUALIZACIÓN VIRTUAL SGSST (20 HORAS)\nHORAS CERTIFICADAS\n20\nEn testimonio de lo anterior, se firma el presente el\n24 de septiembre de 2021\nRegistro Certificado de Oferente de Seguros de Riesgos Laborales Suramericana S.A. RCO-0003.\n9BeqWY…"
+        },
+        {
+          "archivo": "7. JULIO CESAR MALDONADO . Certificacion BANCOLOMBIA.pdf",
+          "categoria": "certificacion_otra",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "79480916"
+          },
+          "preview": "Miércoles,08defebrerode2023\nSeñor(a)\nHORUSGRUPOOFTALMOLOGICOSA\nBANCOLOMBIAS.A.sepermiteinformarqueJULIOCESARMALDONADOQUIROGAidentificado(a)con\nCC79480916,alafechadeexpedicióndeestacertificación,tieneconelbancolossiguientesproductos:\nProducto No. Producto Fecha Apertura Estado\nCUENTA DE AHORROS 15701826512 1999/02/12 ACTIVA\n*Importante: Esta constancia solo hace referencia a los productos mencionad…"
+        },
+        {
+          "archivo": "7. SGSST. EIF- Cuenta de cobro julio 2024.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "901146454"
+          },
+          "preview": "ASESORÍAS Y CONSULTORÍAS\nBogotá, 10 de agosto de 2024\nEQUIPOS INDUSTRIALES FENIX SAS\nNit: 901.146.454-6\nDEBE A:\nJULIO CESAR MALDONADO QUIROGA\nCC 79.480.916\nLA SUMA DE SEIS CIENTOS SETENTA Y CINCO MIL PESOS M/L ($675.000)\nPor concepto del inicio desarrollo del plan de plan de trabajo del Sistema de Gestión de\nSeguridad y Salud en el trabajo SG-SST, gestión realizada en el mes de JULIO de 2024.\nPara…"
+        },
+        {
+          "archivo": "8. SGSST. EIF- Cuenta de cobro AGOSTO 2024..pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "901146454"
+          },
+          "preview": "ASESORÍAS Y CONSULTORÍAS\nBogotá, 05 de septiembre de 2024\nEQUIPOS INDUSTRIALES FENIX SAS\nNit: 901.146.454-6\nDEBE A:\nJULIO CESAR MALDONADO QUIROGA\nCC 79.480.916\nLA SUMA DE SEIS CIENTOS SETENTA Y CINCO MIL PESOS M/L ($675.000)\nPor concepto del inicio desarrollo del plan de plan de trabajo del Sistema de Gestión de\nSeguridad y Salud en el trabajo SG-SST, gestión realizada en el mes de AGOSTO de 2024.…"
+        },
+        {
+          "archivo": "8. SGSST. EIF- Cuenta de cobro SEPTIEMBRE 2024.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "901146454"
+          },
+          "preview": "ASESORÍAS Y CONSULTORÍAS\nBogotá, 02 de octubre de 2024\nEQUIPOS INDUSTRIALES FENIX SAS\nNit: 901.146.454-6\nDEBE A:\nJULIO CESAR MALDONADO QUIROGA\nCC 79.480.916\nLA SUMA DE SEIS CIENTOS SETENTA Y CINCO MIL PESOS M/L ($675.000)\nPor concepto del inicio desarrollo del plan de plan de trabajo del Sistema de Gestión de\nSeguridad y Salud en el trabajo SG-SST, gestión realizada en el mes de SEPTIEMBRE de 2024…"
+        },
+        {
+          "archivo": "9. Acta de reuniones. INFORME DE GESTION MES DE SEPTIEMBRE  DE 2024.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "cargo_mencion": "Analista administrativo Hora inicio y finalización\nN",
+            "menciona_eif": true
+          },
+          "preview": "CODIGO: Formato 03\nSISTEMA DE GESTION DE SEGURIDAD Y\nVERSION: 2\nSALUD EN EL TRABAJO\nFECHA: 14 marzo de 2024\nSGSST\nEIF SAS Página: 1 de 1\nACTA DE REUNIONES – INFORMES DE GESTIÓN\nComité o\ngrupo PLAN TRABAJO SGSST Acta No: 09\nCitado por MILENA CARMONA Fecha: 02 octubre de 2024\nCargo Analista administrativo Hora inicio y finalización\nN.º PUNTOS A TRATAR\n1 REUNION GERENCIAL Y DE EQUIPO DE TRABAJO\n2 CAP…"
+        },
+        {
+          "archivo": "Acta de reunión 07 - informe de Gestión. 31 JULIO DE 2024.pdf",
+          "categoria": "otro",
+          "paginas": 3,
+          "texto_extraible": true,
+          "campos": {
+            "cargo_mencion": "ANALISTA ADMINISTRATIVO Hora inicio y finalización",
+            "menciona_eif": true
+          },
+          "preview": "CODIGO: Formato 03\nSISTEMA DE GESTION DE SEGURIDAD Y\nVERSION: 2\nSALUD EN EL TRABAJO\nFECHA: 14 marzo de 2024\nSGSST\nEIF SAS Página: 1 de 3\nACTA DE REUNIONES – INFORMES DE GESTIÓN\nComité o grupo PLAN TRABAJO SGSST Acta No: 07\nCitado por CRISTIAN VELASCO Fecha: 31 julio de 2024\nCargo ANALISTA ADMINISTRATIVO Hora inicio y finalización 10.45 am – 1.00 pm\nN.º PUNTOS A TRATAR\n1 Presupuesto del SGSST\n2 Alc…"
+        },
+        {
+          "archivo": "CC JULIO CESAR MALDONADO QUIROGA.pdf",
+          "categoria": "cedula",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {},
+          "preview": "AUTORIZACION PARA PROCESOS DE LICITACION EN EQUIPOS INDUSTRIALE FENIX\nAUTORIZACION PARA PROCESOS DE LICITACION EN EQUIPOS INDUSTRIALES FENIX"
+        },
+        {
+          "archivo": "CERTIFICACION ARL SURA JULIO CESAR MALDONADO QUIROGA.pdf",
+          "categoria": "certificacion_otra",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {},
+          "preview": "ARL\nAUTORIZACION PARA PROCESOS DE LICITACION EN EQUIPOS INDUSTRIALES FENIX\nLa República de Colombia, el Ministerio de Trabajo y ARL SURA\nCERTIFICA QUE\nJULIO CESAR MALDONADO QUIROGA\nC79480916\nHA FINALIZADO CORRECTAMENTE LA FORMACIÓN\nACTUALIZACIÓN VIRTUAL SGSST (20 HORAS)\nHORAS CERTIFICADAS\n20\nEn testimonio de lo anterior, se firma el presente el\n24 de septiembre de 2021\nRegistro Certificado de Ofer…"
+        },
+        {
+          "archivo": "CERTIFICACION COMERCIAL JULIO CESAR MALDONADO QUIROGA.pdf",
+          "categoria": "certificacion_otra",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "901146454",
+            "menciona_eif": true
+          },
+          "preview": "EQUIPOS INDUSTRIALES FENIX SAS\nNIT: 901.146.454 - 6\nBogotá, 5 agosto de 202\nREF: PRESTACION DE SERVICIOS\nEQUIPOS INDUSTRIALES FENIX S.A.S con NIT: 901.146.454-6. Certifica que el\nseñor JULIO CESAR MALDONADO QUIROGA, Identificado con cedula de\nciudadanía No. 79.480.916 de Bogotá, suscribió un contrato de prestación\nde servicios como PROFESIONAL EN SALUD OCUPACIONAL – SST desde el\n01 de enero de 202…"
+        },
+        {
+          "archivo": "CERTIFICACION-JULIO CESAR MALDONADO QUIROGA.pdf",
+          "categoria": "certificacion_otra",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "901146454",
+            "menciona_eif": true
+          },
+          "preview": "EQUIPOS INDUSTRIALES FENIX SAS\nNIT: 901.146.454 - 6\nBogotá, 5 agosto de 2024\nREF: PRESTACION DE SERVICIOS\nEQUIPOS INDUSTRIALES FENIX S.A.S con NIT: 901.146.454-6. Certifica que el\nseñor JULIO CESAR MALDONADO QUIROGA, Identificado con cedula de\nciudadanía No. 79.480.916 de Bogotá, suscribió un contrato de prestación\nde servicios como PROFESIONAL EN SALUD OCUPACIONAL – SST desde el\n01 de enero de 20…"
+        },
+        {
+          "archivo": "EIF. SG-SST - CONTRATO PRESTACION DE SERVICIO. 1 ENERO DE 2024.pdf",
+          "categoria": "contrato",
+          "paginas": 3,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "16288590",
+            "cargo_mencion": "de su exclusiva dependencia"
+          },
+          "preview": "CONTRATO DE PRESTACION DE SERVICIOS PROFESIONALES – SIN VINCULO LABORAL\nENTRE DAVID SEBASTIAN VALENCIA RESTREPO Y JULIO CESAR MALDONADO QUIROGA\nBOGOTA 1 ENERO DE 2024\nEntre los suscritos a saber DAVID SEBASTIAN VALENCIA RESTREPO, mayor de edad, identificado con cédula de\nciudadanía 16.288.590 de Bogotá, Actuando como REPRESENTANTE LEGAL de la Empresa EQUIPOS\nINDUSTRIALES FENIX SAS. identificado co…"
+        },
+        {
+          "archivo": "LICENCIA JULIO CESAR MALDONADO QUIROGA.pdf",
+          "categoria": "otro",
+          "paginas": 3,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "79480916",
+            "cargo_mencion": "de las entidades departamentales y distritales\nde salud"
+          },
+          "preview": "RESOLUCIÓN No. 25-0224 de 2024\n(24 DE ABRIL DE 2024)\n“Por la cual se renueva la Licencia para Prestación de Servicios en\nSeguridad y Salud en el Trabajo a JULIO CESAR MALDONADO QUIROGA”\nLA DIRECTORA DE DESARROLLO DE SERVICIOS DE LA SECRETARÍA DE\nSALUD DE CUNDINAMARCA\nEn uso de las facultades legales y reglamentarias mediante la Ley 1562 de 2012, y la\nResolución N° 04502 del 28 de diciembre de 2012…"
+        },
+        {
+          "archivo": "8. Planilla Agosto . 8379648791.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "79480916"
+          },
+          "preview": "Pag. 1 de 1\nCompensar operador de información certifica que procesó el pago realizado por:\nSeñor(a): JULIO CESAR MALDONADO QUIROGA\nNo. Identificación: CC79480916\nDirección: CALLE 12A NO 71B-41 T2 AP 201\nTelefono: 5341622\nCorreo: juliocmaldoq4@gmail.com\nCiudad: BOGOTÁ, D.C.\nNúmero de Planilla: 8379648791\nCITE EL NÚMERO DE PLANILLA PARA CUALQUIER CONSULTA DE PAGO\nNombre Aportante JULIO CESAR MALDONA…"
+        },
+        {
+          "archivo": "Planilla julio de 2024. 8378886922.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "79480916"
+          },
+          "preview": "Pag. 1 de 1\nCompensar operador de información certifica que procesó el pago realizado por:\nSeñor(a): JULIO CESAR MALDONADO QUIROGA\nNo. Identificación: CC79480916\nDirección: CALLE 12A NO 71B-41 T2 AP 201\nTelefono: 5341622\nCorreo: juliocmaldoq4@gmail.com\nCiudad: BOGOTÁ, D.C.\nNúmero de Planilla: 8378886922\nCITE EL NÚMERO DE PLANILLA PARA CUALQUIER CONSULTA DE PAGO\nNombre Aportante JULIO CESAR MALDONA…"
+        },
+        {
+          "archivo": "Planilla junio. 8378069302.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "79480916"
+          },
+          "preview": "Pag. 1 de 1\nCompensar operador de información certifica que procesó el pago realizado por:\nSeñor(a): JULIO CESAR MALDONADO QUIROGA\nNo. Identificación: CC79480916\nDirección: CALLE 12A NO 71B-41 T2 AP 201\nTelefono: 5341622\nCorreo: juliocmaldoq4@gmail.com\nCiudad: BOGOTÁ, D.C.\nNúmero de Planilla: 8378069302\nCITE EL NÚMERO DE PLANILLA PARA CUALQUIER CONSULTA DE PAGO\nNombre Aportante JULIO CESAR MALDONA…"
+        },
+        {
+          "archivo": "RES 0224 RENOV JULIO CESAR MALDONADO QUIROGA.pdf",
+          "categoria": "otro",
+          "paginas": 3,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "79480916",
+            "cargo_mencion": "de las entidades departamentales y\ndistritales de salud"
+          },
+          "preview": "RESOLUCIÓN No. 25-0224 de 2024\n(24 DE ABRIL DE 2024)\n“Por la cual se renueva la Licencia para Prestación de Servicios en\nSeguridad y Salud en el Trabajo a JULIO CESAR MALDONADO QUIROGA”\nLA DIRECTORA DE DESARROLLO DE SERVICIOS DE LA SECRETARÍA DE\nSALUD DE CUNDINAMARCA\nEn uso de las facultades legales y reglamentarias mediante la Ley 1562 de 2012, y la\nResolución N° 04502 del 28 de diciembre de 2012…"
+        }
+      ]
+    },
+    {
+      "empleado": "KEVIN ANTONIO AREVALO",
+      "total_pdfs": 23,
+      "escaneados_sin_texto": 8,
+      "categorias": {
+        "graduacion": 1,
+        "arl": 2,
+        "pension": 1,
+        "cesantias": 4,
+        "cedula": 1,
+        "certificacion_otra": 2,
+        "certificacion_laboral": 2,
+        "contrato": 2,
+        "eps": 1,
+        "examen_medico": 2,
+        "otro": 1,
+        "hoja_vida": 1,
+        "novedad": 1,
+        "policia_procuraduria": 2
+      },
+      "documentos": [
+        {
+          "archivo": "ACTA DE GRADO KEVIN AREVALO.pdf",
+          "categoria": "graduacion",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "AFILIACION ARL KEVIN.pdf",
+          "categoria": "arl",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "901146454",
+            "salario_mencion": "1,400,000",
+            "fechas_encontradas": [
+              "05/11/2024",
+              "02/11/2024"
+            ]
+          },
+          "preview": "INGRESO EMPLEADO\nDATOS DE LA EMPRESA\nTipo de Identificación: NIT\nNúmero de documento: 901146454\nNúmero Afiliación: 9004713\nRazón social: EQUIPOS INDUSTRIALES FENIX SAS\nDATOS DEL EMPLEADO:\nTipo de documento: CÉDULA\nNúmero de Documento 1001272119\nNombre: KEVIN ANTONIO AREVALO RODRIGUEZ\nFecha Ingreso: 05/11/2024\nSalario básico: 1,400,000\nNit empresa en misión: 0\nCódigo Sucursal: 11001\nCentro de traba…"
+        },
+        {
+          "archivo": "CAJA KEVIN ANTONIO AREVALO RODRIGUEZ.pdf",
+          "categoria": "pension",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "860066942",
+            "cargo_mencion": "AUXILIAR DE INVENTARIOS Y COSTOS\nHoras Labor Mes",
+            "fechas_encontradas": [
+              "5/11/2024",
+              "5/11/2024",
+              "5/11/2024"
+            ]
+          },
+          "preview": "Bogotá DC. 5 de Noviembre de 2.024\nCONSTANCIA SOLICITUD DE AFILIACIÓN\nCAJA DE COMPENSACIÓN FAMILIAR COMPENSAR\nNIT 860066942\nSeñor usuario, reciba un cordial saludo de su Caja de Compensación Familiar Compensar. Informamos que\nel día 5/11/2024, se ha recibido una solicitud de afiliación, la cual estará sujeta a verificación.\nSi el trabajador desea recibir cuota monetaria de subsidio debe consultar …"
+        },
+        {
+          "archivo": "CARNET ARL KEVIN.pdf",
+          "categoria": "arl",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {},
+          "preview": "KEVIN ANTONIO AREVALO RODRIGUEZ\nC.C. 1001272119\nIdentificación: 901146454\nRazón Social: EQUIPOS INDUSTRIALES FENIX SAS\nNo. Afiliación: 9004713\nE.P.S. FAMISANAR LTDA."
+        },
+        {
+          "archivo": "CARTA firmada PARA RETIRO DE CESANTIAS KEVIN JUNIO 2026--.pdf",
+          "categoria": "cesantias",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "CARTA PARA RETIRO DE CESANTIAS KEVIN JUNIO 2026.pdf",
+          "categoria": "cesantias",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "901146454"
+          },
+          "preview": "Bogotá D.C., 02 de junio de 2026\nSeñores\nFONDO NACIONAL DEL AHORRO – FNA\nCiudad\nAsunto: Autorización para retiro de cesantías con fines educativos\nPor medio de la presente, EQUIPOS INDUSTRIALES FÉNIX S.A.S., identificada con NIT\n901.146.454-6, certifica que el señor KEVIN ANTONIO ARÉVALO RODRÍGUEZ, identificado\ncon cédula de ciudadanía No. 1001272119, se encuentra vinculado laboralmente con\nnuestr…"
+        },
+        {
+          "archivo": "CEDULA KEVIN AREVALO.pdf",
+          "categoria": "cedula",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "CERTIFICACION BANCARIA-KEVIN ANTONIO AREVALO RODRIGUEZ.pdf",
+          "categoria": "certificacion_otra",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "1001272119"
+          },
+          "preview": "Viernes,1denoviembrede2024\nAquienpuedainteresar\nBANCOLOMBIAS.A.sepermiteinformarqueKEVINANTONIOAREVALORODRIGUEZidentificado(a)\nconCC1001272119,alafechadeexpedicióndeestacertificación,tieneconelbancolossiguientes\nproductos:\nProducto No. Producto Fecha Apertura Estado\nCUENTA DE AHORROS 91210249945 2020/05/05 ACTIVA\n*Importante: Esta constancia solo hace referencia a los productos mencionados anterio…"
+        },
+        {
+          "archivo": "CERTIFICACION LABORAL KEVIN AREVALO (2).pdf",
+          "categoria": "certificacion_laboral",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "901023218",
+            "salario_mencion": "$ 1.300.000",
+            "cargo_mencion": "AUXILIAR LOGISTICO\nFecha de ingreso"
+          },
+          "preview": "HQ5 SAS\nNIT : 901023218-6\nCERTIFICA QUE:\nNombre AREVALO RODRIGUEZ KEVIN ANTONIO\nTipo de identificación CEDULA DE CIUDADANIA\nN° identificación 1001272119\nTipo de contrato Contrato de Obra o labor\nEmpresa usuaria MB TECH DE COLOMBIA S.A.S\nCargo AUXILIAR LOGISTICO\nFecha de ingreso 22-Jan-2024\nFecha de retiro 23-Oct-2024\nSalario $ 1.300.000,00\nSubsidio de Transporte Legal $ 162.000,00\nLa presente soli…"
+        },
+        {
+          "archivo": "CERTIFICACION LABORAL KEVIN AREVALO.pdf",
+          "categoria": "certificacion_laboral",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "1001272119"
+          },
+          "preview": "LORENFORM S.A.S.\nCERTIFICA QUE:\nKevin Antonio Arévalo Rodríguez identificado con Cedula de Ciudadanía N°1001272119,\nlaboro en nuestra compañía desde el 21 de Junio de 2022 hasta el 23 de Febrero de 2023\ndesempeñándose como Auxiliar logístico y Operario de máquina, tiempo en el cual\ndemostró cumplimiento en las labores asignadas.\nSe expide en Bogotá a los días (10) del mes de Marzo de 2023\nNICOLAS …"
+        },
+        {
+          "archivo": "CERTIFICADO COLPENSIONES KEVIN AREVALO.pdf",
+          "categoria": "certificacion_otra",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "1001272119",
+            "fechas_encontradas": [
+              "18/07/2022"
+            ]
+          },
+          "preview": "LA ADMINISTRADORA COLOMBIANA DE PENSIONES - COLPENSIONES\nCERTIFICA QUE\nVerificada la base de datos de afiliados, el/la señor/a KEVIN ANTONIO AREVALO RODRIGUEZ identificado/a con\ndocumento de identidad Cédula de Ciudadanía número 1001272119, se encuentra afiliado/a desde 18/07/2022 al\nRégimen de Prima Media con Prestación Definida (RPM) administrado por la Administradora Colombiana de\nPensiones COL…"
+        },
+        {
+          "archivo": "CONTRATO FIRMADO KEVIN ANTONIO AREVALO.pdf",
+          "categoria": "contrato",
+          "paginas": 5,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "CONTRATO-KEVIN ANTONIO AREVALO RODRIGUEZ.pdf",
+          "categoria": "contrato",
+          "paginas": 5,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "901146454",
+            "salario_mencion": "1.400.000",
+            "cargo_mencion": "SALARIO"
+          },
+          "preview": "CONTRATO DE TRABAJO A TERMINO FIJO INFERIOR A UN AÑO\nNOMBRE DEL EMPLEADOR: EQUIPOS INDUSTRIALES FENIX S.A.S.\nDOCUMENTO DE IDENTIFICACIÓN NIT.901.146.454-6\nDOMICILIO DEL EMPLEADOR Bogotá\nNOMBRE DEL TRABAJADOR KEVIN ANTONIO AREVALO RODRIGUEZ\nDOCUMENTO DE IDENTIDAD CC 1.001.272.119\nCIUDAD Y FECHA DE EXPEDICIÓN Bogotá D.C 27-enero 2020\nCELULAR 3223174826\nDIRECCIÓN DE RESIDENCIA - BARRIO TRANS 18 I 70 …"
+        },
+        {
+          "archivo": "EPS KEVIN AREVALO.pdf",
+          "categoria": "eps",
+          "paginas": 2,
+          "texto_extraible": true,
+          "campos": {
+            "fechas_encontradas": [
+              "1/11/24",
+              "01/08/2017",
+              "31/12/2999",
+              "11/01/2024",
+              "1/11/24"
+            ]
+          },
+          "preview": "1/11/24, 17:50 aplicaciones.adres.gov.co/bdua_internet/Pages/RespuestaConsulta.aspx?tokenId=1YdKALMnDE50yxGumN6vIA==\nADMINISTRADORA DE LOS RECURSOS DEL SISTEMA GENERAL\nDE SEGURIDAD SOCIAL EN SALUD - ADRES\nInformación de afiliación en la Base de Datos Única de Afiliados – BDUA en el Sistema General de\nSeguridad Social en Salud\nResultados de la consulta\nInformación Básica del Afiliado :\nCOLUMNAS DAT…"
+        },
+        {
+          "archivo": "EXAMEN DE INGRESO kEVIN ANTONIO AREVALO.pdf",
+          "categoria": "examen_medico",
+          "paginas": 2,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "1001272119",
+            "cargo_mencion": "También establece que la Empresa solo puede conocer el CERTI",
+            "fechas_encontradas": [
+              "2/11/24",
+              "2/11/24",
+              "28/04/2015",
+              "04/03/2023"
+            ]
+          },
+          "preview": "2/11/24, 11:25 a.m. Certificado medico KEVIN ANTONIO AREVALO RODRIGUEZ\nCERTIFICADO MÉDICO DE PREINGRESO OCUPACIONAL\nFecha: 2024-11-02\n1. INFORMACIÓN GENERAL\nEmpresa Usuaria: EQUIPOS INDUSTRIALES FENIX SAS Actividad económica: Comercio formal\nNombre: KEVIN ANTONIO AREVALO RODRIGUEZ Documento: CC 1001272119\nFecha de nacimiento: 2002-01-13 Lugar de nacimiento: BOGOTA (CUNDINAMARCA)\nEdad: 22 años Iden…"
+        },
+        {
+          "archivo": "Formulario_unico_afiliacion.pdf",
+          "categoria": "otro",
+          "paginas": 3,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "HOJA DE VIDA KEVIN AREVALO.pdf",
+          "categoria": "hoja_vida",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "1001272119"
+          },
+          "preview": "Experiencia\nMB TECH DE COLOMBIA S.A.S\n21 de marzo del 2023 – 23 de octubre del\n2024\n• Gestión optima de piking y\npaking.\n• Control de inventarios.\n• Recepción de materia primas.\n• Alistamiento de mercancía.\nKevin Antonio\nLORENFORM S.A.S\nArevalo Rodriguez\n21 de junio del 2022 - 23 de febrero 2023\nCC. 1001.272.119\n• Etiquetar y empacar mercancía\n• Distribución de pedidos\nAuxiliar logistico\nTeléfono:…"
+        },
+        {
+          "archivo": "NOVEDAD CAMBIO EMPLEO AREVALO RODRIGUEZ KEVIN ANTONIO.pdf",
+          "categoria": "novedad",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "1001272119",
+            "cargo_mencion": "DEPENDIENTE SAT\nCambio Empleo"
+          },
+          "preview": "9011521613\n28495280\n9011521613\n07 11 2024\nX X X X\nX\nAREVALO RODRIGUEZ KEVIN ANTONIO\nCC 1001272119 X 13 01 2002\nAXA COLPATRIA\n$1.400.000\nEQUIPOS INDUSTRIALES FENIX SAS NT 901146454\n2129044 BOGOTA DISTRITO CAPITAL\nCLL 76 20B 24 OF 207\nX\n05 11 2024\nCARGO: DEPENDIENTE SAT\nCambio Empleo"
+        },
+        {
+          "archivo": "POLICIA KEVIN AREVALO.pdf",
+          "categoria": "policia_procuraduria",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "PROCURADURIA KEVIN AREVALO.pdf",
+          "categoria": "policia_procuraduria",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "cargo_mencion": "s que exijan para su desempeño ausencia de antecedentes"
+          },
+          "preview": "CERTIFICADO DE ANTECEDENTES\nPIB\n17:54:18\nCERTIFICADO ORDINARIO Hoja 1 de 01\nNo. 257341976\nBogotá DC, 01 de noviembre del 2024\nLa PROCURADURIA GENERAL DE LA NACIÓN certifica que una vez consultado el Sistema de Información de (cid:9)Registro de Sanciones e Inhabilidades\n(SIRI), el(la) señor(a) KEVIN ANTONIO AREVALO RODRIGUEZ identificado(a) con Cédula de ciudadanía número 1001272119:\nNO REGISTRA SA…"
+        },
+        {
+          "archivo": "RECOMENDACIONES MEDICAS KEVIN ANTONIO AREVALO RODRIGUEZ.pdf",
+          "categoria": "examen_medico",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "1001272119",
+            "fechas_encontradas": [
+              "6/11/24",
+              "28/04/2015",
+              "04/03/2023"
+            ]
+          },
+          "preview": "6/11/24, 10:38 a.m. Formato de recomendaciones [historia_ingreso] KEVIN ANTONIO AREVALO RODRIGUEZ\nRECOMENDACIONES MÉDICAS OCUPACIONALES\nDerivadas de la valoración Ocupacional de Ingreso\nFecha: 2024-11-02\nEn atención al Examen Médico Ocupacional que le fue realizado por Laboratorio Clínico Colmédicos IPS S.A.S. como\nproveedor de evaluaciones ocupacionales en el marco del Sistema de Gestión de la Se…"
+        },
+        {
+          "archivo": "SOLICITUD CARTA RETIRO CESANTIAS KEVIN AREVALO MAYO 2026 (1).pdf",
+          "categoria": "cesantias",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "SOLICITUD CARTA RETIRO CESANTIAS KEVIN AREVALO MAYO 2026.pdf",
+          "categoria": "cesantias",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        }
+      ]
+    },
+    {
+      "empleado": "LUIS FERNANDO DIAZ ALZATE",
+      "total_pdfs": 18,
+      "escaneados_sin_texto": 1,
+      "categorias": {
+        "graduacion": 1,
+        "eps": 1,
+        "otro": 6,
+        "cedula": 2,
+        "certificacion_otra": 3,
+        "contrato": 3,
+        "bancaria": 1,
+        "hoja_vida": 1
+      },
+      "documentos": [
+        {
+          "archivo": "Acta de grado.pdf",
+          "categoria": "graduacion",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "1022926872"
+          },
+          "preview": "ACTA INDIVIDUAL DE GRADO\nColegioC huniza\nInstitución Educativa Distrital\nCódigo Dane :1110010866\nCódigo Nit :8 30071428\nEn la ciudad de Bogotá, D.C, a los treinta (30) dias del mes de Noviembre delaño dos milveintiuno\n(2021) se reunieron con el fin de formalzar la graduación de los estudiantes de último grado, los\nSuscritos Rector y Secretaria en la Rectoria del coLEGIO CHUNZA 1NSTITVCIÓN\nEDUCATTV…"
+        },
+        {
+          "archivo": "AFILIACON EPS LUIS DIAZ.pdf",
+          "categoria": "eps",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "1022926872",
+            "fechas_encontradas": [
+              "01/03/2025"
+            ]
+          },
+          "preview": "CE-006 - 0000000100 – 2025\nCERTIFICA\nQue la(s) persona(s) relacionada(s) a continuación está(n) o ha(n) estado afiliada(s) a\nTIPO Y NÚMERO DE IDENTIFICACIÓN CC 1022926872\nNOMBRES Y APELLIDOS Diaz Alzate,Luis Fernando\nTIPO DE AFILIADO Titular\nTIPO DE TRABAJADOR Dependiente\nFECHA DE AFILIACIÓN AL REGIMEN 01/03/2025\nESTADO DE AFILIACIÓN Vigente\nESTADO DE SERVICIO No Habilitado\nREGIMEN Contributivo\nLa…"
+        },
+        {
+          "archivo": "Carta_fechas_1022926872_2025116.pdf",
+          "categoria": "otro",
+          "paginas": 3,
+          "texto_extraible": true,
+          "campos": {
+            "fechas_encontradas": [
+              "15/04/2024",
+              "15/01/2026",
+              "16/01/2026",
+              "14/07/2026"
+            ],
+            "menciona_eif": true
+          },
+          "preview": "11-9303\nBogota D. C., 15 de enero de 2025\nSr(a).\nMILENA CARMONA\nEQUIPOS INDUSTRIALES FENIX SAS - EIF SAS\nAnalista@viaindustrial.com\nBogota D. C.\nAsunto: Contrato de Aprendizaje - Carta de fechas\nRespetado empresario:\nDe acuerdo a su solicitud y para dar continuidad al proceso de contratación adelantado\npor su empresa, le informamos oficialmente los datos académicos y fechas de formación\ndel aprend…"
+        },
+        {
+          "archivo": "CC Luis Diaz  (1).pdf",
+          "categoria": "cedula",
+          "paginas": 2,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "1022926872"
+          },
+          "preview": "REPÜE CA DE COLOMBIA\nCEDULA DE\nCIUDADANÍA\nNUIP 1.022.926.872\nApelidos\nDIAZ ALZAE\nNombres\nLUIS FERNANDO\nNacionalidad Estatura Sexo\nCOL 1.73 M\nFecha de nacimiento G.S.\n22 AGO 2004\nLugar de nacimiento\nBOGOTA D.C. (CUNDINAMARCA)\nFecha y lugar de expedición\n23 AGO 2022, BOGOTA D.C.\nFecha de expiración\nFirma\n06 MAYO 2033\n.00\n021342963\nREGISTRADOR NACIONAL\nAlexander Vega Rocha\nICCOLO21342963615001<<<«<«<…"
+        },
+        {
+          "archivo": "CC Luis Diaz .pdf",
+          "categoria": "cedula",
+          "paginas": 2,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "1022926872"
+          },
+          "preview": "REPÜE CA DE COLOMBIA\nCEDULA DE\nCIUDADANÍA\nNUIP 1.022.926.872\nApelidos\nDIAZ ALZAE\nNombres\nLUIS FERNANDO\nNacionalidad Estatura Sexo\nCOL 1.73 M\nFecha de nacimiento G.S.\n22 AGO 2004\nLugar de nacimiento\nBOGOTA D.C. (CUNDINAMARCA)\nFecha y lugar de expedición\n23 AGO 2022, BOGOTA D.C.\nFecha de expiración\nFirma\n06 MAYO 2033\n.00\n021342963\nREGISTRADOR NACIONAL\nAlexander Vega Rocha\nICCOLO21342963615001<<<«<«<…"
+        },
+        {
+          "archivo": "Certificado Afiliado 34360913 (1).pdf",
+          "categoria": "certificacion_otra",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "1022926872"
+          },
+          "preview": "CERTIFICA\nQue el usuario LUIS FERNANDO DIAZ ALZATE con tipo de documento\nCédula de Ciudadanía No.1022926872 se encuentra activo(a) en nuestra\nbase de datos del Régimen subsidiado en la ciudad de Bogota, ficha\nsisben 3022860, desde 27 de agosto de 2013, sin ninguna discapacidad.\nSe expide el día 15 de enero de 2025a solicitud del interesado.\nInformación sujeta a verificación por parte de CAPITAL SA…"
+        },
+        {
+          "archivo": "Certificado Antecedentes Policia.pdf",
+          "categoria": "certificacion_otra",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "Certificado Antecedentes Procuraduria.pdf",
+          "categoria": "certificacion_otra",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "cargo_mencion": "s que exijan para su desempeño ausencia de antecedentes"
+          },
+          "preview": "CERTIFICADO DE ANTECEDENTES\nPIB\n09:54:04\nCERTIFICADO ORDINARIO Hoja 1 de 01\nNo. 261965356\nBogotá DC, 17 de enero del 2025\nLa PROCURADURIA GENERAL DE LA NACIÓN certifica que una vez consultado el Sistema de Información de (cid:9)Registro de Sanciones e Inhabilidades\n(SIRI), el(la) señor(a) LUIS FERNANDO DIAZ ALZATE identificado(a) con Cédula de ciudadanía número 1022926872:\nNO REGISTRA SANCIONES NI…"
+        },
+        {
+          "archivo": "CONTRATO CONFIDENCIALIDAD LUIS FERNANDO DIAZ ALZATE.pdf",
+          "categoria": "contrato",
+          "paginas": 2,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "16288590"
+          },
+          "preview": "ANEXO No. 01\nCONTRATO DE ACUERDO DE CONFIDENCIALIDAD\nEntre los suscritos a saber, David Sebastián Valencia Restrepo, mayor de edad y vecino de Bogotá,\nidentificado con la cédula de ciudadanía No. 16.288.590 de Bogotá, quien actúa en calidad de\nrepresentante legal de EQUIPOS INDUSTRIALES FENIX SAS, Nit. 901.146.454, sociedad legal y\ndebidamente constituida y domiciliada en Bogotá, D.C., en su calid…"
+        },
+        {
+          "archivo": "CUENTA BANCARIA LUIS.pdf",
+          "categoria": "bancaria",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "1022926872"
+          },
+          "preview": "Miércoles, 22 de enero de 2025\nSeñores:\nA quien pueda interesar\nBANCOLOMBIA S.A. se permite informar que LUIS FERNANDO DIAZ ALZATE identificado(a)\ncon CC. 1022926872 a la fecha de expedición de esta certificación, tiene con el Banco los\nsiguientes productos:\nProducto No. Producto Fecha Apertura Estado\nCuenta de Ahorro 912-772436-40 2025/01/22 Activa\n*Importante:Estaconstanciasólohacereferenciaalos…"
+        },
+        {
+          "archivo": "Diploma Bachiller.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {},
+          "preview": "La República de Colombia\nEI linisterio de Ebucación Aacional\nP en su nombre el\nColegio Chunisa\nJnstitución Ebucatiba Bistrital\nResoluciónf l0. 5366 Bel 28 de Biciembre de 2007\nContiere &:\nLuia Fenando Diagcyate\nDcumento e(cid:17) tdentidad 022926872\nEIt itulo de:\nBachiller Aradémico\npor haber cursabo pa probabo los estudios correspondientes al nibel de\nCbucación ledia Acabémica, según los planes p…"
+        },
+        {
+          "archivo": "Hoja de vida Contratos.pdf",
+          "categoria": "contrato",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "fechas_encontradas": [
+              "15/04/2024",
+              "15/01/2026",
+              "16/01/2026",
+              "14/07/2026"
+            ]
+          },
+          "preview": "3164729447\nLUIS FERNANDO\nDIAZ ALZATE luis2004diazalzate@gmail.com\n20 años Calle 92a sur #10-19\nBogota D.C\nTECNOLOGO EN ANALISIS Y\nDESARROLLO DE SOFTWARE\nSoy técnico en sistemas con una sólida base en soporte técnico y mantenimiento de equipos informáticos,\nactualmente cursando un tecnólogo en análisis y desarrollo de software. Me destaco por mi capacidad para\nadaptarme a los cambios y aprender ráp…"
+        },
+        {
+          "archivo": "Hoja de vida.pdf",
+          "categoria": "hoja_vida",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "fechas_encontradas": [
+              "15/04/2024",
+              "15/01/2026",
+              "16/01/2026",
+              "14/07/2026"
+            ]
+          },
+          "preview": "3164729447\nLUIS FERNANDO\nDIAZ ALZATE luis2004diazalzate@gmail.com\n20 años Calle 92a sur #10-19\nBogota D.C\nTECNOLOGO EN ANALISIS Y\nDESARROLLO DE SOFTWARE\nSoy técnico en sistemas con una sólida base en soporte técnico y mantenimiento de equipos informáticos,\nactualmente cursando un tecnólogo en análisis y desarrollo de software. Me destaco por mi capacidad para\nadaptarme a los cambios y aprender ráp…"
+        },
+        {
+          "archivo": "MINUTA CONTRATO DE APRENDIZAJE (1) (1).pdf",
+          "categoria": "contrato",
+          "paginas": 3,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "901146454",
+            "cargo_mencion": "REPRESENTANTE LEGAL\nCEDULA NO",
+            "fechas_encontradas": [
+              "22/08/2004"
+            ]
+          },
+          "preview": "CONTRATO DE APRENDIZAJE\nEMPRESA EQUIPOS INDUSTRIALES FENIX SAS\nNIT 901.146.454-6\nDIRECCION CALLE 76 # 20B 24\nTELEFONO 601-212 90 44\nREPRESENTANTE LEGAL DAVID SEBASTIAN VALENCIA RESTREPO\nCARGO REPRESENTANTE LEGAL\nCEDULA NO. 16.288.590\nNOMBRE APRENDIZ LUIS FERNANDO DIAZ ALZATE\nCEDULA 1.022.926.872\nFECHA NACIMIENTO 22/08/2004\nDIRECCION Calle 92 a sur 10-19\nTELEFONO 3164729447\nCORREO ELECTRONICO luis2…"
+        },
+        {
+          "archivo": "Referencia _Personal_Melva.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {},
+          "preview": "Melva Lucia Franco Arias\nTel 3213311448\nFecha: 17 de enero de 2025\nAqu ien corresponda:\nEs un placer para mí escribir esta carta de referencia personal para Luis FernandoD iaz\nAlzate, a quien conozco desde hace 20 años. Durante este tiempo, he tenido la oportunidad\nde observar su crecimiento y desarrollo tanto personal como profesional.\nLuis Fernando es una persona íntegra, responsable y con una g…"
+        },
+        {
+          "archivo": "Referencia_Familiar_Camilo.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "122993777"
+          },
+          "preview": "Cristian Camilo Betancur Alzate\nCalle 92A Sur 10-19\nBogotá, Colombia, Código postal 110541\nccbetancura @icloud.com\n3103210717\nFecha: 17 de enero de 2025\nA quien corresponda:\nMe dirijo a ustedes para recomendar a mi hermano, Luis Fernando Diaz Alzate, identificado\ncon cédula de ciudadanía número 1022926872 de Bogotá, quien actualmente estudia en el\nSENA y estáe n proceso de contrato de aprendizaje.…"
+        },
+        {
+          "archivo": "Referencia_Familiar_Jhonatan.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "1087989514"
+          },
+          "preview": "Jhonatan Andres Betancur Alzate\nCel 3113656443\nJhonatanbet@gmail.com\nFecha: 17 de enero de 2025\nA quien corresponda:\nEs un placer para mí escribir esta carta de recomendación para mi hermano, Luis Fernando\nDiaz Alzate, identificado con cédula de ciudadanía número 1022926872 de Bogotá. Luis\nFernando está actualmente cursando sus estudios en el SENA y se encuentra en proceso de\ncontrato de aprendiza…"
+        },
+        {
+          "archivo": "Referencia_Personal_Alejandra.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "1015392034"
+          },
+          "preview": "Dayan Alejandra Manco Arias\nTel 3186389651\nFecha: 17 de enero de 2025\nA quien corresponda:\nEs un placer para mí escribir esta carta de referencia personal para Luis Fernando Diaz\nAlzate, a quien conozco desde hace 3 años, Durante este tiempo, he tenido la oportunidad\nde observar su crecimiento y desarrollo tanto personal como profesional.\nLuis Fernando es una persona íntegra, responsable y con una…"
+        }
+      ]
+    },
+    {
+      "empleado": "MANUELA TRUJILLO VALENCIA",
+      "total_pdfs": 11,
+      "escaneados_sin_texto": 3,
+      "categorias": {
+        "otro": 5,
+        "cedula": 1,
+        "contrato": 1,
+        "examen_medico": 4
+      },
+      "documentos": [
+        {
+          "archivo": "Carta Firmada Manuela.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "101723970",
+            "cargo_mencion": "AsistenteComercial\nE",
+            "menciona_eif": true
+          },
+          "preview": "CODIGO:Formato04\nSISTEMADEGESTIONDESEGURIDADY\nVERSION:2\nSALUDENELTRABAJO\nFECHA:14marzode2024\nSGSST\nEIFSAS Página:1de1\nACTADEENTREGADEDOTACIÓN\nCiudad:Medellín\nFecha: 14 de Enero 2025\nNombre del trabajador: MANUELATRUJILLO VALENCIA\nCargo: AsistenteComercial\nE. S. M\nRef.: Entrega de Dotación\nPrimera entrega Segunda entrega Tercera entrega\n30abril 31 agosto 20 diciembre\nPor medio de lapresente acta, s…"
+        },
+        {
+          "archivo": "CC MANUELA TRUJILLO VALENCIA.pdf",
+          "categoria": "cedula",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "CONTRATO FIRMADO MANUELA TRUJILLO VALENCIA.pdf",
+          "categoria": "contrato",
+          "paginas": 5,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "DOCUMENTOS GENERALES MANUELA TRUJILLO VALENCIA.PDF",
+          "categoria": "otro",
+          "paginas": 22,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "EXAMEN DE RETIRO.pdf",
+          "categoria": "examen_medico",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "1017239701",
+            "fechas_encontradas": [
+              "19/2/25",
+              "26/10/2016"
+            ]
+          },
+          "preview": "19/2/25, 11:37 a.m. Certificado medico MANUELA TRUJILLO VALENCIA\nCERTIFICADO MÉDICO DE EGRESO\nFecha: 2025-02-19\n1. INFORMACIÓN GENERAL\nEmpresa Usuaria: EQUIPOS INDUSTRIALES FENIX SAS Actividad económica: Comercio formal\nNombre: MANUELA TRUJILLO VALENCIA Documento: CC 1017239701\nFecha de nacimiento: 1996-04-25 Lugar de nacimiento: CALI (VALLE)\nEdad: 28 años Identidad de Género: Femenino\nEstado civi…"
+        },
+        {
+          "archivo": "EXAMEN PERIODICO  MANUELA TRUJILLO VALENCIA.pdf",
+          "categoria": "examen_medico",
+          "paginas": 2,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "1017239701",
+            "fechas_encontradas": [
+              "9/11/24",
+              "9/11/24",
+              "23/02/2022"
+            ]
+          },
+          "preview": "9/11/24, 8:09 a.m. Certificado medico MANUELA TRUJILLO VALENCIA\nCERTIFICADO MÉDICO DE CONTROL PERIODICO\nFecha: 2024-11-09\n1. INFORMACIÓN GENERAL\nEmpresa Usuaria: EQUIPOS INDUSTRIALES FENIX SAS Actividad económica: Comercio formal\nNombre: MANUELA TRUJILLO VALENCIA Documento: CC 1017239701\nFecha de nacimiento: 1996-04-25 Lugar de nacimiento: CALI (VALLE)\nEdad: 28 años Identidad de Género: Femenino\nE…"
+        },
+        {
+          "archivo": "EXAMEN PERIODICO MANUELA TRUJILLO VALENCIA.pdf",
+          "categoria": "examen_medico",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "00573204",
+            "fechas_encontradas": [
+              "1/11/24"
+            ]
+          },
+          "preview": "1/11/24, 2:40 p.m. Cita oficializada\nRadicado único\nNo: 00573204\nDETALLE DE LA ATENCION SOLICITADA:\nFecha y hora de la cita: 2024-11-09 06:40:00\nMANUELA TRUJILLO VALENCIA (1017239701) - ASISTENTE COMERCIAL\nReservado por coordadmon.fenix en 2024-11-01 a nombre de EQUIPOS INDUSTRIALES FENIX SAS para realizar: EXAMEN\nPERIODICO\nFirma de seguridad (Id+Ev+Fe+De): 36c225910afbf32b39d9a079c856ac93\nTransve…"
+        },
+        {
+          "archivo": "Hx Manuela.pdf",
+          "categoria": "otro",
+          "paginas": 7,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "1017239701",
+            "fechas_encontradas": [
+              "25/04/1996",
+              "16/12/2024",
+              "16/12/2024",
+              "16/12/2024",
+              "20/12/2024"
+            ],
+            "menciona_eif": true
+          },
+          "preview": "IDENTIFICACIÓN DEL PACIENTE\nTipo y número de identificación CC 1017239701\nPaciente MANUELA TRUJILLO VALENCIA\nManuel Uribe Angel\nFecha y hora de nacirmiento (dd/rmmn/aaaa hh rnrm) 25/04/1996 00:00\nEdad y sexo 28 Años, Masculino\nESE HO,PITAL\nVinculados con la Vida! ldentificador único. 938958-4\nFinanciador EPS SANITAS BAS\nCERTIFICADO DE INCAPACIDAD\nFecha 16/12/2024 14:01 - Ubicación. ATENCION INICIA…"
+        },
+        {
+          "archivo": "ImprimirRetiroIndividual.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "901146454",
+            "fechas_encontradas": [
+              "13/02/2025",
+              "15/02/2025"
+            ]
+          },
+          "preview": "RETIRO EMPLEADO\nDATOS DE LA EMPRESA\nTipo de Identificación: NIT\nNúmero de documento: 901146454\nNúmero Afiliación: 9004713\nRazón social: EQUIPOS INDUSTRIALES FENIX SAS\nDATOS DEL EMPLEADO:\nTipo de documento: CÉDULA\nNúmero de Doc.: 1017239701\nNombre: MANUELA TRUJILLO VALENCIA\nFecha Retiro: 13/02/2025\nFecha hora transacción: 15/02/2025 08:10:03 a. m.\nNit empresa en misión: 0\nCódigo Sucursal 11001\nCent…"
+        },
+        {
+          "archivo": "LICINC_INF_LICINC_ACCOU_STATE.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "1017239701",
+            "fechas_encontradas": [
+              "16/12/2024",
+              "20/12/2024",
+              "01/12/2024"
+            ]
+          },
+          "preview": "ESTADO DE CUENTA PRESTACIONES ECONÓMICAS\nRespetados señores, reciban un cordial saludo\nSe remite la información detallada correspondiente al estado de las Prestaciones Económicas (incapacidades y licencias), radicadas por su entidad ante la EPS Sanitas\nNumero de Tipo Numero Estado de\nTipo Numero Primer Segundo Primer Segundo Nombre de Tipo de Fecha Inicio Fecha Final Codigo de Dias Dias IBC Días T…"
+        },
+        {
+          "archivo": "RECOMENDACIONES MANUELA TRUJILLO VALENCIA.pdf",
+          "categoria": "examen_medico",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "1017239701",
+            "fechas_encontradas": [
+              "9/11/24",
+              "23/02/2022"
+            ]
+          },
+          "preview": "9/11/24, 8:09 a.m. Formato de recomendaciones [historia_control] MANUELA TRUJILLO VALENCIA\nRECOMENDACIONES MÉDICAS OCUPACIONALES\nDerivadas de la valoración Ocupacional de Control\nFecha: 2024-11-09\nEn atención al Examen Médico Ocupacional que le fue realizado por Laboratorio Clínico Colmédicos IPS S.A.S. como\nproveedor de evaluaciones ocupacionales en el marco del Sistema de Gestión de la Seguridad…"
+        }
+      ]
+    },
+    {
+      "empleado": "MARIA DEL CARMEN VALENCIA",
+      "total_pdfs": 4,
+      "escaneados_sin_texto": 4,
+      "categorias": {
+        "cedula": 1,
+        "contrato": 1,
+        "otro": 1,
+        "examen_medico": 1
+      },
+      "documentos": [
+        {
+          "archivo": "CC MARIA DEL CARMEN VALENCIA.pdf",
+          "categoria": "cedula",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "CONTRATO MARIA DEL CARMEN VALENCIA.pdf",
+          "categoria": "contrato",
+          "paginas": 5,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "DOCUMENTOS GENERALES MARIA DEL CARMEN VALENCIA.PDF",
+          "categoria": "otro",
+          "paginas": 12,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "EXAMEN DE INGRESO MARIA DEL CARMEN VALENCIA.pdf",
+          "categoria": "examen_medico",
+          "paginas": 2,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        }
+      ]
+    },
+    {
+      "empleado": "MARTIN DIONISIO AGUILERA",
+      "total_pdfs": 5,
+      "escaneados_sin_texto": 4,
+      "categorias": {
+        "cedula": 1,
+        "contrato": 1,
+        "otro": 2,
+        "examen_medico": 1
+      },
+      "documentos": [
+        {
+          "archivo": "CC MARTIN D AGUILERA.pdf",
+          "categoria": "cedula",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "CONTRATO FIRMADO MARTIN D AGUILERA.pdf",
+          "categoria": "contrato",
+          "paginas": 5,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "DOCUMENTOS GENERALES MARTIN D AGUILERA .PDF",
+          "categoria": "otro",
+          "paginas": 18,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "EXAMEN DE INGRESO MARTIN D AGUILERA.pdf",
+          "categoria": "examen_medico",
+          "paginas": 2,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "PERMISO 04 DE FEBRERO.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {},
+          "preview": "GESTION HUMANA\nSOLICITUD DE PERMISOS\nFECHA DEL DIA QUE HACE LA SOLICITUD: 27-ene-25\nNOMBRE DEL TRABAJADOR: OMAR EDUARDO CHINGATE\nFECHA DEL PERMISO: 04-ene-25\nHORA DE SALIDA: HORA DE LLEGADA:\nCAMBIO DE RECIDENCIA\nMOTIVO:\nANEXO SOPORTE :\nDESCONTAR DE NÓMINA:\nDESCONTAR DE VACACIONES:\nDESCONTAR DEL PERIODO DE VACACIONES PENDIENTES\nRESPOSICIÓN DE TIEMPO (DETALLAR DIAS Y HORARIOS):\nFIRMA DEL TRABAJADOR:…"
+        }
+      ]
+    },
+    {
+      "empleado": "NELSON N CRUZ CASTILLO",
+      "total_pdfs": 15,
+      "escaneados_sin_texto": 7,
+      "categorias": {
+        "otro": 5,
+        "cedula": 1,
+        "certificacion_otra": 2,
+        "examen_medico": 2,
+        "contrato": 2,
+        "novedad": 3
+      },
+      "documentos": [
+        {
+          "archivo": "CamScanner 18-01-2025 11.07 (1).pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "CC NELSON N CRUZ CASTILLO.pdf",
+          "categoria": "cedula",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "Certificado medico NELSON NORBERTO CRUZ CASTILLO.pdf",
+          "categoria": "certificacion_otra",
+          "paginas": 2,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "79874112",
+            "fechas_encontradas": [
+              "6/11/24",
+              "6/11/24",
+              "09/06/2008",
+              "13/09/2024"
+            ]
+          },
+          "preview": "6/11/24, 10:31 a.m. Certificado medico NELSON NORBERTO CRUZ CASTILLO\nCERTIFICADO MÉDICO DE CONTROL PERIODICO\nFecha: 2024-11-02\n1. INFORMACIÓN GENERAL\nEmpresa Usuaria: EQUIPOS INDUSTRIALES FENIX SAS Actividad económica: Comercio formal\nNombre: NELSON NORBERTO CRUZ CASTILLO Documento: CC 79874112\nFecha de nacimiento: 1977-01-19 Lugar de nacimiento: BOGOTA (CUNDINAMARCA)\nEdad: 47 años Identidad de Gé…"
+        },
+        {
+          "archivo": "CertificadoAfiliacion20240 NELSON CRUZ.pdf",
+          "categoria": "certificacion_otra",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "800149496"
+          },
+          "preview": "COLFONDOS ADMINISTRADORA DE FONDOS DE PENSIONES Y CESANTIAS\nNIT 800.149.496-2\nCERTIFICA QUE:\nEl(la) Señor(a) NELSON NORBERTO CRUZ CASTILLO, identificado(a) con C.C 79.874.112, se encuentra\nafiliado(a) al Fondo Pensiones Obligatorias NIT 800.227.940-6 y al Fondo Cesantias NIT 800.198.644-5.\nSe expide la presente certificación a la fecha 16 de enero de 2024.\nEl presente certificado emitido contiene …"
+        },
+        {
+          "archivo": "CITA EXAMEN PERIODICO.pdf",
+          "categoria": "examen_medico",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "00530632",
+            "fechas_encontradas": [
+              "29/10/24"
+            ]
+          },
+          "preview": "29/10/24, 8:30 a.m. Cita oficializada\nRadicado único\nNo: 00530632\nDETALLE DE LA ATENCION SOLICITADA:\nFecha y hora de la cita: 2024-11-02 06:40:00\nNELSON NORBERTO CRUZ CASTILLO (79874112) - MENSAJERO\nReservado por coordadmon.fenix en 2024-10-29 a nombre de EQUIPOS INDUSTRIALES FENIX SAS para realizar: EXAMEN PERIODICO\nFirma de seguridad (Id+Ev+Fe+De): f1945dcc1a62e93cb9ff30cac9f398f8\nCarrera 19 A #…"
+        },
+        {
+          "archivo": "Resultados638721998224975551(1).pdf",
+          "categoria": "otro",
+          "paginas": 3,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "79874112",
+            "fechas_encontradas": [
+              "11-01-2025",
+              "11-01-2025",
+              "11-01-2025",
+              "11-01-2025"
+            ]
+          },
+          "preview": "11102580\n1 1 1 0 2 5 8 0\nPetición No 11102580 Fecha de ingreso 11-ene.-2025 06:32 a. m.\nPaciente CRUZ CASTILLO NELSON NORBERTO Fecha de impresión 11-ene.-2025 01:44 p. m.\nDocumento Id CC 79874112 Sede SUBA CLINICENTRO\nFecha de nacimiento 19-ene.-1977 Servicio CONSULTA EXTERNA\nEdad 47 Años Sexo M Empresa EPS SANITAS SIN VALE\nDirección CALL 127 C N 95 87 Médico CENTRO MEDICO SUBA AL PASO EPS SANITAS…"
+        },
+        {
+          "archivo": "CONTRATO NELSON NORBERTO CRUZ DIC 14 2020.pdf",
+          "categoria": "contrato",
+          "paginas": 5,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "901146454",
+            "salario_mencion": "878.000",
+            "cargo_mencion": "Salario",
+            "fechas_encontradas": [
+              "19/01/1977",
+              "14/12/2020",
+              "14/03/2021"
+            ]
+          },
+          "preview": "CONTRATO DE TRABAJO A TERMINO FIJO INFERIOR A UN AÑO\nNombre del empleador: EQUIPOS INDUSTRIALES FENIX S.A.S.\nDocumento de identificación NIT.901.146.454-6\ndomicilio del empleador Bogotá\nNombre del trabajador NELSON NORBERTO CRUZ CASTILLO\nDocumento de identidad 79.874.112\nDirección de Residencia Calle 127 C No. 95-87 Bogotá Barrio Suba\nRincón\nLugar, fecha de nacimiento 19/01/1977\nNacionalidad Colom…"
+        },
+        {
+          "archivo": "CONTRATO NORBERTO CRUZ MENSAJERO DIC 14 2020.pdf",
+          "categoria": "contrato",
+          "paginas": 5,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "901146454",
+            "salario_mencion": "878.000",
+            "cargo_mencion": "Salario",
+            "fechas_encontradas": [
+              "19/01/1977",
+              "14/12/2020",
+              "14/03/2021"
+            ]
+          },
+          "preview": "CONTRATO DE TRABAJO A TERMINO FIJO INFERIOR A UN AÑO\nNombre del empleador: EQUIPOS INDUSTRIALES FENIX S.A.S.\nDocumento de identificación NIT.901.146.454-6\ndomicilio del empleador Bogotá\nNombre del trabajador NELSON NORBERTO CRUZ CASTILLO\nDocumento de identidad 79.874.112\nDirección de Residencia Calle 127 C No. 95-87 Bogotá Barrio Suba\nRincón\nLugar, fecha de nacimiento 19/01/1977\nNacionalidad Colom…"
+        },
+        {
+          "archivo": "CONTRTAO FIRMADO NELSON N CRUZ.pdf",
+          "categoria": "otro",
+          "paginas": 10,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "DOCUMENTOS GENERALES NELSON N CRUZ CASTILLO.PDF",
+          "categoria": "otro",
+          "paginas": 35,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "Formato de recomendaciones [historia_control] NELSON NORBERTO CRUZ CASTILLO.pdf",
+          "categoria": "examen_medico",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "79874112",
+            "fechas_encontradas": [
+              "6/11/24",
+              "09/06/2008",
+              "13/09/2024"
+            ]
+          },
+          "preview": "6/11/24, 10:31 a.m. Formato de recomendaciones [historia_control] NELSON NORBERTO CRUZ CASTILLO\nRECOMENDACIONES MÉDICAS OCUPACIONALES\nDerivadas de la valoración Ocupacional de Control\nFecha: 2024-11-02\nEn atención al Examen Médico Ocupacional que le fue realizado por Laboratorio Clínico Colmédicos IPS S.A.S. como\nproveedor de evaluaciones ocupacionales en el marco del Sistema de Gestión de la Segu…"
+        },
+        {
+          "archivo": "MEMORANDO NELSON ABRIL 9 DE 2026.pdf",
+          "categoria": "novedad",
+          "paginas": 2,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "901146454",
+            "cargo_mencion": "Mensajero\nAsunto"
+          },
+          "preview": "MEMORANDO\nFecha: Bogotá, abril 9 de 2026\nSeñor: Nelson Norberto Cruz Castillo\nCargo: Mensajero\nAsunto: Memorando por incumplimiento de recomendaciones médicas y normas del SG-SST\nEn el marco del Sistema de Gestión de Seguridad y Salud en el Trabajo (SG-SST) de la empresa, y en\ncumplimiento de las obligaciones legales establecidas en la normatividad laboral vigente, nos permitimos\nrealizar el prese…"
+        },
+        {
+          "archivo": "Memorando Nelson N Cruz.pdf",
+          "categoria": "novedad",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "MEMORANDO NELSON NORBERTO CRUZ CASTILLO-001.pdf",
+          "categoria": "novedad",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "PRESTAMO NELSON CRUZ.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        }
+      ]
+    },
+    {
+      "empleado": "OMAR CHINGATE CHINGATE",
+      "total_pdfs": 5,
+      "escaneados_sin_texto": 4,
+      "categorias": {
+        "cedula": 1,
+        "contrato": 1,
+        "otro": 1,
+        "examen_medico": 1,
+        "cesantias": 1
+      },
+      "documentos": [
+        {
+          "archivo": "CC OMAR CHINGATE.pdf",
+          "categoria": "cedula",
+          "paginas": 35,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "CONTRATO FIRMADO OMAR CHINGATE.pdf",
+          "categoria": "contrato",
+          "paginas": 7,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "DOCUMENTOS GENERALES OMAR CHINGATE.pdf",
+          "categoria": "otro",
+          "paginas": 35,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "EXAMEN DE INGRESO OMAR CHINGATE.pdf",
+          "categoria": "examen_medico",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "FONDO CESANTIAS OMAR CHINGATE.pdf",
+          "categoria": "cesantias",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "800170043"
+          },
+          "preview": "Ensucondicióndeadministradoradel\nFONDODECESANTÍASPORVENIR\nNIT.800.170.043-7\nCra13Nro.26A-65\nCERTIFICAQUE:\nOMAR EDUARDO CHINGATE CHINGATE, identificado(a) con cédula de ciudadanía 1,023,861,819, se encuentra\nafiliado(a)alFondodeCesantíasPorvenirysucuentapresentalasiguientedistribucióndeportafolio:\nEmpresao SaldoPortafolio + SaldoPortafolio - Saldo = Saldo\nRazónSocial NIT LargoPlazo CortoPlazo Bloqu…"
+        }
+      ]
+    },
+    {
+      "empleado": "RICARDO QUEVEDO MELO",
+      "total_pdfs": 5,
+      "escaneados_sin_texto": 3,
+      "categorias": {
+        "cedula": 2,
+        "contrato": 2,
+        "novedad": 1
+      },
+      "documentos": [
+        {
+          "archivo": "CEDULA RICARDO QUEVEDO MELO.pdf",
+          "categoria": "cedula",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "CEDULAC RQM.pdf",
+          "categoria": "cedula",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "CONTRATO firmado RICARDO QUEVEDO.pdf",
+          "categoria": "contrato",
+          "paginas": 4,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "CONTRATO RICARDO QUEVEDO AGOSTO 1 2025.pdf",
+          "categoria": "contrato",
+          "paginas": 5,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "901146454",
+            "salario_mencion": "$1.700.000",
+            "cargo_mencion": "SALARIO",
+            "fechas_encontradas": [
+              "06/05/2009",
+              "02/05/1991",
+              "01/08/2025",
+              "01/02/2026"
+            ]
+          },
+          "preview": "CONTRATO DE TRABAJO A TERMINO FIJO INFERIOR A UN AÑO\nNOMBRE DEL EMPLEADOR: EQUIPOS INDUSTRIALES FENIX S.A.S.\nDOCUMENTO DE IDENTIFICACIÓN NIT.901.146.454-6\nDOMICILIO DEL EMPLEADOR Bogotá Calle 76 20B-24\nNOMBRE DEL TRABAJADOR RICARDO QUEVEDO MELO\nDOCUMENTO DE IDENTIDAD C.C.1.121.876.115\nCIUDAD Y FECHA DE EXPEDICIÓN VILLAVICENCIO/06/05/2009\nCELULAR 313 421 91 30\nDIRECCIÓN DE RESIDENCIA - BARRIO CRA 7…"
+        },
+        {
+          "archivo": "MEMORANDO 1 RICARDO QUEVEDO ABRIL 16 2021.pdf",
+          "categoria": "novedad",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "901146454",
+            "cargo_mencion": "se están represando y la falta de atención a\nestos compromis",
+            "menciona_eif": true
+          },
+          "preview": "EQUIPOS INDUSTRIALES FENIX S.A.S\nNIT: 901.146.454 - 6\nBogotá, abril 16 de 2021\nSeñora:\nRicardo Quevedo Galindo\nc.c. 1.121.876.115\nComprador internacional\nCiudad.\nREF. MEMORANDO\nObservamos con gran preocupación una falta de compromiso de su parte debido a las\nllegadas tarde a las reuniones virtuales programadas por la empresa, en donde se le llama\ny usted no atiende a los llamados. Le recordamos qu…"
+        }
+      ]
+    },
+    {
+      "empleado": "SANDRA LILIANA AVILA",
+      "total_pdfs": 11,
+      "escaneados_sin_texto": 4,
+      "categorias": {
+        "otro": 4,
+        "cedula": 1,
+        "certificacion_otra": 1,
+        "examen_medico": 4,
+        "contrato": 1
+      },
+      "documentos": [
+        {
+          "archivo": "__SOFIA__.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "00532713",
+            "fechas_encontradas": [
+              "6/11/24"
+            ]
+          },
+          "preview": "6/11/24, 7:51 a.m. Cita oficializada\nRadicado único\nNo: 00532713\nDETALLE DE LA ATENCION SOLICITADA:\nFecha y hora de la cita: 2024-11-08 13:00:00\nSANDRA LILIANA AVILA AMAYA (52108923) - ANALISTA ADMINISTRATIVO\nReservado por coordadmon.fenix en 2024-11-06 a nombre de EQUIPOS INDUSTRIALES FENIX SAS para realizar: EXAMEN\nPERIODICO\nFirma de seguridad (Id+Ev+Fe+De): 9ca56672cf6bebd39537bb08ca0a199b\nCarr…"
+        },
+        {
+          "archivo": "CARTA VACACIONES LILIANA ABRIL 2020.pdf",
+          "categoria": "otro",
+          "paginas": 2,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "901146454"
+          },
+          "preview": "EQUIPOS INDUSTRIALES FENIX SAS\nNit. 901.146.454-6\nBogotá, 14 de Abril de 2020\nApreciada señora:\nSandra Liliana Ávila Amaya\nRef.: Vacaciones Anticipadas Fase de Contención COVID-19 Declaración de\nEmergencia Sanitaria.\nA través de la presente, ponemos de su conocimiento que de acuerdo a la circular No.\n0021 de 2020 expedida por el Ministerio de Trabajo y que con el fin de acatar la\nlegislación labor…"
+        },
+        {
+          "archivo": "CC SANDRA LILIANA AVILA.pdf",
+          "categoria": "cedula",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "certificado_52108923_ LILIANA AVILA.pdf",
+          "categoria": "certificacion_otra",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "800144331"
+          },
+          "preview": "SOCIEDAD ADMINISTRADORA DE FONDOS DE PENSIONES Y CESANTÍAS\nPORVENIR S.A.\nEn su condición de administradora del\nFONDO DE PENSIONES Y CESANTÍAS PORVENIR\nNIT 800.144.331-3\nCERTIFICA QUE:\nSANDRA LILIANA AVILA AMAYA, identificado(a) con cédula de ciudadanía 52.108.923, se encuentra\nafiliado(a) al Fondo de Pensiones Obligatorias Porvenir y al Fondo de Cesantías Porvenir.\nLa presente certificación se exp…"
+        },
+        {
+          "archivo": "CITA EXAMEN PERIODICO.pdf",
+          "categoria": "examen_medico",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "00530614",
+            "fechas_encontradas": [
+              "29/10/24"
+            ]
+          },
+          "preview": "29/10/24, 7:40 a.m. Cita oficializada\nRadicado único\nNo: 00530614\nDETALLE DE LA ATENCION SOLICITADA:\nFecha y hora de la cita: 2024-11-07 13:00:00\nSANDRA LILIANA AVILA AMAYA (52108923) - ANALISTA ADMINISTRATIVO\nReservado por coordadmon.fenix en 2024-10-29 a nombre de EQUIPOS INDUSTRIALES FENIX SAS para realizar: EXAMEN PERIODICO\nFirma de seguridad (Id+Ev+Fe+De): b46152287ec417542eecd7c9fd0e8fad\nCar…"
+        },
+        {
+          "archivo": "CONTRATO FIRMADO SANDRA LILIANA AVILA.pdf",
+          "categoria": "contrato",
+          "paginas": 3,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "DOCUMENTOS GENERALES SANDRA LILIANA AVILA.PDF",
+          "categoria": "otro",
+          "paginas": 20,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "EXAMEN DE INGRESO SANDRA LILIANA AVILA.pdf",
+          "categoria": "examen_medico",
+          "paginas": 2,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "EXAMEN PERIODICO  SANDRA LILIANA AVILA AMAYA.pdf",
+          "categoria": "examen_medico",
+          "paginas": 2,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "52108923",
+            "cargo_mencion": "También establece que la Empresa solo puede conocer el CERTI",
+            "fechas_encontradas": [
+              "8/11/24",
+              "8/11/24"
+            ]
+          },
+          "preview": "8/11/24, 5:01 p.m. Certificado medico SANDRA LILIANA AVILA AMAYA\nCERTIFICADO MÉDICO DE PREINGRESO OCUPACIONAL\nFecha: 2021-03-13\n1. INFORMACIÓN GENERAL\nEQUIPOS INDUSTRIALES Actividad Comercio al por mayor de otros tipos de maquinaria\nEmpresa Usuaria:\nFENIX SAS económica: y equipo n.c.p.\nSANDRA LILIANA AVILA\nNombre: Documento: CC 52108923\nAMAYA\nFecha de Lugar de\n1974-07-24 BOGOTA (CUNDINAMARCA)\nnaci…"
+        },
+        {
+          "archivo": "PERMISO ENERO 28 2025.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {},
+          "preview": "GESTION HUMANA\nSOLICITUD DE PERMISOS\nFECHA DEL DIA QUE HACE LA SOLICITUD: ENERO 23/2025\nNOMBRE DEL TRABAJADOR: LILIANA AVILA\nFECHA DEL PERMISO: ENERO 28/2025\nHORA DE SALIDA: 2:OOPM HORA DE LLEGADA: 3:30 PM\nTOMA EXAMEN MAMOGRAFIA- COMPENSAR\nMOTIVO:\nANEXO SOPORTE :\nx\nDESCONTAR DE NÓMINA:\nDESCONTAR DE VACACIONES:\nENERO 28/2025/ HORA ALMUERZO\nRESPOSICIÓN DE TIEMPO (DETALLAR DIAS Y HORARIOS):\nFIRMA DEL…"
+        },
+        {
+          "archivo": "RECOMENDACIONES- SANDRA LILIANA AVILA AMAYA.pdf",
+          "categoria": "examen_medico",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "52108923",
+            "fechas_encontradas": [
+              "8/11/24"
+            ]
+          },
+          "preview": "8/11/24, 5:02 p.m. Formato de recomendaciones [historia_ingreso] SANDRA LILIANA AVILA AMAYA\nRECOMENDACIONES MÉDICAS OCUPACIONALES\nDerivadas de la valoración Ocupacional de Ingreso\nFecha: 2021-03-13\nEn atención al Examen Médico Ocupacional que le fue realizado por Laboratorio Clínico Colmédicos IPS S.A.S. como\nproveedor de evaluaciones ocupacionales en el marco del Sistema de Gestión de la Segurida…"
+        }
+      ]
+    },
+    {
+      "empleado": "SANDRA LILIANA VILLATE",
+      "total_pdfs": 11,
+      "escaneados_sin_texto": 5,
+      "categorias": {
+        "otro": 5,
+        "cedula": 3,
+        "pension": 2,
+        "certificacion_otra": 1
+      },
+      "documentos": [
+        {
+          "archivo": "Carta_Afiliación.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "24750664"
+          },
+          "preview": "BOGOTA, D.C., 28 de Noviembre de 2024 2024_24750664-42515213\nSeñor (a):\nEQUIPOS INDUSTRIALES FENIX SAS\nEQUIPOSINDUSTRIALESFENIX@GMAIL.COM\nBOGOTA, D.C. - BOGOTA D.C\nReferencia: Radicado No. 2024_24750664 del 22 de Noviembre de 2024\nCiudadano: SANDRA LILIANA VILLATE LIEVANO\nTipo de Trámite: AFILIACIONES - Traslado de Régimen\nRespetado(a) señor(a):\nReciba un cordial saludo de la Administradora Colomb…"
+        },
+        {
+          "archivo": "CC SANDRA LILIANA VILLATE.pdf",
+          "categoria": "cedula",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "cert afiliacion SLVL colpensiones 01 01 2025.pdf",
+          "categoria": "pension",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "Certificado ProtecciÃ³n (3) SANDRA L. VILLATE.pdf",
+          "categoria": "certificacion_otra",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "800170494"
+          },
+          "preview": "Fondo de Cesantías Protección\nNIT 800.170.494\nHace constar que:\nEl(La) Señor(a) SANDRA LILIANA VILLATE LIEVANO identificado(a) con CC número 52.054.474 se encuentra\nafiliado(a) al FONDO DE CESANTÍAS PROTECCIÓN, desde el 13 de febrero de 2015.\nEsta constancia se expide a petición del interesado(a) el día 17 de enero de 2024.\nCordialmente,\nCesar Mauricio Aubad Echeverry\nEquipo Soporte para Clientes\n…"
+        },
+        {
+          "archivo": "COMFANDI-SANDRA LILIANA VILLATE LIEVANO.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "52054474"
+          },
+          "preview": "Página 1/1\nSantiago de Cali, septiembre 30 de 2024\nCAJA DE COMPENSACION FAMILIAR DEL VALLE DEL CAUCA\nCOMFAMILIAR ANDI - COMFANDI\nHACE CONSTAR QUE:\nSANDRA LILIANA VILLATE LIEVANO identificado(a) con Cédula de Ciudadanía 52054474 se\nencuentra afiliado(a) en la Caja de Compensación Familiar del Valle del Cauca - Comfamiliar\nAndi - Comfandi, por la empresa EQUIPOS INDUSTRIALES FENIX SAS con NIT 901146…"
+        },
+        {
+          "archivo": "DOCUMENTOS GENERALES SANDRA LILIANA VILLATE.PDF",
+          "categoria": "otro",
+          "paginas": 5,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "FOTOCOPIA CEDULA SLV.pdf",
+          "categoria": "cedula",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "PENSIONES-VILLATE LIEVANO SANDRA LILIANA.pdf",
+          "categoria": "pension",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "800229739"
+          },
+          "preview": "Fondo de Pensiones Obligatorias Protección\nNIT 800.229.739\nHace constar que:\nEl(la) Señor(a) VILLATE LIEVANO SANDRA LILIANA identificado(a) con CC número 52.054.474 se encuentra\nafiliado(a) en Pensiones Obligatorias a PROTECCIÓN, desde el día 01 de septiembre de 1997 y sus recursos se\nencuentran distribuidos como se enuncia a continuación, de conformidad con lo consagrado en el Decreto 2373 de\n201…"
+        },
+        {
+          "archivo": "PROTECCION-SANDRA LILIANA VILLATE LIEVANO.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "800170494"
+          },
+          "preview": "Fondo de Cesantías Protección\nNIT 800.170.494\nHace constar que:\nEl(La) Señor(a) SANDRA LILIANA VILLATE LIEVANO identificado(a) con CC número 52.054.474 se encuentra\nafiliado(a) al FONDO DE CESANTÍAS PROTECCIÓN, desde el 13 de febrero de 2015.\nEsta constancia se expide a petición del interesado(a) el día 30 de septiembre de 2024.\nCordialmente,\nCesar Mauricio Aubad Echeverry\nEquipo Soporte para Clie…"
+        },
+        {
+          "archivo": "TARJETA DE IDENTIDAD ANDRES JUAN VALENCIA.pdf",
+          "categoria": "cedula",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {},
+          "preview": "PRIMERA VEZ TI\n1.027.290.835\nAPELLIDOS / NOMBRES\nVALENCIA VILLATE\nANDRES JUAN\nFECHA Y LUGAR DE NACIMIENTO\n20-MAY-2013\nBOGOTA D.C. - CUNDINAMARCA\nFECHA DE EXPEDICIÓN\n11-NOV-2021\nSEXO\nMASCULINO\nLUGAR DE PREPARACIÓN\nCALI - AUXILIAR 2 PASO ANCHO\nOFICINA DE ENTREGA\nCALI - AUXILIAR 2 PASO ANCHO\nESTE COMPROBANTE ES 8503391953\nVÁLIDO HASTA EL 11-MAY-2022 11-NOV-2021"
+        },
+        {
+          "archivo": "TI JUAN ESTEBAN.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        }
+      ]
+    },
+    {
+      "empleado": "SARA CRISTINA TANGARIFE TUBERQUIA",
+      "total_pdfs": 1,
+      "escaneados_sin_texto": 0,
+      "categorias": {
+        "contrato": 1
+      },
+      "documentos": [
+        {
+          "archivo": "CONTRATO SARA MILENA TANAGRIFE TUBERQUIA.pdf",
+          "categoria": "contrato",
+          "paginas": 5,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "901146454",
+            "salario_mencion": "$1.423.500",
+            "cargo_mencion": "SALARIO",
+            "fechas_encontradas": [
+              "31/03/2022",
+              "01/09/2025",
+              "01/03/2026"
+            ]
+          },
+          "preview": "CONTRATO DE TRABAJO A TERMINO FIJO INFERIOR A UN AÑO\nNOMBRE DEL EMPLEADOR: EQUIPOS INDUSTRIALES FENIX S.A.S.\nDOCUMENTO DE IDENTIFICACIÓN NIT.901.146.454-6\nDOMICILIO DEL EMPLEADOR Bogotá Calle 76 20B-24\nNOMBRE DEL TRABAJADOR Sara Cristina Tangarife Tuberquia\nDOCUMENTO DE IDENTIDAD C.C. 1.015.066.911\nCIUDAD Y FECHA DE EXPEDICIÓN Medellín 31/03/2022\nCELULAR 304 617 82 42\nDIRECCIÓN DE RESIDENCIA - BAR…"
+        }
+      ]
+    },
+    {
+      "empleado": "YOLANDA RIVAS RIVAS",
+      "total_pdfs": 11,
+      "escaneados_sin_texto": 1,
+      "categorias": {
+        "otro": 4,
+        "eps": 2,
+        "policia_procuraduria": 1,
+        "certificacion_otra": 2,
+        "cedula": 1,
+        "cesantias": 1
+      },
+      "documentos": [
+        {
+          "archivo": "ACTUALIZACION FECHA DE NACIMIENTO YOLANDA RIVAS.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "901146454",
+            "fechas_encontradas": [
+              "15/07/2024",
+              "10/06/1988"
+            ]
+          },
+          "preview": "ACTUALIZACION DE EMPLEADOS\nDATOS DE LA EMPRESA\nTipo de Identificación: NIT\nNúmero de documento: 901146454\nNúmero Afiliación: 9004713\nRazón social: EQUIPOS INDUSTRIALES FENIX SAS\nDATOS DEL EMPLEADO:\nTipo de documento: CÉDULA\nNúmero de documento: 1026260284\nFecha hora transacción: 15/07/2024 10:03:41 a. m.\nDATOS ACTUALIZADOS:\nFECHA DE NACIMIENTO: 10/06/1988"
+        },
+        {
+          "archivo": "AFILIACION EPS YOLANDA RIVAS (1).pdf",
+          "categoria": "eps",
+          "paginas": 2,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "1026260284",
+            "salario_mencion": "$ 1,300,000",
+            "cargo_mencion": "OTRO\nSucursal BOGOTA D",
+            "fechas_encontradas": [
+              "13/7/24",
+              "13/07/2024",
+              "13/07/2024",
+              "13/07/2024",
+              "13/7/24"
+            ]
+          },
+          "preview": "13/7/24, 9:29 solucionesenlineaeps.suramericana.com/reingresos/AffiliationReadmissionsRepLoad.aspx?opjcurl=1\nBuscar... 1 de 1 100%\nInforme principal\nResultados del registro de novedades de reingreso\nEPS Y MEDICINA PREPAGADA SURAMERICANA S.A.\nNúmero de Solicitud 6I_3769107\nPor favor imprima este comprobante como constancia de la novedad reportada.\nReingreso 1\nEmpleador NI 901146454 EQUIPOS INDUSTRI…"
+        },
+        {
+          "archivo": "AFILIACION EPS YOLANDA RIVAS.pdf",
+          "categoria": "eps",
+          "paginas": 2,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "1026260284",
+            "salario_mencion": "$ 1,300,000",
+            "cargo_mencion": "OTRO\nSucursal BOGOTA D",
+            "fechas_encontradas": [
+              "13/7/24",
+              "13/07/2024",
+              "13/07/2024",
+              "13/07/2024",
+              "13/7/24"
+            ]
+          },
+          "preview": "13/7/24, 9:29 solucionesenlineaeps.suramericana.com/reingresos/AffiliationReadmissionsRepLoad.aspx?opjcurl=1\nBuscar... 1 de 1 100%\nInforme principal\nResultados del registro de novedades de reingreso\nEPS Y MEDICINA PREPAGADA SURAMERICANA S.A.\nNúmero de Solicitud 6I_3769107\nPor favor imprima este comprobante como constancia de la novedad reportada.\nReingreso 1\nEmpleador NI 901146454 EQUIPOS INDUSTRI…"
+        },
+        {
+          "archivo": "Afiliacion Persona - Consulta RUAF.pdf",
+          "categoria": "policia_procuraduria",
+          "paginas": 2,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "1026260284",
+            "fechas_encontradas": [
+              "01/02/2022",
+              "2/13/2026",
+              "2/13/2026"
+            ]
+          },
+          "preview": "Afiliaciones de una Persona en el Sistema\nINFORMACIÓN BASICA Fecha de Corte: 2026-02-13\nNúmero de Identificación Primer Nombre Segundo Nombre Primer Apellido Segundo Apellido Sexo\nCC 1026260284 YOLANDA RIVAS RIVAS F\nAFILIACIÓN A SALUD Fecha de Corte: 2026-02-13\nAdministradora Régimen Fecha Afiliacion Estado de Afiliación Tipo de Afiliado Departamento -> Municipio\nEPS SURAMERICANA S.A. Contributivo…"
+        },
+        {
+          "archivo": "CARNET YOLANDA RIVAS ACTUALIZADO.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {},
+          "preview": "YOLANDA RIVAS RIVAS\nC.C. 1026260284\nIdentificación: 901146454\nRazón Social: EQUIPOS INDUSTRIALES FENIX SAS\nNo. Afiliación: 9004713\nSURA E.P.S"
+        },
+        {
+          "archivo": "CARNET YOLANDA RIVAS.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {},
+          "preview": "YOLANDA RIVAS RIVAS\nC.C. 1026260284\nIdentificación: 901146454\nRazón Social: EQUIPOS INDUSTRIALES FENIX SAS\nNo. Afiliación: 9004713\nSURA E.P.S"
+        },
+        {
+          "archivo": "CERTIFICADO CAJA YOLANDA RIVAS.pdf",
+          "categoria": "certificacion_otra",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "1026260284"
+          },
+          "preview": "Página 1/1\nSantiago de Cali, julio 13 de 2024\nCAJA DE COMPENSACION FAMILIAR DEL VALLE DEL CAUCA\nCOMFAMILIAR ANDI - COMFANDI\nHACE CONSTAR QUE:\nYOLANDA RIVAS RIVAS identificado(a) con Cédula de Ciudadanía 1026260284 se encuentra\nafiliado(a) en la Caja de Compensación Familiar del Valle del Cauca - Comfamiliar Andi -\nComfandi, por la empresa EQUIPOS INDUSTRIALES FENIX SAS con NIT 9011464546 desde\nel …"
+        },
+        {
+          "archivo": "CERTIFICADO DE AFILIACION YOLANDA RIVAS.pdf",
+          "categoria": "certificacion_otra",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "901146454",
+            "salario_mencion": "1,300,000",
+            "fechas_encontradas": [
+              "14/07/2024",
+              "13/07/2024"
+            ]
+          },
+          "preview": "INGRESO EMPLEADO\nDATOS DE LA EMPRESA\nTipo de Identificación: NIT\nNúmero de documento: 901146454\nNúmero Afiliación: 9004713\nRazón social: EQUIPOS INDUSTRIALES FENIX SAS\nDATOS DEL EMPLEADO:\nTipo de documento: CÉDULA\nNúmero de Documento 1026260284\nNombre: YOLANDA RIVAS RIVAS\nFecha Ingreso: 14/07/2024\nSalario básico: 1,300,000\nNit empresa en misión: 0\nCódigo Sucursal: 11001\nCentro de trabajo: 1\nTasa: …"
+        },
+        {
+          "archivo": "COMFANDI-YOLANDA RIVAS RIVAS.pdf",
+          "categoria": "otro",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "1026260284"
+          },
+          "preview": "Página 1/1\nSantiago de Cali, septiembre 30 de 2024\nCAJA DE COMPENSACION FAMILIAR DEL VALLE DEL CAUCA\nCOMFAMILIAR ANDI - COMFANDI\nHACE CONSTAR QUE:\nYOLANDA RIVAS RIVAS identificado(a) con Cédula de Ciudadanía 1026260284 se encuentra\nafiliado(a) en la Caja de Compensación Familiar del Valle del Cauca - Comfamiliar Andi -\nComfandi, por la empresa EQUIPOS INDUSTRIALES FENIX SAS con NIT 9011464546 desd…"
+        },
+        {
+          "archivo": "FOTOCOPIA CEDULA YOLANDA RIVAS.pdf",
+          "categoria": "cedula",
+          "paginas": 2,
+          "texto_extraible": false,
+          "campos": {},
+          "preview": ""
+        },
+        {
+          "archivo": "RETIRO DE CESANTIAS YOLANDA RIVAS RIVAS.pdf",
+          "categoria": "cesantias",
+          "paginas": 1,
+          "texto_extraible": true,
+          "campos": {
+            "documento": "901342380"
+          },
+          "preview": "ELECTROMATICA SAS\nNIT: 901.342.380-1\nBogotá, 24 de enero 2025\nSeñores:\nCOLFONDOS\nCiudad\nREF: RETIRO DE CESANTIAS\nELECTROMATICA S.A.S con NIT: 901.342.380-1. Certifica que la señora YOLANDA\nRIVAS RIVAS; identificado con cedula de ciudadanía No. 1.026.260.284 de Bogotá,\nlaboró en nuestra compañía en SERVICIOS GENERALES, desde el 01 de diciembre\n2021, hasta el 12 de julio de 2024. Motivo por el cual …"
+        }
+      ]
+    }
+  ],
+  "resumen_global": {
+    "total_pdfs": 216,
+    "escaneados_sin_texto": 85,
+    "texto_extraible": 131,
+    "categorias": {
+      "otro": 77,
+      "cedula": 29,
+      "contrato": 25,
+      "certificacion_otra": 23,
+      "examen_medico": 20,
+      "eps": 8,
+      "cesantias": 7,
+      "policia_procuraduria": 5,
+      "arl": 5,
+      "novedad": 5,
+      "hoja_vida": 4,
+      "pension": 3,
+      "graduacion": 2,
+      "certificacion_laboral": 2,
+      "bancaria": 1
+    }
+  }
+}
