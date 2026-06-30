@@ -150,6 +150,12 @@ def inicializar_db() -> None:
 
     inicializar_tablas_modulos()
     inicializar_tablas_calendario()
+    from modulos.rrhh_db import inicializar_tablas_rrhh
+
+    inicializar_tablas_rrhh()
+    from utils.calendario_maestro import inicializar_tablas_calendario_maestro
+
+    inicializar_tablas_calendario_maestro()
     logger.info("Base de datos inicializada correctamente.")
 
 

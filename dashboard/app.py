@@ -14,6 +14,7 @@ from dashboard.chat import chat_responder
 from dashboard.estilos import CSS
 from dashboard.paginas import (
     alertas,
+    calendario,
     comisiones,
     contabilidad,
     correos,
@@ -35,6 +36,7 @@ from database import cargar_datos_demo, inicializar_db, obtener_estadisticas_hoy
 
 PAGINAS = {
     "🏠 Inicio": inicio.render,
+    "📅 Calendario": calendario.render,
     "🔔 Alertas": alertas.render,
     "📒 Contabilidad": contabilidad.render,
     "🧾 Impuestos": impuestos.render,
@@ -60,6 +62,26 @@ st.set_page_config(
 st.markdown(CSS, unsafe_allow_html=True)
 inicializar_db()
 get_engine()
+if "rrhh_watcher_on" not in st.session_state:
+    try:
+        from modulos.watcher_carpetas import iniciar_watcher
+
+        iniciar_watcher()
+    except Exception as exc:
+        import logging
+
+        logging.getLogger(__name__).warning("Watcher carpetas RRHH: %s", exc)
+    st.session_state.rrhh_watcher_on = True
+if "calendario_executor_on" not in st.session_state:
+    try:
+        from utils.calendario_maestro import iniciar_executor
+
+        iniciar_executor()
+    except Exception as exc:
+        import logging
+
+        logging.getLogger(__name__).warning("Calendario maestro: %s", exc)
+    st.session_state.calendario_executor_on = True
 if en_modo_demo():
     cargar_datos_demo()
 

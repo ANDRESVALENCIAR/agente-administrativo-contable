@@ -86,7 +86,7 @@ def verificar_alertas_globales() -> int:
             crear_alerta("CRITICO", "creditos", titulo, f"{dias} días — ${saldo:,.0f}")
             nuevas += 1
 
-    # Dotación pendiente
+    # Dotación pendiente (tabla legacy)
     c.execute("SELECT empleado, periodo FROM dotacion_rrhh WHERE entregado=0")
     for emp, per in c.fetchall():
         titulo = f"Dotación pendiente: {emp}"
@@ -94,5 +94,42 @@ def verificar_alertas_globales() -> int:
             crear_alerta("AVISO", "personal", titulo, f"Período {per}")
             nuevas += 1
 
+    # Dotación próxima a vencer (≤ 15 días) — tabla novedades RRHH
+    limite_dot = (hoy + timedelta(days=15)).isoformat()
+    c.execute(
+        """SELECT empleado, item, proxima_entrega FROM dotacion
+           WHERE proxima_entrega IS NOT NULL AND proxima_entrega <= ?""",
+        (limite_dot,),
+    )
+    for emp, item, prox in c.fetchall():
+        titulo = f"Dotación próxima: {emp}"
+        if not _alerta_existe("personal", titulo):
+            crear_alerta(
+                "AVISO",
+                "personal",
+                titulo,
+                f"{item or 'Ítem'} — próxima entrega {prox} (≤15 días)",
+            )
+            nuevas += 1
+
+    # Vacaciones pendientes de aprobar
+    c.execute(
+        """SELECT empleado, tipo, fecha_inicio FROM novedades_rrhh
+           WHERE estado='PENDIENTE' AND tipo='Vacaciones'"""
+    )
+    for emp, tipo, fi in c.fetchall():
+        titulo = f"Vacaciones pendientes: {emp}"
+        if not _alerta_existe("personal", titulo):
+            crear_alerta("AVISO", "personal", titulo, f"{tipo} desde {fi} — pendiente de aprobación")
+            nuevas += 1
+
     conn.close()
+
+    try:
+        from modulos.carpetas_rrhh import generar_alertas_carpetas
+
+        nuevas += generar_alertas_carpetas()
+    except Exception:
+        pass
+
     return nuevas

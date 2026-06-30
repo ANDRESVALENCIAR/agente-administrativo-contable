@@ -103,7 +103,7 @@ def construir_contexto_modulos() -> str:
             ["empleado", "tipo", "fecha_fin", "estado"],
         ),
         _resumen_df(
-            "SELECT empleado, tipo, fecha_inicio, estado FROM personal_novedades ORDER BY id DESC",
+            "SELECT empleado, tipo, fecha_inicio, estado FROM novedades_rrhh ORDER BY id DESC",
             "Novedades",
             ["empleado", "tipo", "fecha_inicio", "estado"],
         ),

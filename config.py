@@ -62,6 +62,10 @@ class Config:
     NIT_EMPRESA = os.getenv("NIT_EMPRESA", "901146454-6")
     CIUDAD_EMPRESA = os.getenv("CIUDAD_EMPRESA", "Bogotá D.C.")
     DATABASE_PATH = os.getenv("DATABASE_PATH", "agente.db")
+    RRHH_CARPETA_PERSONAL = os.getenv(
+        "RRHH_CARPETA_PERSONAL",
+        r"c:\Users\micro\OneDrive - viaindustrial.com\16. RRHH PERSONAL FUNCIONES\PERSONAL ACTIVO",
+    )
 
     # Destinos de correo por categoría (PROMPT_MAESTRO_SHAKI_v2)
     DESTINOS_CORREO = {
