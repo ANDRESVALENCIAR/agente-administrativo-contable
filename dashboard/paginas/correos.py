@@ -1,6 +1,7 @@
 """Página Correos — reglas y procesados."""
 import streamlit as st
 
+from config import en_modo_demo
 from dashboard.utils.db_helper import execute, query_df
 from modulos.correos import procesar_correos, sincronizar_reglas_desde_config
 
@@ -8,6 +9,8 @@ from modulos.correos import procesar_correos, sincronizar_reglas_desde_config
 def render() -> None:
     """Renderiza módulo correos."""
     st.markdown("## Correos")
+    if en_modo_demo():
+        st.info("Modo demo: la clasificación usa respuestas simuladas. Configure Gmail/Outlook en `.env` para producción.")
     t1, t2 = st.tabs(["Procesados", "Reglas de reenvío"])
 
     with t1:

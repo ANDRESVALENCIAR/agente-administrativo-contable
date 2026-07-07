@@ -37,7 +37,27 @@ def render() -> None:
         df = query_df("SELECT * FROM creditos_analizados ORDER BY id DESC")
         cartera = query_df("SELECT * FROM cartera_cxc ORDER BY dias_mora DESC")
         if not df.empty:
-            st.dataframe(df[["cliente", "cupo_solicitado", "decision", "estado_habilitacion"]], use_container_width=True)
+            st.dataframe(
+                df[["id", "cliente", "cupo_solicitado", "decision", "estado_habilitacion"]],
+                use_container_width=True,
+            )
+            st.markdown("**Actualizar habilitación en VIA**")
+            for _, row in df.head(10).iterrows():
+                cid = int(row["id"])
+                cols = st.columns([3, 2, 1])
+                cols[0].write(f"{row['cliente']} — {row['decision']}")
+                nuevo = cols[1].selectbox(
+                    "Estado",
+                    ["PENDIENTE", "HABILITADO", "BLOQUEADO"],
+                    key=f"hab_{cid}",
+                    label_visibility="collapsed",
+                )
+                if cols[2].button("Guardar", key=f"save_hab_{cid}"):
+                    execute(
+                        "UPDATE creditos_analizados SET estado_habilitacion=? WHERE id=?",
+                        (nuevo, cid),
+                    )
+                    st.rerun()
         if not cartera.empty:
             st.subheader("Semáforo de mora")
             for _, row in cartera.iterrows():

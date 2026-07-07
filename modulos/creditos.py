@@ -113,6 +113,23 @@ def revisar_mora_clientes() -> None:
         for _, fila in df.iterrows():
             dias_mora = int(fila.get("DIAS_MORA", 0))
             cliente = str(fila.get("CLIENTE", ""))
+            nit = str(fila.get("NIT", ""))
+            saldo = float(fila.get("SALDO", 0))
+
+            conn = sqlite3.connect(cfg.DATABASE_PATH)
+            c = conn.cursor()
+            c.execute(
+                "UPDATE cartera_cxc SET saldo=?, dias_mora=?, nit=? WHERE cliente=?",
+                (saldo, dias_mora, nit, cliente),
+            )
+            if c.rowcount == 0:
+                c.execute(
+                    "INSERT INTO cartera_cxc (cliente, nit, saldo, dias_mora) VALUES (?,?,?,?)",
+                    (cliente, nit, saldo, dias_mora),
+                )
+            conn.commit()
+            conn.close()
+
             if dias_mora > 90:
                 crear_alerta(
                     "CRITICO",

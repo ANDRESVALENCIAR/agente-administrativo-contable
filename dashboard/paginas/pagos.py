@@ -9,7 +9,7 @@ from database_modulos import (
     guardar_checklist_pagos_periodo,
     obtener_checklist_pagos_periodo,
 )
-from modulos.pagos import registrar_pago_ejecutado, revisar_cxp_diario
+from modulos.pagos import registrar_pago_ejecutado, revisar_cxp_diario, revision_nomina
 
 
 def _periodo_actual() -> str:
@@ -108,3 +108,6 @@ def render() -> None:
     if st.button("Guardar checklist del período"):
         guardar_checklist_pagos_periodo(nom_ok, com_ok, periodo)
         st.success(f"Checklist {periodo} guardado.")
+    if st.button("Ejecutar revisión de nómina (IA)"):
+        revision_nomina()
+        st.success("Revisión de nómina enviada a RRHH/contabilidad.")

@@ -5,12 +5,15 @@ from datetime import date, datetime
 
 import streamlit as st
 
+from modulos.calendario_callbacks import CALLBACKS
 from utils.calendario_maestro import (
+    MODULOS_VALIDOS,
     agregar_tarea,
     cancelar_tarea,
     dias_habiles_entre,
     es_dia_habil,
     es_festivo,
+    ejecutar_tarea_por_id,
     executor_esta_activo,
     get_festivos_colombia,
     listar_todas_activas,
@@ -93,12 +96,27 @@ def render() -> None:
             st.dataframe(df_m, use_container_width=True, hide_index=True)
 
     with tab_todas:
-        if df_venc.empty:
-            st.success("Sin tareas vencidas.")
-        else:
+        if not df_venc.empty:
             st.error(f"⚠️ {len(df_venc)} tarea(s) vencida(s)")
+            for _, row in df_venc.iterrows():
+                c1, c2 = st.columns([4, 1])
+                c1.write(f"#{row['id']} {row['titulo']} — {row['modulo']}")
+                if c2.button("▶ Ejecutar", key=f"run_venc_{row['id']}"):
+                    ejecutar_tarea_por_id(int(row["id"]))
+                    st.success("Ejecutada.")
+                    st.rerun()
             st.dataframe(df_venc, use_container_width=True, hide_index=True)
+        else:
+            st.success("Sin tareas vencidas.")
         st.divider()
+        if not df_activas.empty:
+            for _, row in df_activas.head(20).iterrows():
+                c1, c2 = st.columns([4, 1])
+                c1.write(f"#{row['id']} {row['titulo']} — próxima: {row.get('fecha_proxima_ejecucion', '—')}")
+                if row.get("funcion_callback") and c2.button("▶ Ahora", key=f"run_{row['id']}"):
+                    ejecutar_tarea_por_id(int(row["id"]))
+                    st.success("Ejecutada.")
+                    st.rerun()
         st.dataframe(df_activas, use_container_width=True, hide_index=True)
 
     with tab_log:
@@ -112,14 +130,17 @@ def render() -> None:
         with st.form("nueva_tarea_cal"):
             titulo = st.text_input("Título *")
             descripcion = st.text_area("Descripción")
-            col_a, col_b = st.columns(2)
-            modulo = col_a.selectbox(
-                "Módulo",
-                ["MANUAL", "SISTEMA", "RRHH", "IMPUESTOS", "PAGOS", "CORREOS", "CONTABILIDAD", "JURIDICO"],
-            )
+            col_a, col_b, col_c = st.columns(3)
+            modulo = col_a.selectbox("Módulo", sorted(MODULOS_VALIDOS))
             tipo = col_b.selectbox(
                 "Tipo",
                 ["TAREA_MANUAL", "RECORDATORIO", "VENCIMIENTO", "REUNION", "ALERTA", "AUTOMATICA"],
+            )
+            callback_opts = [None] + sorted(CALLBACKS.keys())
+            funcion_callback = col_c.selectbox(
+                "Callback (opcional)",
+                callback_opts,
+                format_func=lambda x: "Ninguno" if x is None else x,
             )
             col_c, col_d = st.columns(2)
             prioridad = col_c.selectbox("Prioridad", ["MEDIA", "ALTA", "CRITICA", "BAJA"])
@@ -146,6 +167,7 @@ def render() -> None:
                         prioridad=prioridad,
                         recurrencia=recurrencia,
                         recurrencia_config=cfg,
+                        funcion_callback=funcion_callback,
                         creada_por="MANUAL",
                     )
                     st.success(f"Tarea #{tid} agregada.")

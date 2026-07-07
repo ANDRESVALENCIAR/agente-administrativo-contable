@@ -281,6 +281,25 @@ def render() -> None:
             st.info("Sin candidatos registrados.")
 
     with tabs[6]:
+        with st.form("form_contrato"):
+            c1, c2 = st.columns(2)
+            with c1:
+                emp_c = st.selectbox("Empleado", empleados or ["—"], key="cont_emp")
+                tipo_c = st.selectbox("Tipo contrato", ["Indefinido", "Fijo", "Obra o labor", "Aprendizaje"])
+            with c2:
+                fi_c = st.date_input("Fecha inicio", date.today(), key="cont_fi")
+                ff_c = st.date_input("Fecha fin", date.today() + timedelta(days=365), key="cont_ff")
+            if st.form_submit_button("Registrar contrato"):
+                if empleados and not emp_c.startswith("—"):
+                    execute(
+                        """INSERT INTO contratos_rrhh (empleado, tipo, fecha_inicio, fecha_fin, estado)
+                           VALUES (?,?,?,?, 'VIGENTE')""",
+                        (emp_c, tipo_c, fi_c.isoformat(), ff_c.isoformat()),
+                    )
+                    st.success("Contrato registrado.")
+                    st.rerun()
+                else:
+                    st.error("Seleccione un empleado válido.")
         st.dataframe(
             query_df("SELECT * FROM contratos_rrhh ORDER BY fecha_fin"),
             use_container_width=True,

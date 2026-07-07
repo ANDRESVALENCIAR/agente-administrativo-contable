@@ -34,8 +34,26 @@ def analisis_presupuesto_mes_actual() -> None:
 def revision_normatividad_semanal() -> None:
     from modulos.juridico import revisar_normatividad
 
-    if datetime.now().day <= 7:
-        revisar_normatividad()
+    revisar_normatividad()
+
+
+def revision_formularios_mes() -> None:
+    from modulos.impuestos import revision_formularios
+
+    now = datetime.now()
+    revision_formularios(now.month, now.year)
+
+
+def revisar_politicas_internas() -> None:
+    from modulos.juridico import revisar_politicas
+
+    revisar_politicas()
+
+
+def sincronizar_cartera_cxc() -> None:
+    from modulos.cxp_cxc import sincronizar_cartera_desde_excel
+
+    sincronizar_cartera_desde_excel()
 
 
 def liquidar_comisiones_mes_anterior() -> None:
@@ -99,6 +117,9 @@ CALLBACKS: dict[str, Callable[..., Any]] = {
     "revisar_normatividad": revision_normatividad_semanal,
     "vigilar_dian": _lazy("vigilar_dian", "modulos.impuestos", "vigilar_dian"),
     "liquidar_comisiones_mes": liquidar_comisiones_mes_anterior,
+    "revision_formularios": revision_formularios_mes,
+    "revisar_politicas": revisar_politicas_internas,
+    "sincronizar_cartera_cxc": sincronizar_cartera_cxc,
 }
 
 

@@ -5,7 +5,7 @@ import streamlit as st
 
 from dashboard.utils.db_helper import execute, query_df
 from dashboard.utils.reportes import generar_reporte
-from modulos.cxp_cxc import preparar_reunion_semanal
+from modulos.cxp_cxc import preparar_reunion_semanal, sincronizar_cartera_desde_excel
 
 
 def render() -> None:
@@ -14,9 +14,24 @@ def render() -> None:
     t1, t2, t3, t4 = st.tabs(["CXC Cobros", "CXP Pagos", "Incapacidades", "Reunión semanal"])
 
     with t1:
+        if st.button("Sincronizar cartera desde Excel"):
+            n = sincronizar_cartera_desde_excel()
+            st.success(f"{n} cliente(s) sincronizado(s).")
+            st.rerun()
         df = query_df("SELECT * FROM cartera_cxc ORDER BY dias_mora DESC")
         if df.empty:
-            st.info("Sin cartera.")
+            st.info("Sin cartera. Sincronice desde Excel o agregue un cliente.")
+            with st.form("cxc_new"):
+                cli = st.text_input("Cliente")
+                nit = st.text_input("NIT")
+                saldo = st.number_input("Saldo", min_value=0.0)
+                dias = st.number_input("Días mora", min_value=0, value=0)
+                if st.form_submit_button("Agregar cliente"):
+                    execute(
+                        "INSERT INTO cartera_cxc (cliente,nit,saldo,dias_mora) VALUES (?,?,?,?)",
+                        (cli, nit, saldo, int(dias)),
+                    )
+                    st.rerun()
         else:
             for _, r in df.iterrows():
                 dias = r["dias_mora"]

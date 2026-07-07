@@ -42,6 +42,14 @@ def construir_contexto_modulos() -> str:
         f"Correos hoy: {stats['correos_hoy']} | Alertas activas: {stats['alertas_activas']} | "
         f"Pagos por aprobar: {stats['pagos_pendientes']} | Costo API hoy: ${stats['costo_hoy']}",
         "",
+        "=== CALENDARIO ===",
+        _resumen_df(
+            "SELECT titulo, modulo, prioridad FROM calendario_maestro WHERE activa=1 "
+            "AND date(fecha_proxima_ejecucion) = date('now') ORDER BY prioridad",
+            "Tareas hoy",
+            ["titulo", "modulo", "prioridad"],
+        ),
+        "",
         "=== ALERTAS ===",
         alertas_txt,
         "",

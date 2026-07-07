@@ -3,7 +3,8 @@ Módulo CXP/CXC: consolidación para reuniones semanales.
 """
 import logging
 import os
-from datetime import datetime
+import sqlite3
+from datetime import date, datetime
 
 from config import cfg
 from conexiones.claude_client import llamar_claude
@@ -68,3 +69,43 @@ Datos consolidados:
     except Exception as e:
         logger.error("Error preparar_reunion_semanal: %s", e, exc_info=True)
         registrar_accion("cxp_cxc", "preparar_reunion_semanal", str(e), "ERROR", detalle_error=str(e))
+
+
+def sincronizar_cartera_desde_excel() -> int:
+    """Importa CARTERA_CLIENTES del Excel a SQLite. Retorna filas sincronizadas."""
+    import sqlite3
+
+    logger.info("Sincronizando cartera CXC desde Excel...")
+    try:
+        df = leer_excel(cfg.EXCEL_CXP_CXC_ID or "demo", "CARTERA_CLIENTES")
+        if df.empty:
+            registrar_accion("cxp_cxc", "sincronizar_cartera", "Sin datos", "ERROR")
+            return 0
+
+        conn = sqlite3.connect(cfg.DATABASE_PATH)
+        c = conn.cursor()
+        n = 0
+        for _, fila in df.iterrows():
+            cliente = str(fila.get("CLIENTE", ""))
+            nit = str(fila.get("NIT", ""))
+            saldo = float(fila.get("SALDO", 0))
+            dias = int(fila.get("DIAS_MORA", 0))
+            c.execute(
+                "UPDATE cartera_cxc SET saldo=?, dias_mora=?, nit=?, ultima_gestion=? WHERE cliente=?",
+                (saldo, dias, nit, date.today().isoformat(), cliente),
+            )
+            if c.rowcount == 0:
+                c.execute(
+                    """INSERT INTO cartera_cxc (cliente, nit, saldo, dias_mora, ultima_gestion)
+                       VALUES (?,?,?,?,?)""",
+                    (cliente, nit, saldo, dias, date.today().isoformat()),
+                )
+            n += 1
+        conn.commit()
+        conn.close()
+        registrar_accion("cxp_cxc", "sincronizar_cartera", f"{n} clientes", "EXITOSO")
+        return n
+    except Exception as e:
+        logger.error("Error sincronizar_cartera: %s", e, exc_info=True)
+        registrar_accion("cxp_cxc", "sincronizar_cartera", str(e), "ERROR", detalle_error=str(e))
+        return 0

@@ -30,6 +30,30 @@ def verificar_conciliacion_bancaria() -> None:
 Datos:
 {resumen}"""
         informe = llamar_claude(prompt, modulo="contable", max_tokens=2500)
+
+        import sqlite3
+        from datetime import date
+
+        conn = sqlite3.connect(cfg.DATABASE_PATH)
+        c = conn.cursor()
+        if not conciliacion.empty and "SALDO" in conciliacion.columns:
+            for _, fila in conciliacion.iterrows():
+                fuente = str(fila.get("FUENTE", fila.get("BANCO", "Banco")))
+                saldo = float(fila.get("SALDO", 0))
+                c.execute(
+                    """INSERT OR REPLACE INTO conciliacion_bancaria (fuente, saldo, fecha)
+                       VALUES (?,?,?)""",
+                    (fuente, saldo, date.today().isoformat()),
+                )
+        else:
+            c.execute(
+                """INSERT OR REPLACE INTO conciliacion_bancaria (fuente, saldo, fecha)
+                   VALUES (?,?,?)""",
+                ("Conciliación automática", 0, date.today().isoformat()),
+            )
+        conn.commit()
+        conn.close()
+
         enviar_correo(
             cfg.EMAIL_CONTABILIDAD or "contabilidad@empresa.com",
             f"Conciliación bancaria — {datetime.now().strftime('%d/%m/%Y')}",

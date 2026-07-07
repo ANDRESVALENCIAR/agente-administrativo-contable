@@ -6,6 +6,7 @@ import plotly.express as px
 import streamlit as st
 
 from database import marcar_alerta_resuelta, obtener_alertas_activas, obtener_correos_ultimos_dias, obtener_estadisticas_hoy
+from utils.calendario_maestro import tareas_hoy, tareas_vencidas
 
 
 def render() -> None:
@@ -14,11 +15,16 @@ def render() -> None:
     st.markdown("## Panel principal")
     st.caption(datetime.now().strftime("%A %d de %B de %Y · %H:%M"))
 
-    m1, m2, m3, m4 = st.columns(4)
+    m1, m2, m3, m4, m5 = st.columns(5)
     m1.metric("Alertas activas", stats["alertas_activas"])
     m2.metric("Pagos por aprobar", stats["pagos_pendientes"])
     m3.metric("Correos hoy", stats["correos_hoy"])
-    m4.metric("Costo API hoy", f"${stats['costo_hoy']}")
+    m4.metric("Tareas hoy", len(tareas_hoy()))
+    m5.metric("Costo API hoy", f"${stats['costo_hoy']}")
+
+    df_venc = tareas_vencidas()
+    if not df_venc.empty:
+        st.warning(f"⚠️ {len(df_venc)} tarea(s) del calendario vencida(s). Revise el módulo Calendario.")
 
     st.divider()
     st.markdown('<p class="section-title">Alertas activas</p>', unsafe_allow_html=True)
@@ -41,6 +47,16 @@ def render() -> None:
                     st.rerun()
     else:
         st.success("Sin alertas activas.")
+
+    df_hoy = tareas_hoy()
+    if not df_hoy.empty:
+        st.divider()
+        st.markdown('<p class="section-title">Tareas del calendario — hoy</p>', unsafe_allow_html=True)
+        st.dataframe(
+            df_hoy[["titulo", "modulo", "prioridad", "tipo"]].head(8),
+            use_container_width=True,
+            hide_index=True,
+        )
 
     st.divider()
     st.markdown('<p class="section-title">Últimas acciones</p>', unsafe_allow_html=True)

@@ -3,7 +3,7 @@ import os
 
 import streamlit as st
 
-from dashboard.utils.db_helper import query_df
+from dashboard.utils.db_helper import execute, query_df
 
 
 def render() -> None:
@@ -34,15 +34,18 @@ def render() -> None:
     st.caption(f"{len(filtrado)} documento(s)")
     for _, row in filtrado.iterrows():
         c1, c2 = st.columns([4, 1])
+        descargado = "✓ descargado" if row.get("descargado") else ""
         c1.write(f"**{row['nombre_archivo']}** — {row['descripcion']}")
-        c1.caption(f"{row['tipo']} · {row['modulo_origen']} · {row['timestamp']}")
+        c1.caption(f"{row['tipo']} · {row['modulo_origen']} · {row['timestamp']} {descargado}")
         if row["path_local"] and os.path.exists(row["path_local"]):
             with open(row["path_local"], "rb") as f:
-                c2.download_button(
-                    "Descargar",
-                    f.read(),
-                    row["nombre_archivo"],
-                    key=f"doc_{row['id']}",
-                )
+                data = f.read()
+            if c2.download_button(
+                "Descargar",
+                data,
+                row["nombre_archivo"],
+                key=f"doc_{row['id']}",
+            ):
+                execute("UPDATE documentos_generados SET descargado=1 WHERE id=?", (int(row["id"]),))
         else:
             c2.caption("Archivo no local")

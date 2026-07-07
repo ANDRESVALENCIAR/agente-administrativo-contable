@@ -9,6 +9,7 @@ from config import cfg
 from dashboard.utils.db_helper import execute, query_df
 from dashboard.utils.reportes import generar_reporte
 from database import crear_alerta
+from modulos.impuestos import revision_formularios, revisar_vencimientos
 from modulos.impuestos_calendario import (
     enviar_recordatorios_vencimientos,
     inicializar_tablas_calendario,
@@ -133,6 +134,13 @@ def render() -> None:
                     st.success("Guardado.")
                     st.rerun()
         with col2:
+            st.subheader("Acciones del agente")
+            if st.button("Revisar vencimientos Excel"):
+                revisar_vencimientos()
+                st.success("Revisión de vencimientos ejecutada.")
+            if st.button("Checklist formularios DIAN (mes actual)"):
+                revision_formularios(date.today().month, date.today().year)
+                st.success("Checklist enviado a contabilidad.")
             st.subheader("Enlaces oficiales")
             st.link_button("SHD Bogotá — Calendario", "https://www.haciendabogota.gov.co/es/calendario-tributario")
             st.link_button("Datos abiertos Bogotá", "https://datosabiertos.bogota.gov.co/")

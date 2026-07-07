@@ -86,12 +86,15 @@ def verificar_alertas_globales() -> int:
             crear_alerta("CRITICO", "creditos", titulo, f"{dias} días — ${saldo:,.0f}")
             nuevas += 1
 
-    # Dotación pendiente (tabla legacy)
-    c.execute("SELECT empleado, periodo FROM dotacion_rrhh WHERE entregado=0")
-    for emp, per in c.fetchall():
+    # Dotación pendiente de entrega
+    c.execute(
+        """SELECT empleado, item FROM dotacion
+           WHERE entregado=0 OR entregado IS NULL"""
+    )
+    for emp, item in c.fetchall():
         titulo = f"Dotación pendiente: {emp}"
         if not _alerta_existe("personal", titulo):
-            crear_alerta("AVISO", "personal", titulo, f"Período {per}")
+            crear_alerta("AVISO", "personal", titulo, f"Ítem: {item or 'dotación'}")
             nuevas += 1
 
     # Dotación próxima a vencer (≤ 15 días) — tabla novedades RRHH

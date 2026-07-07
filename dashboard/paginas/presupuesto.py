@@ -30,9 +30,24 @@ def render() -> None:
         st.bar_chart(df.set_index("rubro")[["presupuesto", "ejecutado"]])
 
     uploaded = st.file_uploader("Cargar ejecución real (Excel)", type=["xlsx"])
-    if uploaded:
+    if uploaded and st.button("Importar rubros desde Excel"):
         imp = pd.read_excel(uploaded)
-        st.dataframe(imp.head(), use_container_width=True)
+        for _, row in imp.iterrows():
+            rubro = str(row.get("RUBRO", row.get("rubro", "")))
+            if not rubro:
+                continue
+            pres = float(row.get("PRESUPUESTO", row.get("presupuesto", 0)))
+            ejec = float(row.get("EJECUTADO", row.get("ejecutado", 0)))
+            execute(
+                """INSERT INTO presupuesto_rubros (rubro,mes,anio,presupuesto,ejecutado) VALUES (?,?,?,?,?)
+                   ON CONFLICT(rubro,mes,anio) DO UPDATE SET
+                     presupuesto=excluded.presupuesto, ejecutado=excluded.ejecutado""",
+                (rubro, mes, anio, pres, ejec),
+            )
+        st.success("Rubros importados.")
+        st.rerun()
+    elif uploaded:
+        st.dataframe(pd.read_excel(uploaded).head(), use_container_width=True)
 
     with st.form("rubro"):
         rubro = st.text_input("Rubro")

@@ -41,6 +41,33 @@ def _calcular_comision_asesor(ventas_netas: float, recaudo_pct: float, anticipo:
     }
 
 
+def _persistir_comision_detalle(asesor: str, calc: dict, mes: int, anio: int, fila: pd.Series) -> None:
+    """Guarda liquidación en comisiones_detalle."""
+    import sqlite3
+
+    periodo = f"{anio}-{mes:02d}"
+    retenciones = calc["retencion_fuente"] + calc["retencion_ica"]
+    conn = sqlite3.connect(cfg.DATABASE_PATH)
+    c = conn.cursor()
+    c.execute(
+        """INSERT INTO comisiones_detalle
+           (asesor, ventas, recaudo, anticipos, comision_bruta, retenciones, comision_neta, periodo)
+           VALUES (?,?,?,?,?,?,?,?)""",
+        (
+            asesor,
+            calc["ventas_netas"],
+            float(fila.get("RECAUDO_PCT", 0)) * 100,
+            float(fila.get("ANTICIPO", 0)),
+            calc["base_comision"],
+            retenciones,
+            calc["neto_pagar"],
+            periodo,
+        ),
+    )
+    conn.commit()
+    conn.close()
+
+
 def liquidar_comisiones_mes(mes: int, anio: int) -> None:
     """
     Liquida comisiones del mes para todos los asesores.
@@ -96,6 +123,7 @@ NETO A PAGAR: ${calc['neto_pagar']:,.0f}
                     adjuntos=[path_pdf],
                 )
             consolidado.append({"ASESOR": asesor, **calc})
+            _persistir_comision_detalle(asesor, calc, mes, anio, fila)
 
         df_consolidado = pd.DataFrame(consolidado)
         escribir_excel(cfg.EXCEL_VENTAS_ID or "demo", "LIQUIDACION", df_consolidado)

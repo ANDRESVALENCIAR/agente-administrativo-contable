@@ -10,6 +10,7 @@ from config import cfg
 from dashboard.utils.contexto_chat import construir_contexto_modulos
 from dashboard.utils.db_helper import execute, query_df
 from database import aprobar_pago, marcar_alerta_resuelta, obtener_pagos_pendientes, rechazar_pago
+from utils.calendario_maestro import tareas_hoy, tareas_vencidas
 
 logger = logging.getLogger(__name__)
 
@@ -20,8 +21,13 @@ Puedo consultar y ejecutar acciones en estos módulos:
 • Correos — procesar correos, sincronizar reglas desde .env
 • Impuestos — listar vencimientos, sincronizar calendario DIAN/SHD, recordatorios 48h/24h
 • CXP/CXC — resumen cartera mora, bloquear cliente por nombre
-• Créditos, Comisiones, Personal, Presupuesto, Jurídico — consultar estado (pregúntame)
-Ejemplos: "aprobar pago 1", "verificar alertas", "procesar correos", "cartera vencida"
+• Créditos — cartera mora, bloquear cliente
+• Comisiones — liquidar mes actual
+• CXP/CXC — sincronizar cartera desde Excel
+• Calendario — tareas de hoy, tareas vencidas
+• Pagos — revisión nómina
+• Presupuesto — análisis mensual
+Ejemplos: "aprobar pago 1", "verificar alertas", "tareas hoy", "liquidar comisiones"
 """
 
 
@@ -66,6 +72,18 @@ def detectar_intencion(mensaje: str) -> str | None:
         return "cartera_mora"
     if "bloquear cliente" in t or "bloquear" in t and "cliente" in t:
         return "bloquear_cliente"
+    if "tareas hoy" in t or "calendario hoy" in t:
+        return "tareas_hoy"
+    if "tareas vencidas" in t or "calendario vencidas" in t:
+        return "tareas_vencidas"
+    if "liquidar comisiones" in t or "comisiones del mes" in t:
+        return "liquidar_comisiones"
+    if "sincronizar cartera" in t:
+        return "sincronizar_cartera"
+    if "revisión nómina" in t or "revision nomina" in t or "revisar nomina" in t:
+        return "revision_nomina"
+    if "análisis presupuesto" in t or "analisis presupuesto" in t:
+        return "analisis_presupuesto"
     return None
 
 
@@ -204,6 +222,52 @@ def ejecutar_accion(intencion: str, mensaje: str) -> dict[str, Any]:
                 "ejecutada": True,
                 "modulo": "creditos",
                 "resultado": f"Cliente '{df.iloc[0]['cliente']}' bloqueado en cartera.",
+            }
+
+        if intencion == "tareas_hoy":
+            df = tareas_hoy()
+            if df.empty:
+                return {"ejecutada": True, "modulo": "calendario", "resultado": "Sin tareas programadas para hoy."}
+            lineas = [f"· {r.titulo} ({r.modulo})" for r in df.itertuples()]
+            return {"ejecutada": True, "modulo": "calendario", "resultado": "Tareas hoy:\n" + "\n".join(lineas)}
+
+        if intencion == "tareas_vencidas":
+            df = tareas_vencidas()
+            if df.empty:
+                return {"ejecutada": True, "modulo": "calendario", "resultado": "Sin tareas vencidas."}
+            lineas = [f"· #{r.id} {r.titulo}" for r in df.itertuples()]
+            return {"ejecutada": True, "modulo": "calendario", "resultado": "Tareas vencidas:\n" + "\n".join(lineas)}
+
+        if intencion == "liquidar_comisiones":
+            from datetime import date
+            from modulos.comisiones import liquidar_comisiones_mes
+
+            hoy = date.today()
+            liquidar_comisiones_mes(hoy.month, hoy.year)
+            return {"ejecutada": True, "modulo": "comisiones", "resultado": f"Liquidación {hoy.month}/{hoy.year} ejecutada."}
+
+        if intencion == "sincronizar_cartera":
+            from modulos.cxp_cxc import sincronizar_cartera_desde_excel
+
+            n = sincronizar_cartera_desde_excel()
+            return {"ejecutada": True, "modulo": "cxp_cxc", "resultado": f"Cartera sincronizada: {n} cliente(s)."}
+
+        if intencion == "revision_nomina":
+            from modulos.pagos import revision_nomina
+
+            revision_nomina()
+            return {"ejecutada": True, "modulo": "pagos", "resultado": "Revisión de nómina enviada."}
+
+        if intencion == "analisis_presupuesto":
+            from datetime import date
+            from modulos.presupuesto import analisis_mensual_presupuesto
+
+            hoy = date.today()
+            analisis_mensual_presupuesto(hoy.month, hoy.year)
+            return {
+                "ejecutada": True,
+                "modulo": "presupuesto",
+                "resultado": f"Análisis presupuesto {hoy.month}/{hoy.year} generado.",
             }
 
     except Exception as e:

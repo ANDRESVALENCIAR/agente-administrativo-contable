@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+_BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 
 class Config:
     """Configuración global del sistema administrativo-contable."""
@@ -64,7 +66,7 @@ class Config:
     DATABASE_PATH = os.getenv("DATABASE_PATH", "agente.db")
     RRHH_CARPETA_PERSONAL = os.getenv(
         "RRHH_CARPETA_PERSONAL",
-        r"c:\Users\micro\OneDrive - viaindustrial.com\16. RRHH PERSONAL FUNCIONES\PERSONAL ACTIVO",
+        os.path.join(_BASE_DIR, "PERSONAL ACTIVO"),
     )
 
     # Destinos de correo por categoría (PROMPT_MAESTRO_SHAKI_v2)

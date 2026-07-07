@@ -178,6 +178,17 @@ def registrar_accion(
         VALUES (?,?,?,?,?,?,?,?)""",
         (modulo, funcion, descripcion, estado, detalle_error, tokens_input, tokens_output, costo),
     )
+    if tokens_input or tokens_output or costo:
+        c.execute(
+            """INSERT INTO uso_tokens_diario
+               (fecha, tokens_input_haiku, tokens_output_haiku, costo_estimado_usd)
+               VALUES (?,?,?,?)
+               ON CONFLICT(fecha) DO UPDATE SET
+                 tokens_input_haiku = tokens_input_haiku + excluded.tokens_input_haiku,
+                 tokens_output_haiku = tokens_output_haiku + excluded.tokens_output_haiku,
+                 costo_estimado_usd = costo_estimado_usd + excluded.costo_estimado_usd""",
+            (date.today().isoformat(), tokens_input, tokens_output, costo),
+        )
     conn.commit()
     last_id = c.lastrowid
     conn.close()
@@ -222,6 +233,15 @@ def marcar_alerta_resuelta(alerta_id: int) -> None:
         "UPDATE alertas SET resuelto=1, fecha_resolucion=? WHERE id=?",
         (datetime.now(), alerta_id),
     )
+    conn.commit()
+    conn.close()
+
+
+def marcar_alerta_vista(alerta_id: int) -> None:
+    """Marca una alerta como vista sin resolverla."""
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute("UPDATE alertas SET visto=1 WHERE id=?", (alerta_id,))
     conn.commit()
     conn.close()
 
