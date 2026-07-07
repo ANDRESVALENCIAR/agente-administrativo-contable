@@ -13,7 +13,10 @@ logger = logging.getLogger(__name__)
 
 def get_conn() -> sqlite3.Connection:
     """Retorna conexión a SQLite."""
-    return sqlite3.connect(cfg.DATABASE_PATH, check_same_thread=False)
+    conn = sqlite3.connect(cfg.DATABASE_PATH, check_same_thread=False, timeout=30)
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA busy_timeout=30000")
+    return conn
 
 
 def inicializar_db() -> None:
