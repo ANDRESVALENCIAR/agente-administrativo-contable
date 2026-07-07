@@ -254,6 +254,21 @@ def aprobar_pago(pago_id: int, aprobado_por: str = "Usuario") -> None:
     conn.close()
 
 
+def obtener_pagos_aprobados() -> list[tuple[Any, ...]]:
+    """Retorna pagos aprobados pendientes de ejecución bancaria."""
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute(
+        """SELECT * FROM pagos_pendientes WHERE estado='APROBADO'
+                 ORDER BY CASE prioridad
+                   WHEN 'VENCIDO' THEN 1 WHEN 'HOY' THEN 2
+                   WHEN 'URGENTE' THEN 3 WHEN 'PROXIMO' THEN 4 ELSE 5 END"""
+    )
+    rows = c.fetchall()
+    conn.close()
+    return rows
+
+
 def rechazar_pago(pago_id: int, aprobado_por: str = "Usuario") -> None:
     """Rechaza un pago pendiente."""
     conn = get_conn()

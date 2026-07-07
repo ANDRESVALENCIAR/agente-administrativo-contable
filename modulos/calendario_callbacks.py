@@ -38,6 +38,15 @@ def revision_normatividad_semanal() -> None:
         revisar_normatividad()
 
 
+def liquidar_comisiones_mes_anterior() -> None:
+    """Liquida comisiones del mes calendario anterior (tarea programada)."""
+    from dateutil.relativedelta import relativedelta
+    from modulos.comisiones import liquidar_comisiones_mes
+
+    ref = datetime.now() - relativedelta(months=1)
+    liquidar_comisiones_mes(ref.month, ref.year)
+
+
 def _lazy(name: str, import_path: str, attr: str) -> Callable[..., Any]:
     def _fn(*args, **kwargs):
         import importlib
@@ -89,6 +98,7 @@ CALLBACKS: dict[str, Callable[..., Any]] = {
     "analisis_mensual_presupuesto": analisis_presupuesto_mes_actual,
     "revisar_normatividad": revision_normatividad_semanal,
     "vigilar_dian": _lazy("vigilar_dian", "modulos.impuestos", "vigilar_dian"),
+    "liquidar_comisiones_mes": liquidar_comisiones_mes_anterior,
 }
 
 

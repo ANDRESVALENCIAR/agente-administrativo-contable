@@ -113,7 +113,7 @@ def revisar_cxp_diario() -> None:
 
 def registrar_pago_ejecutado(pago_id: int, fecha: str, referencia: str) -> bool:
     """
-    Marca un pago como ejecutado en SQLite y actualiza Excel.
+    Marca un pago como ejecutado en SQLite, registra historial y actualiza Excel.
 
     Args:
         pago_id: ID del pago en pagos_pendientes.
@@ -128,22 +128,40 @@ def registrar_pago_ejecutado(pago_id: int, fecha: str, referencia: str) -> bool:
         conn = sqlite3.connect(cfg.DATABASE_PATH)
         c = conn.cursor()
         c.execute(
+            "SELECT proveedor, concepto, monto, estado FROM pagos_pendientes WHERE id=?",
+            (pago_id,),
+        )
+        row = c.fetchone()
+        if not row:
+            logger.warning("Pago %s no encontrado", pago_id)
+            conn.close()
+            return False
+        proveedor, concepto, monto, estado = row
+        if estado not in ("APROBADO", "PENDIENTE"):
+            logger.warning("Pago %s en estado %s — no se puede ejecutar", pago_id, estado)
+            conn.close()
+            return False
+
+        c.execute(
             """UPDATE pagos_pendientes SET estado='PAGADO', fecha_decision=?
                WHERE id=?""",
             (datetime.now(), pago_id),
         )
-        c.execute("SELECT proveedor, concepto FROM pagos_pendientes WHERE id=?", (pago_id,))
-        row = c.fetchone()
+        c.execute(
+            """INSERT INTO historial_pagos (proveedor, concepto, valor, fecha_pago, comprobante, estado)
+               VALUES (?,?,?,?,?, 'PAGADO')""",
+            (proveedor, concepto, monto, fecha, referencia),
+        )
         conn.commit()
         conn.close()
 
-        if row and cfg.EXCEL_CXP_CXC_ID:
+        if cfg.EXCEL_CXP_CXC_ID:
             actualizar_celda(cfg.EXCEL_CXP_CXC_ID, "CXP_ADMINISTRATIVOS", "G1", "PAGADO")
 
         registrar_accion(
             "pagos",
             "registrar_pago_ejecutado",
-            f"Pago {pago_id} — ref {referencia}",
+            f"Pago {pago_id} {proveedor} — ref {referencia}",
             "EXITOSO",
         )
         return True

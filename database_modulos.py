@@ -50,6 +50,13 @@ def inicializar_tablas_modulos() -> None:
         timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
+    CREATE TABLE IF NOT EXISTS checklist_pagos_periodo (
+        periodo TEXT PRIMARY KEY,
+        nomina_revisada INTEGER DEFAULT 0,
+        comisiones_liquidadas INTEGER DEFAULT 0,
+        actualizado DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
     CREATE TABLE IF NOT EXISTS cartera_cxc (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         cliente TEXT,
@@ -321,3 +328,45 @@ def _seed_datos_demo() -> None:
     conn.commit()
     conn.close()
     logger.info("Datos demo módulos UI cargados.")
+
+
+def _periodo_actual() -> str:
+    return date.today().strftime("%Y-%m")
+
+
+def obtener_checklist_pagos_periodo(periodo: str | None = None) -> dict[str, bool]:
+    """Retorna estado del checklist de nómina/comisiones del período."""
+    periodo = periodo or _periodo_actual()
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute(
+        "SELECT nomina_revisada, comisiones_liquidadas FROM checklist_pagos_periodo WHERE periodo=?",
+        (periodo,),
+    )
+    row = c.fetchone()
+    conn.close()
+    if not row:
+        return {"nomina_revisada": False, "comisiones_liquidadas": False}
+    return {"nomina_revisada": bool(row[0]), "comisiones_liquidadas": bool(row[1])}
+
+
+def guardar_checklist_pagos_periodo(
+    nomina_revisada: bool,
+    comisiones_liquidadas: bool,
+    periodo: str | None = None,
+) -> None:
+    """Persiste checklist de cierre de período en pagos."""
+    periodo = periodo or _periodo_actual()
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute(
+        """INSERT INTO checklist_pagos_periodo (periodo, nomina_revisada, comisiones_liquidadas, actualizado)
+           VALUES (?,?,?,CURRENT_TIMESTAMP)
+           ON CONFLICT(periodo) DO UPDATE SET
+             nomina_revisada=excluded.nomina_revisada,
+             comisiones_liquidadas=excluded.comisiones_liquidadas,
+             actualizado=CURRENT_TIMESTAMP""",
+        (periodo, int(nomina_revisada), int(comisiones_liquidadas)),
+    )
+    conn.commit()
+    conn.close()

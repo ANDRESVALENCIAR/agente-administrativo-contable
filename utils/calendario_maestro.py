@@ -785,6 +785,16 @@ def sembrar_tareas_iniciales() -> int:
             "funcion_callback": "revision_nomina",
         },
         {
+            "titulo": "Liquidación mensual comisiones",
+            "modulo": "COMISIONES",
+            "tipo": "AUTOMATICA",
+            "descripcion": "Liquida comisiones del mes anterior y envía PDFs a asesores",
+            "fecha_inicio": base_hoy,
+            "recurrencia": "MENSUAL",
+            "recurrencia_config": {"hora": "08:00", "dia_mes": 5},
+            "funcion_callback": "liquidar_comisiones_mes",
+        },
+        {
             "titulo": "Revisión normatividad jurídica",
             "modulo": "JURIDICO",
             "tipo": "AUTOMATICA",
