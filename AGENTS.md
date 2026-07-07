@@ -24,11 +24,11 @@ Non-obvious caveats:
   `ANTHROPIC_API_KEY` the code runs in "modo demo" (sample data, no external API/Gmail/Graph
   calls). Real credentials in `.env` switch it to production. The dashboard sidebar shows
   `Activo · Demo`.
-- **`python agente.py` hits a pre-existing SQLite self-deadlock in demo mode.** In
-  `modulos/impuestos.py` `revisar_vencimientos` holds an uncommitted write on one `sqlite3`
-  connection while `crear_alerta`/`registrar_accion` write from a second connection in the same
-  process, raising `sqlite3.OperationalError: database is locked` (~30s timeout each) and killing
-  the worker before the scheduler starts. This is a code bug (see README troubleshooting #7), not
-  an environment issue — the worker still performs full startup (DB init, demo-data load, library
-  registration) before failing. Do not "fix" the environment for this; it reproduces anywhere.
-- The dashboard is the reliable way to demonstrate end-to-end behavior in demo mode.
+- **SQLite write pattern (avoid `database is locked`).** `database.py` helpers such as
+  `crear_alerta` / `registrar_accion` open their *own* short-lived connection. Do not call them
+  while another `sqlite3` connection in the same function is still holding an uncommitted write
+  (README troubleshooting #7) — commit and `close()` first, then call the helper. Existing modules
+  follow this (collect data during the write loop, close the connection, then create alerts).
+- The worker (`python agente.py`) starts cleanly in demo mode: DB init, demo-data load, library
+  registration, initial impuestos/CXP review, then `Calendario maestro activo`. The dashboard is
+  the most convenient way to demonstrate end-to-end behavior.
