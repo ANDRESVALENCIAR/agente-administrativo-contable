@@ -33,18 +33,14 @@ def get_engine() -> Any | None:
 
 
 def query_df(sql: str, params: dict | tuple | None = None) -> pd.DataFrame:
-    """SELECT vía SQLAlchemy; fallback sqlite3 + pandas."""
+    """SELECT vía SQLAlchemy (params nombrados) o sqlite3 (params posicionales)."""
     engine = get_engine()
-    if engine is not None:
+    if engine is not None and isinstance(params, dict):
         from core.registro_libs import registrar_uso_libreria
 
         registrar_uso_libreria("dashboard", "sqlalchemy")
         with engine.connect() as conn:
-            if isinstance(params, dict):
-                return pd.read_sql(text(sql), conn, params=params)
-            if isinstance(params, tuple):
-                return pd.read_sql(sql, conn, params=list(params))
-            return pd.read_sql(sql, conn)
+            return pd.read_sql(text(sql), conn, params=params)
     import sqlite3
 
     conn = sqlite3.connect(cfg.DATABASE_PATH)
@@ -54,16 +50,11 @@ def query_df(sql: str, params: dict | tuple | None = None) -> pd.DataFrame:
 
 
 def execute(sql: str, params: dict | tuple | None = None) -> None:
-    """Ejecuta DML vía SQLAlchemy o sqlite3."""
+    """Ejecuta DML vía SQLAlchemy (dict) o sqlite3 (tupla)."""
     engine = get_engine()
-    if engine is not None:
+    if engine is not None and isinstance(params, dict):
         with engine.begin() as conn:
-            if isinstance(params, dict):
-                conn.execute(text(sql), params)
-            elif isinstance(params, tuple):
-                conn.execute(text(sql), list(params))
-            else:
-                conn.execute(text(sql))
+            conn.execute(text(sql), params)
         return
     import sqlite3
 
