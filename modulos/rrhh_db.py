@@ -112,6 +112,138 @@ def inicializar_tablas_rrhh() -> None:
         fecha_cambio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         procesado BOOLEAN DEFAULT 0
     );
+
+    CREATE TABLE IF NOT EXISTS empleados_fenix (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nombre_completo TEXT NOT NULL,
+        cedula TEXT,
+        tipo_plantilla TEXT DEFAULT 'nomina_activo',
+        activo BOOLEAN DEFAULT 1,
+        cargo TEXT,
+        departamento TEXT,
+        jefe_inmediato TEXT,
+        lugar_labor TEXT,
+        tipo_contrato TEXT,
+        termino TEXT,
+        fecha_ingreso DATE,
+        vencimiento_contrato DATE,
+        fecha_preaviso DATE,
+        fecha_nacimiento DATE,
+        telefono TEXT,
+        email_corporativo TEXT,
+        email_personal TEXT,
+        direccion TEXT,
+        barrio TEXT,
+        ciudad TEXT,
+        salario_ibc TEXT,
+        salud TEXT,
+        pension TEXT,
+        cesantias TEXT,
+        caja_compensacion TEXT,
+        ref_emergencia TEXT,
+        parentesco_emergencia TEXT,
+        tel_emergencia TEXT,
+        observaciones TEXT,
+        carpeta_vinculada TEXT,
+        datos_json TEXT,
+        origen TEXT DEFAULT 'import',
+        fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS novedades_fenix (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        empleado_id INTEGER,
+        nombre_completo TEXT NOT NULL,
+        cedula TEXT,
+        fecha_ingreso DATE,
+        pendiente_dotacion TEXT,
+        examenes_periodicos TEXT,
+        meses_json TEXT,
+        fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS vacaciones_fenix (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        empleado_id INTEGER,
+        nombre_completo TEXT NOT NULL,
+        hoja_origen TEXT,
+        dias_pendientes TEXT,
+        dias_tomar TEXT,
+        dias_pendientes_2025 TEXT,
+        fecha_regreso DATE,
+        observaciones TEXT,
+        datos_json TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS cumpleanos_fenix (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nombre TEXT NOT NULL,
+        dia TEXT,
+        mes TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS contratos_fijos_fenix (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        empleado_id INTEGER,
+        nombre_completo TEXT NOT NULL,
+        cedula TEXT,
+        cargo TEXT,
+        fecha_inicio DATE,
+        termino TEXT,
+        vencimiento_contrato DATE,
+        fecha_preaviso DATE,
+        datos_json TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS personal_fenix_sync (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        ruta_archivo TEXT,
+        ultima_importacion TIMESTAMP,
+        empleados INTEGER DEFAULT 0,
+        vinculados INTEGER DEFAULT 0
+    );
+
+    CREATE TABLE IF NOT EXISTS contratos_activos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        empleado_carpeta_id INTEGER,
+        nombre_completo TEXT NOT NULL UNIQUE,
+        cedula TEXT,
+        fecha_ingreso DATE,
+        cargo TEXT,
+        sueldo_bruto TEXT,
+        area TEXT,
+        modalidad_trabajo TEXT,
+        tipo_contrato TEXT,
+        fecha_inicio DATE,
+        fecha_fin DATE,
+        estado TEXT DEFAULT 'ACTIVO',
+        sctr TEXT,
+        vida_ley TEXT,
+        examen_medico TEXT,
+        induccion TEXT,
+        epp TEXT,
+        doc_foto TEXT DEFAULT 'NO',
+        doc_foto_ruta TEXT,
+        doc_cv TEXT DEFAULT 'NO',
+        doc_cv_ruta TEXT,
+        doc_antecedentes TEXT DEFAULT 'NO',
+        doc_antecedentes_ruta TEXT,
+        doc_contrato TEXT DEFAULT 'NO',
+        doc_contrato_ruta TEXT,
+        doc_dni TEXT DEFAULT 'NO',
+        doc_dni_ruta TEXT,
+        doc_recibo_servicios TEXT DEFAULT 'NO',
+        doc_recibo_ruta TEXT,
+        doc_croquis TEXT DEFAULT 'NO',
+        doc_croquis_ruta TEXT,
+        doc_declaracion TEXT DEFAULT 'NO',
+        doc_declaracion_ruta TEXT,
+        doc_certificados TEXT DEFAULT 'NO',
+        doc_certificados_ruta TEXT,
+        observaciones TEXT,
+        origen TEXT DEFAULT 'sync',
+        fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
     """)
     try:
         c.execute("ALTER TABLE empleados ADD COLUMN ruta_expediente TEXT")

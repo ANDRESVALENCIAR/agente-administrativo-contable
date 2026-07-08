@@ -68,6 +68,14 @@ class Config:
         "RRHH_CARPETA_PERSONAL",
         os.path.join(_BASE_DIR, "PERSONAL ACTIVO"),
     )
+    RRHH_ARCHIVO_GENERAL = os.getenv(
+        "RRHH_ARCHIVO_GENERAL",
+        os.path.join(
+            os.path.dirname(_BASE_DIR),
+            "Agente ADmin Shaki",
+            "ARCHIVO GENERAL PERSONAL FENIX 2026.xlsx",
+        ),
+    )
 
     # Destinos de correo por categoría (PROMPT_MAESTRO_SHAKI_v2)
     DESTINOS_CORREO = {

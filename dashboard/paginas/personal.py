@@ -12,11 +12,14 @@ from dashboard.utils.rrhh_helpers import (
     exportar_candidatos_excel,
     exportar_dotacion_excel,
     exportar_novedades_excel,
+    parse_fecha,
     proxima_dotacion,
     resumen_vacaciones_todos,
 )
 from database import registrar_documento
 from dashboard.paginas.personal_expedientes import render_expedientes_vivo
+from dashboard.paginas.personal_archivo_general import render as render_archivo_general
+from dashboard.paginas.personal_contratos_activos import render as render_contratos_activos
 from modulos.rrhh_expediente import guardar_certificacion_en_expediente
 
 TIPOS_NOVEDAD = ["Permiso", "Vacaciones", "Incapacidad", "Licencia"]
@@ -28,7 +31,9 @@ ESTADOS_CANDIDATO = ["RECIBIDO", "EN PROCESO", "ENTREVISTADO", "CONTRATADO", "DE
 def _lista_empleados() -> list[str]:
     df = query_df(
         """SELECT nombre_display AS nombre FROM empleados_carpetas WHERE activo=1
-           UNION SELECT nombre FROM empleados WHERE activo=1 ORDER BY 1"""
+           UNION SELECT nombre FROM empleados WHERE activo=1
+           UNION SELECT nombre_completo AS nombre FROM empleados_fenix WHERE activo=1
+           ORDER BY 1"""
     )
     return df["nombre"].tolist() if not df.empty else []
 
@@ -40,6 +45,8 @@ def render() -> None:
     tabs = st.tabs(
         [
             "📂 Expedientes",
+            "📋 Archivo General",
+            "📑 Contratos Activos",
             "Novedades",
             "Vacaciones/Primas",
             "Certificaciones",
@@ -54,6 +61,12 @@ def render() -> None:
         render_expedientes_vivo()
 
     with tabs[1]:
+        render_archivo_general()
+
+    with tabs[2]:
+        render_contratos_activos()
+
+    with tabs[3]:
         with st.form("form_novedad"):
             c1, c2 = st.columns(2)
             with c1:
@@ -97,7 +110,7 @@ def render() -> None:
             hide_index=True,
         )
 
-    with tabs[2]:
+    with tabs[4]:
         st.caption("Cálculo local: 15 días por año trabajado; disfrutados = novedades tipo Vacaciones.")
         res = resumen_vacaciones_todos()
         if res.empty:
@@ -109,12 +122,11 @@ def render() -> None:
             sel = st.selectbox("Detalle por empleado", empleados, key="vac_sel")
             emp_row = query_df("SELECT fecha_ingreso FROM empleados WHERE nombre=?", (sel,))
             if not emp_row.empty and emp_row.iloc[0]["fecha_ingreso"]:
-                fi = emp_row.iloc[0]["fecha_ingreso"]
-                if isinstance(fi, str):
-                    fi = date.fromisoformat(fi)
-                st.json(calcular_vacaciones(sel, fi))
+                fi = parse_fecha(emp_row.iloc[0]["fecha_ingreso"])
+                if fi:
+                    st.json(calcular_vacaciones(sel, fi))
 
-    with tabs[3]:
+    with tabs[5]:
         df_emp = query_df(
             """SELECT e.nombre, e.cargo, e.fecha_ingreso, e.salario, e.tipo_contrato, e.cedula,
                       c.nombre_carpeta
@@ -135,10 +147,8 @@ def render() -> None:
             nombre = row["nombre"]
             nombre_carpeta = row.get("nombre_carpeta") or nombre
             cargo = st.text_input("Cargo", value=row.get("cargo") or "")
-            fecha_ing = row["fecha_ingreso"]
-            if isinstance(fecha_ing, str):
-                fecha_ing = date.fromisoformat(fecha_ing)
-            fecha_ingreso = st.date_input("Fecha ingreso", fecha_ing or date.today())
+            fecha_ing = parse_fecha(row["fecha_ingreso"], date.today())
+            fecha_ingreso = st.date_input("Fecha ingreso", fecha_ing)
             salario = st.number_input("Salario mensual", min_value=0.0, value=float(row.get("salario") or 0))
             tipo_contrato = st.text_input("Tipo contrato", value=row.get("tipo_contrato") or "Indefinido")
             cedula = st.text_input("Cédula", value=row.get("cedula") or "")
@@ -179,7 +189,7 @@ def render() -> None:
                     except Exception as e:
                         st.error(f"Error al generar PDF: {e}")
 
-    with tabs[4]:
+    with tabs[6]:
         with st.form("form_dotacion"):
             c1, c2 = st.columns(2)
             with c1:
@@ -217,12 +227,12 @@ def render() -> None:
             limite = date.today() + timedelta(days=15)
             df_dot["alerta"] = df_dot["proxima_entrega"].apply(
                 lambda x: "⚠ ≤15 días"
-                if x and date.fromisoformat(str(x)[:10]) <= limite
+                if parse_fecha(x) and parse_fecha(x) <= limite
                 else ""
             )
         st.dataframe(df_dot, use_container_width=True, hide_index=True)
 
-    with tabs[5]:
+    with tabs[7]:
         with st.form("form_candidato"):
             c1, c2 = st.columns(2)
             with c1:
@@ -271,7 +281,7 @@ def render() -> None:
                     label_visibility="collapsed",
                 )
                 if cols[2].button("Actualizar", key=f"upd_cand_{cid}"):
-                    dias = dias_en_proceso(date.fromisoformat(str(row["fecha_aplicacion"])[:10]))
+                    dias = dias_en_proceso(parse_fecha(row["fecha_aplicacion"], date.today()))
                     execute(
                         "UPDATE candidatos SET estado=?, dias_proceso=? WHERE id=?",
                         (nuevo, dias, cid),
@@ -280,7 +290,7 @@ def render() -> None:
         else:
             st.info("Sin candidatos registrados.")
 
-    with tabs[6]:
+    with tabs[8]:
         with st.form("form_contrato"):
             c1, c2 = st.columns(2)
             with c1:
@@ -306,7 +316,7 @@ def render() -> None:
             hide_index=True,
         )
 
-    with tabs[7]:
+    with tabs[9]:
         with st.form("form_examen"):
             emp_e = st.text_input("Empleado examen")
             tipo_e = st.selectbox("Tipo examen", ["Ingreso", "Periódico", "Retiro"])

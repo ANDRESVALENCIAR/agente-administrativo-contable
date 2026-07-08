@@ -1,7 +1,7 @@
 """Helpers RRHH — pandas, python-dateutil, openpyxl (sin IA)."""
 import json
 import os
-from datetime import date, datetime
+from datetime import date, datetime, datetime
 from typing import Any
 
 import pandas as pd
@@ -69,6 +69,21 @@ def calcular_prima(empleado: str, salario: float, fecha_ingreso: date) -> dict[s
 
 def dias_en_proceso(fecha_aplicacion: date) -> int:
     return max((date.today() - fecha_aplicacion).days, 0)
+
+
+def parse_fecha(val: Any, default: date | None = None) -> date | None:
+    """Convierte valor de BD/Excel a date; tolera NaT, None y cadenas vacías."""
+    if val is None:
+        return default
+    if isinstance(val, date) and not isinstance(val, datetime):
+        return val
+    s = str(val).strip()
+    if not s or s.lower() in ("nat", "none", "nan", ""):
+        return default
+    try:
+        return date.fromisoformat(s[:10])
+    except ValueError:
+        return default
 
 
 def _estilo_header(ws) -> None:
@@ -187,12 +202,118 @@ def resumen_vacaciones_todos() -> pd.DataFrame:
     emp = query_df("SELECT nombre, fecha_ingreso, salario FROM empleados WHERE activo=1")
     filas = []
     for _, row in emp.iterrows():
-        fi = row["fecha_ingreso"]
+        fi = parse_fecha(row["fecha_ingreso"])
         if not fi:
             continue
-        if isinstance(fi, str):
-            fi = date.fromisoformat(fi)
         vac = calcular_vacaciones(row["nombre"], fi)
         pri = calcular_prima(row["nombre"], float(row.get("salario") or 0), fi)
         filas.append({**vac, "prima_estimada": pri["prima_estimada"]})
     return pd.DataFrame(filas) if filas else pd.DataFrame()
+
+
+def exportar_archivo_general_fenix() -> str:
+    """Exporta toda la memoria del Archivo General Fénix a Excel multi-hoja."""
+    os.makedirs("documentos/exports", exist_ok=True)
+    hoy = date.today()
+    path = os.path.join(
+        "documentos", "exports", f"archivo_general_fenix_{hoy.month:02d}_{hoy.year}.xlsx"
+    )
+
+    with pd.ExcelWriter(path, engine="openpyxl") as writer:
+        query_df(
+            """SELECT nombre_completo, cedula, cargo, departamento, jefe_inmediato, lugar_labor,
+                      tipo_contrato, termino, fecha_ingreso, vencimiento_contrato, fecha_preaviso,
+                      fecha_nacimiento, telefono, email_corporativo, email_personal, direccion,
+                      barrio, ciudad, salario_ibc, salud, pension, cesantias, caja_compensacion,
+                      ref_emergencia, parentesco_emergencia, tel_emergencia, carpeta_vinculada,
+                      observaciones, origen
+               FROM empleados_fenix WHERE tipo_plantilla='nomina_activo' AND activo=1
+               ORDER BY nombre_completo"""
+        ).to_excel(writer, sheet_name="NOMINA ACTIVA", index=False)
+
+        query_df(
+            """SELECT nombre_completo, cedula, cargo, departamento, fecha_ingreso, telefono,
+                      email_corporativo, salario_ibc, tipo_contrato, carpeta_vinculada, observaciones
+               FROM empleados_fenix WHERE tipo_plantilla='prestacion_servicios' AND activo=1
+               ORDER BY nombre_completo"""
+        ).to_excel(writer, sheet_name="PRESTACION SERVICIOS", index=False)
+
+        query_df(
+            """SELECT nombre_completo, cedula, cargo, fecha_ingreso, observaciones
+               FROM empleados_fenix WHERE tipo_plantilla='retirado' OR activo=0
+               ORDER BY nombre_completo"""
+        ).to_excel(writer, sheet_name="RETIRADOS", index=False)
+
+        query_df(
+            """SELECT nombre_completo, cedula, fecha_ingreso, pendiente_dotacion,
+                      examenes_periodicos, meses_json FROM novedades_fenix ORDER BY nombre_completo"""
+        ).to_excel(writer, sheet_name="NOVEDADES", index=False)
+
+        query_df(
+            """SELECT nombre_completo, hoja_origen, dias_pendientes, dias_tomar,
+                      dias_pendientes_2025, fecha_regreso, observaciones
+               FROM vacaciones_fenix ORDER BY nombre_completo"""
+        ).to_excel(writer, sheet_name="VACACIONES", index=False)
+
+        query_df("SELECT nombre, dia, mes FROM cumpleanos_fenix ORDER BY mes, dia").to_excel(
+            writer, sheet_name="CUMPLEANOS", index=False
+        )
+
+        query_df(
+            """SELECT nombre_completo, cedula, cargo, fecha_inicio, termino,
+                      vencimiento_contrato, fecha_preaviso FROM contratos_fijos_fenix
+               ORDER BY nombre_completo"""
+        ).to_excel(writer, sheet_name="CONTRATOS FIJOS", index=False)
+
+    return path
+
+
+def exportar_contratos_activos_excel() -> str:
+    """Exporta planilla Contratos Activos con formato tipo informe horizontal."""
+    from modulos.contratos_activos import COLUMNAS_INFORME
+
+    df = query_df("SELECT * FROM contratos_activos ORDER BY nombre_completo")
+    os.makedirs("documentos/exports", exist_ok=True)
+    hoy = date.today()
+    path = os.path.join("documentos", "exports", f"contratos_activos_{hoy.month:02d}_{hoy.year}.xlsx")
+
+    cols = [k for k, _ in COLUMNAS_INFORME if k in df.columns]
+    labels = [v for k, v in COLUMNAS_INFORME if k in df.columns]
+    export = df[cols].copy() if not df.empty else pd.DataFrame(columns=cols)
+    export.columns = labels
+
+    with pd.ExcelWriter(path, engine="openpyxl") as writer:
+        export.to_excel(writer, sheet_name="CONTRATOS ACTIVOS", index=False)
+        wb = writer.book
+        ws = wb["CONTRATOS ACTIVOS"]
+        from openpyxl.styles import Font, PatternFill
+
+        header_fill = PatternFill(start_color="4A4A4A", end_color="4A4A4A", fill_type="solid")
+        header_font = Font(color="FFFFFF", bold=True, size=9)
+        data_fill = PatternFill(start_color="FFF9C4", end_color="FFF9C4", fill_type="solid")
+        ok_fill = PatternFill(start_color="C8E6C9", end_color="C8E6C9", fill_type="solid")
+        no_fill = PatternFill(start_color="FFCDD2", end_color="FFCDD2", fill_type="solid")
+
+        doc_labels = {
+            "FOTO", "CV", "ANTECEDENTES", "CONTRATO FIRMADO", "DNI ESCANEADO",
+            "RECIBO LUZ/AGUA", "CROQUIS", "DECLARACIÓN JURADA", "CERTIFICADOS",
+            "SCTR", "VIDA LEY", "EXAMEN MÉDICO", "INDUCCIÓN", "EPP",
+        }
+        for cell in ws[1]:
+            cell.fill = header_fill
+            cell.font = header_font
+        for row in ws.iter_rows(min_row=2, max_row=ws.max_row):
+            for cell in row:
+                hdr = ws.cell(row=1, column=cell.column).value
+                val = str(cell.value or "").upper()
+                if hdr in doc_labels:
+                    if val == "SI":
+                        cell.fill = ok_fill
+                    elif val == "NO":
+                        cell.fill = no_fill
+                    else:
+                        cell.fill = data_fill
+                else:
+                    cell.fill = data_fill
+
+    return path
