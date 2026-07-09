@@ -1,24 +1,40 @@
-"""Página Comisiones — liquidación por asesor."""
+"""Página Comisiones — comparador VIA×Contabilidad + liquidación asesores."""
 from datetime import date
 
 import pandas as pd
 import streamlit as st
 
-from config import cfg
 from conexiones.claude_client import llamar_claude_simple
+from dashboard.paginas.comisiones_comparador import render_comparador, render_historial
 from dashboard.utils.db_helper import execute, query_df
 from dashboard.utils.reportes import generar_reporte
 from modulos.comisiones import _calcular_comision_asesor, liquidar_comisiones_mes
 
 
 def render() -> None:
-    """Renderiza módulo comisiones."""
     st.markdown("## Comisiones")
+    tabs = st.tabs([
+        "🔄 Comparador VIA × Contabilidad",
+        "📅 Histórico mensual",
+        "💰 Liquidación asesores",
+    ])
+
+    with tabs[0]:
+        render_comparador()
+
+    with tabs[1]:
+        render_historial()
+
+    with tabs[2]:
+        _render_liquidacion()
+
+
+def _render_liquidacion() -> None:
     periodo = date.today().strftime("%Y-%m")
     df = query_df("SELECT * FROM comisiones_detalle ORDER BY periodo DESC, asesor")
     ret = query_df("SELECT * FROM retenciones_config")
 
-    filtro = st.text_input("Filtrar por asesor (vista individual)")
+    filtro = st.text_input("Filtrar por asesor (vista individual)", key="com_filtro")
     if filtro:
         df = df[df["asesor"].str.contains(filtro, case=False, na=False)]
 
@@ -26,8 +42,8 @@ def render() -> None:
 
     col1, col2, col3 = st.columns(3)
     with col1:
-        uploaded = st.file_uploader("Cargar ventas Excel VIA", type=["xlsx"])
-        if uploaded and st.button("Importar ventas"):
+        uploaded = st.file_uploader("Cargar ventas Excel VIA", type=["xlsx"], key="com_up_ventas")
+        if uploaded and st.button("Importar ventas", key="com_imp"):
             imp = pd.read_excel(uploaded)
             for _, row in imp.iterrows():
                 ventas = float(row.get("VENTAS_NETAS", row.get("VENTAS", 0)))
@@ -55,13 +71,13 @@ def render() -> None:
             st.rerun()
 
     with col2:
-        if st.button("Liquidar mes actual"):
+        if st.button("Liquidar mes actual", key="com_liq_act"):
             hoy = date.today()
             liquidar_comisiones_mes(hoy.month, hoy.year)
             st.success("Liquidación del mes actual ejecutada.")
 
     with col3:
-        if st.button("Liquidar mes anterior"):
+        if st.button("Liquidar mes anterior", key="com_liq_ant"):
             from dateutil.relativedelta import relativedelta
 
             ref = date.today() - relativedelta(months=1)
@@ -69,16 +85,16 @@ def render() -> None:
             st.success(f"Liquidación {ref.month}/{ref.year} ejecutada.")
 
     if not df.empty:
-        asesor = st.selectbox("Asesor para revisión", df["asesor"].tolist())
-        if st.button("Enviar mensaje de revisión"):
+        asesor = st.selectbox("Asesor para revisión", df["asesor"].tolist(), key="com_asesor")
+        if st.button("Enviar mensaje de revisión", key="com_msg"):
             fila = df[df["asesor"] == asesor].iloc[0]
             msg = llamar_claude_simple(
                 f"Resume comisión de {asesor}: neto ${fila.get('comision_neta', 0):,.0f}", modulo="comisiones"
             )
             st.info(msg)
-        if st.button("Exportar liquidación Excel"):
+        if st.button("Exportar liquidación Excel", key="com_exp"):
             data, nombre = generar_reporte("comisiones", df, "excel")
             st.download_button("Descargar", data, nombre)
 
     st.subheader("Tabla paramétrica retenciones")
-    st.dataframe(ret, use_container_width=True)
+    st.dataframe(ret, use_container_width=True, hide_index=True)

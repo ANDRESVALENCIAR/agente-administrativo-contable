@@ -203,6 +203,11 @@ def inicializar_tablas_modulos() -> None:
     conn.commit()
     conn.close()
     _seed_datos_demo()
+    try:
+        from modulos.comparador_comisiones import inicializar_tablas_comparador
+        inicializar_tablas_comparador()
+    except Exception as e:
+        logger.warning("Tablas comparador comisiones: %s", e)
 
 
 def _seed_datos_demo() -> None:
