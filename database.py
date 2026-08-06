@@ -3,7 +3,7 @@ Base de datos SQLite local. Guarda todo el estado, logs y estadísticas del agen
 """
 import sqlite3
 import logging
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from typing import Any
 
 from config import cfg
@@ -159,6 +159,18 @@ def inicializar_db() -> None:
     from utils.calendario_maestro import inicializar_tablas_calendario_maestro
 
     inicializar_tablas_calendario_maestro()
+    try:
+        from utils.sync_pagos import inicializar_tablas_pagos
+
+        inicializar_tablas_pagos()
+    except Exception as e:
+        logger.warning("Tablas pagos CONTROL DE PAGOS: %s", e)
+    try:
+        from modulos.catalogos_gastos import inicializar_catalogos_gastos
+
+        inicializar_catalogos_gastos()
+    except Exception as e:
+        logger.warning("Catálogos gastos: %s", e)
     logger.info("Base de datos inicializada correctamente.")
 
 
@@ -350,6 +362,22 @@ def obtener_estadisticas_hoy() -> dict[str, Any]:
 
     c.execute("SELECT COUNT(*) FROM pagos_pendientes WHERE estado='PENDIENTE'", ())
     pagos_pendientes = c.fetchone()[0]
+    try:
+        corte = (date.today() - timedelta(days=90)).isoformat()
+        c.execute(
+            """SELECT COUNT(*) FROM pagos
+               WHERE estado IN ('HOY','URGENTE','APROBADO')
+                  OR (estado='VENCIDO' AND fecha_limite >= ?)
+                  OR (estado='PENDIENTE' AND fecha_limite <= date('now','+7 days')
+                      AND fecha_limite >= date('now'))""",
+            (corte,),
+        )
+        pagos_ctrl = c.fetchone()[0]
+        if pagos_ctrl is not None:
+            pagos_pendientes = pagos_ctrl
+    except Exception:
+        pass
+
 
     c.execute("SELECT COUNT(*) FROM documentos_generados WHERE DATE(timestamp)=?", (hoy,))
     documentos = c.fetchone()[0]

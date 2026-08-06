@@ -22,6 +22,7 @@ from dashboard.paginas import (
     cxp_cxc,
     documentos,
     estadisticas,
+    gastos,
     impuestos,
     inicio,
     juridico,
@@ -42,6 +43,7 @@ PAGINAS = {
     "🧾 Impuestos": impuestos.render,
     "📋 CXP/CXC": cxp_cxc.render,
     "💳 Pagos": pagos.render,
+    "📦 Gastos": gastos.render,
     "📧 Correos": correos.render,
     "🤝 Créditos": creditos.render,
     "💰 Comisiones": comisiones.render,
@@ -89,6 +91,37 @@ if "alertas_verificadas" not in st.session_state:
     verificar_alertas_globales()
     st.session_state.alertas_verificadas = True
 
+if "pagos_sync" not in st.session_state:
+    try:
+        from utils.sync_pagos import (
+            importar_excel_a_sqlite,
+            programar_tareas_calendario_pagos,
+            actualizar_estados_pagos,
+        )
+
+        st.session_state.pagos_sync = importar_excel_a_sqlite()
+        actualizar_estados_pagos()
+        programar_tareas_calendario_pagos()
+    except Exception as exc:
+        import logging
+
+        logging.getLogger(__name__).warning("Sync CONTROL DE PAGOS al arrancar: %s", exc)
+        st.session_state.pagos_sync = {"error": str(exc)}
+
+if "gastos_std" not in st.session_state:
+    try:
+        from utils.estandarizar_gastos import estandarizar_todos, gastos_maestro_vacio
+
+        if gastos_maestro_vacio():
+            st.session_state.gastos_std = estandarizar_todos()
+        else:
+            st.session_state.gastos_std = {"skipped": True}
+    except Exception as exc:
+        import logging
+
+        logging.getLogger(__name__).warning("Estandarizar gastos al arrancar: %s", exc)
+        st.session_state.gastos_std = {"error": str(exc)}
+
 if "chat_historial" not in st.session_state:
     st.session_state.chat_historial = []
 if "chat_mensajes_ui" not in st.session_state:
@@ -104,11 +137,23 @@ if "chat_mensajes_ui" not in st.session_state:
 
 stats = obtener_estadisticas_hoy()
 
+# Contador urgentes CONTROL DE PAGOS para sidebar
+_pagos_urgentes = 0
+try:
+    from utils.alertas_pagos import resumen_pagos_widget
+
+    _rw = resumen_pagos_widget()
+    _pagos_urgentes = int(_rw.get("vencidos", 0)) + int(_rw.get("hoy", 0))
+except Exception:
+    pass
+
 with st.sidebar:
     st.markdown("### 🤖 AGENTE ADMIN SHAKI")
     st.markdown(f"**{cfg.NOMBRE_EMPRESA}**")
     modo = "Demo" if en_modo_demo() else "Producción"
     st.markdown(f'<p class="status-active">● Activo · {modo}</p>', unsafe_allow_html=True)
+    if _pagos_urgentes:
+        st.warning(f"💳 {_pagos_urgentes} pagos urgentes")
     st.divider()
     pagina = st.radio("Navegación", list(PAGINAS.keys()), label_visibility="collapsed")
     st.divider()

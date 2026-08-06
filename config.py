@@ -76,6 +76,22 @@ class Config:
             "ARCHIVO GENERAL PERSONAL FENIX 2026.xlsx",
         ),
     )
+    CONTROL_DE_PAGOS = os.getenv(
+        "CONTROL_DE_PAGOS",
+        os.path.join(
+            os.path.dirname(_BASE_DIR),
+            "Agente ADmin Shaki",
+            "CONTROL DE PAGOS (1).xlsx",
+        ),
+    )
+    ESTANDARIZAR_GASTOS = os.getenv(
+        "ESTANDARIZAR_GASTOS",
+        os.path.join(
+            os.path.dirname(_BASE_DIR),
+            "Agente ADmin Shaki",
+            "ESTANDARIZAR GASTOS.xlsx",
+        ),
+    )
 
     # Destinos de correo por categoría (PROMPT_MAESTRO_SHAKI_v2)
     DESTINOS_CORREO = {

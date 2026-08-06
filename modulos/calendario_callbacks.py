@@ -102,6 +102,17 @@ CALLBACKS: dict[str, Callable[..., Any]] = {
     ),
     "revisar_cxp_diario": _lazy("revisar_cxp_diario", "modulos.pagos", "revisar_cxp_diario"),
     "revision_nomina": _lazy("revision_nomina", "modulos.pagos", "revision_nomina"),
+    "revisar_pagos_pendientes": _lazy(
+        "revisar_pagos_pendientes", "modulos.pagos", "revisar_pagos_pendientes"
+    ),
+    "alerta_pagos_manana": _lazy("alerta_pagos_manana", "modulos.pagos", "alerta_pagos_manana"),
+    "alerta_nomina_semanal": _lazy("alerta_nomina_semanal", "modulos.pagos", "alerta_nomina_semanal"),
+    "alerta_vencimiento_impuesto": _lazy(
+        "alerta_vencimiento_impuesto", "modulos.pagos", "alerta_vencimiento_impuesto"
+    ),
+    "sincronizar_pagos_excel": _lazy(
+        "sincronizar_pagos_excel", "utils.sync_pagos", "sincronizar_bidireccional"
+    ),
     "actualizar_novedades_diarias": _lazy(
         "actualizar_novedades_diarias", "modulos.personal", "actualizar_novedades_diarias"
     ),

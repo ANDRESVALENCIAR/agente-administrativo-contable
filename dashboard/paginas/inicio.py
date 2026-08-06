@@ -22,6 +22,32 @@ def render() -> None:
     m4.metric("Tareas hoy", len(tareas_hoy()))
     m5.metric("Costo API hoy", f"${stats['costo_hoy']}")
 
+    try:
+        from utils.alertas_pagos import resumen_pagos_widget
+
+        w = resumen_pagos_widget()
+        st.markdown(
+            f"""
+            <div style="border:1px solid #e5e5ea;border-radius:12px;padding:14px 18px;margin:12px 0;background:#fafafa">
+              <div style="font-weight:700;font-size:15px;margin-bottom:8px">💳 PAGOS</div>
+              <div style="font-size:14px">
+                🔴 Vencidos: <strong>{w['vencidos']}</strong>
+                &nbsp;&nbsp;🟠 Hoy: <strong>{w['hoy']}</strong>
+                &nbsp;&nbsp;📅 7d: <strong>{w['proximos_7d']}</strong>
+                &nbsp;&nbsp;🔵 Aprobados: <strong>{w['aprobados']}</strong>
+              </div>
+              <div style="margin-top:6px;font-size:14px">
+                Total pendiente:
+                <strong>${w['total_pendiente']:,.0f}</strong>
+              </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.caption("Abra 💳 Pagos en el menú para ver el detalle.")
+    except Exception:
+        pass
+
     df_venc = tareas_vencidas()
     if not df_venc.empty:
         st.warning(f"⚠️ {len(df_venc)} tarea(s) del calendario vencida(s). Revise el módulo Calendario.")

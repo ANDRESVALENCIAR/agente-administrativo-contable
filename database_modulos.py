@@ -344,34 +344,70 @@ def obtener_checklist_pagos_periodo(periodo: str | None = None) -> dict[str, boo
     periodo = periodo or _periodo_actual()
     conn = get_conn()
     c = conn.cursor()
+    cols = {r[1] for r in c.execute("PRAGMA table_info(checklist_pagos_periodo)").fetchall()}
+    select_cols = ["nomina_revisada", "comisiones_liquidadas"]
+    if "aportes_ss_pagados" in cols:
+        select_cols.append("aportes_ss_pagados")
+    if "retencion_fuente_calculada" in cols:
+        select_cols.append("retencion_fuente_calculada")
     c.execute(
-        "SELECT nomina_revisada, comisiones_liquidadas FROM checklist_pagos_periodo WHERE periodo=?",
+        f"SELECT {', '.join(select_cols)} FROM checklist_pagos_periodo WHERE periodo=?",
         (periodo,),
     )
     row = c.fetchone()
     conn.close()
+    base = {
+        "nomina_revisada": False,
+        "comisiones_liquidadas": False,
+        "aportes_ss_pagados": False,
+        "retencion_fuente_calculada": False,
+    }
     if not row:
-        return {"nomina_revisada": False, "comisiones_liquidadas": False}
-    return {"nomina_revisada": bool(row[0]), "comisiones_liquidadas": bool(row[1])}
+        return base
+    for i, col in enumerate(select_cols):
+        base[col] = bool(row[i])
+    return base
 
 
 def guardar_checklist_pagos_periodo(
     nomina_revisada: bool,
     comisiones_liquidadas: bool,
     periodo: str | None = None,
+    aportes_ss_pagados: bool = False,
+    retencion_fuente_calculada: bool = False,
 ) -> None:
     """Persiste checklist de cierre de período en pagos."""
     periodo = periodo or _periodo_actual()
     conn = get_conn()
     c = conn.cursor()
+    cols = {r[1] for r in c.execute("PRAGMA table_info(checklist_pagos_periodo)").fetchall()}
+    for col, ddl in [
+        ("aportes_ss_pagados", "INTEGER DEFAULT 0"),
+        ("retencion_fuente_calculada", "INTEGER DEFAULT 0"),
+    ]:
+        if col not in cols:
+            try:
+                c.execute(f"ALTER TABLE checklist_pagos_periodo ADD COLUMN {col} {ddl}")
+            except Exception:
+                pass
     c.execute(
-        """INSERT INTO checklist_pagos_periodo (periodo, nomina_revisada, comisiones_liquidadas, actualizado)
-           VALUES (?,?,?,CURRENT_TIMESTAMP)
+        """INSERT INTO checklist_pagos_periodo
+           (periodo, nomina_revisada, comisiones_liquidadas, aportes_ss_pagados,
+            retencion_fuente_calculada, actualizado)
+           VALUES (?,?,?,?,?,CURRENT_TIMESTAMP)
            ON CONFLICT(periodo) DO UPDATE SET
              nomina_revisada=excluded.nomina_revisada,
              comisiones_liquidadas=excluded.comisiones_liquidadas,
+             aportes_ss_pagados=excluded.aportes_ss_pagados,
+             retencion_fuente_calculada=excluded.retencion_fuente_calculada,
              actualizado=CURRENT_TIMESTAMP""",
-        (periodo, int(nomina_revisada), int(comisiones_liquidadas)),
+        (
+            periodo,
+            int(nomina_revisada),
+            int(comisiones_liquidadas),
+            int(aportes_ss_pagados),
+            int(retencion_fuente_calculada),
+        ),
     )
     conn.commit()
     conn.close()

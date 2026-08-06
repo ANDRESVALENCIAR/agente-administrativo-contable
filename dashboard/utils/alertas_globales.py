@@ -135,4 +135,20 @@ def verificar_alertas_globales() -> int:
     except Exception:
         pass
 
+    # Alertas CONTROL DE PAGOS (tabla pagos)
+    try:
+        from utils.alertas_pagos import generar_alertas_pagos
+
+        for a in generar_alertas_pagos():
+            nivel = {"CRITICA": "CRITICO", "ALTA": "URGENTE", "MEDIA": "AVISO"}.get(
+                a.get("prioridad", "MEDIA"), "AVISO"
+            )
+            titulo = a["mensaje"]
+            modulo = (a.get("modulo") or "pagos").lower()
+            if not _alerta_existe(modulo, titulo):
+                crear_alerta(nivel, modulo, titulo, a.get("tipo", "PAGOS"))
+                nuevas += 1
+    except Exception:
+        pass
+
     return nuevas
