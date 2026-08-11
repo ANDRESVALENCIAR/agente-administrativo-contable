@@ -37,6 +37,33 @@ DATOS POR MÓDULO:
 
 {{resultado_accion}}"""
 
+# Acciones que responden directo (sin llamar a Claude)
+_ACCIONES_DIRECTAS = {
+    "ayuda",
+    "aprobar_pago",
+    "rechazar_pago",
+    "listar_pagos",
+    "verificar_alertas",
+    "resolver_alerta",
+    "procesar_correos",
+    "sincronizar_reglas",
+    "impuestos_vencimientos",
+    "sincronizar_calendario",
+    "recordatorios_impuestos",
+    "cartera_mora",
+    "bloquear_cliente",
+    "contratos_vencimientos",
+    "tareas_hoy",
+    "tareas_vencidas",
+}
+
+
+def _safe_guardar(rol: str, contenido: str, tokens: int = 0) -> None:
+    try:
+        guardar_mensaje_chat(rol, contenido, tokens)
+    except Exception as e:
+        logger.warning("No se pudo guardar mensaje chat: %s", e)
+
 
 def chat_responder(mensaje_usuario: str, historial: list[dict[str, str]] | None = None) -> tuple[str, list[dict[str, str]]]:
     """
@@ -52,28 +79,48 @@ def chat_responder(mensaje_usuario: str, historial: list[dict[str, str]] | None 
     if historial is None:
         historial = []
 
-    guardar_mensaje_chat("user", mensaje_usuario)
+    _safe_guardar("user", mensaje_usuario)
 
-    intencion = detectar_intencion(mensaje_usuario)
+    try:
+        intencion = detectar_intencion(mensaje_usuario)
+    except Exception as e:
+        logger.error("detectar_intencion: %s", e)
+        intencion = None
+
     resultado_accion_txt = ""
     if intencion:
-        acc = ejecutar_accion(intencion, mensaje_usuario)
+        try:
+            acc = ejecutar_accion(intencion, mensaje_usuario)
+        except Exception as e:
+            logger.error("ejecutar_accion: %s", e, exc_info=True)
+            acc = {
+                "ejecutada": False,
+                "modulo": "sistema",
+                "resultado": f"No pude completar la consulta por un error interno: {e}",
+            }
         resultado_accion_txt = f"ACCIÓN EJECUTADA ({acc['modulo']}):\n{acc['resultado']}"
-        if intencion in ("ayuda", "aprobar_pago", "rechazar_pago", "listar_pagos", "verificar_alertas",
-                         "resolver_alerta", "procesar_correos", "sincronizar_reglas",
-                         "impuestos_vencimientos", "sincronizar_calendario", "recordatorios_impuestos",
-                         "cartera_mora", "bloquear_cliente"):
-            if acc["ejecutada"] or intencion == "ayuda":
+        if intencion in _ACCIONES_DIRECTAS:
+            if acc.get("ejecutada") or intencion == "ayuda":
                 respuesta = acc["resultado"]
-                guardar_mensaje_chat("assistant", respuesta)
+                _safe_guardar("assistant", respuesta)
                 historial.append({"role": "user", "content": mensaje_usuario})
                 historial.append({"role": "assistant", "content": respuesta})
                 return respuesta, historial
 
-    contexto = procesar_mensaje_interactivo(mensaje_usuario)[1]
-    stats = obtener_estadisticas_hoy()
-    historial_db = obtener_historial_chat(limite=10)
-    historial_texto = "\n".join([f"{r[0].upper()}: {r[1][:200]}" for r in historial_db[-6:]])
+    try:
+        contexto = procesar_mensaje_interactivo(mensaje_usuario)[1]
+    except Exception:
+        contexto = "Contexto no disponible (BD ocupada)."
+
+    try:
+        stats = obtener_estadisticas_hoy()
+    except Exception:
+        stats = {}
+    try:
+        historial_db = obtener_historial_chat(limite=10)
+        historial_texto = "\n".join([f"{r[0].upper()}: {r[1][:200]}" for r in historial_db[-6:]])
+    except Exception:
+        historial_texto = ""
     if stats.get("ultimas_acciones"):
         historial_texto += "\n" + "\n".join(
             f"- [{a[4]}] {a[0]}.{a[1]}: {a[2]}" for a in stats["ultimas_acciones"][:5]
@@ -93,10 +140,14 @@ def chat_responder(mensaje_usuario: str, historial: list[dict[str, str]] | None 
     mensajes.append({"role": "user", "content": mensaje_usuario})
 
     if en_modo_demo():
-        respuesta = llamar_claude(
-            f"{mensaje_usuario}\n\nContexto del sistema:\n{contexto}\n\n{resultado_accion_txt}",
-            modulo="chat",
-        )
+        # Sin API: si hubo acción parcial, úsala; si no, respuesta demo clara
+        if resultado_accion_txt:
+            respuesta = resultado_accion_txt.replace("ACCIÓN EJECUTADA", "Resultado").split(":\n", 1)[-1]
+        else:
+            respuesta = llamar_claude(
+                f"{mensaje_usuario}\n\nContexto del sistema:\n{contexto}\n\n{resultado_accion_txt}",
+                modulo="chat",
+            )
         tokens = 0
     else:
         try:
@@ -117,10 +168,16 @@ def chat_responder(mensaje_usuario: str, historial: list[dict[str, str]] | None 
             tokens = 0
         except Exception as e:
             logger.error("Error en chat: %s", e)
-            respuesta = f"Disculpa, tuve un problema al procesar tu mensaje: {str(e)}"
+            if resultado_accion_txt:
+                respuesta = resultado_accion_txt.split(":\n", 1)[-1]
+            else:
+                respuesta = (
+                    f"Disculpa, tuve un problema al procesar tu mensaje: {str(e)}. "
+                    "Prueba de nuevo o usa el menú Personal / RRHH."
+                )
             tokens = 0
 
-    guardar_mensaje_chat("assistant", respuesta, tokens)
+    _safe_guardar("assistant", respuesta, tokens)
     historial.append({"role": "user", "content": mensaje_usuario})
     historial.append({"role": "assistant", "content": respuesta})
 

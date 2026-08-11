@@ -460,11 +460,16 @@ def marcar_restantes_como_otro() -> int:
     return n
 
 
+_LOOKUP_CACHE: dict[str, dict[str, Any] | None] = {}
+
+
 def lookup_gasto_por_detalle(detalle: str) -> dict[str, Any] | None:
-    """Enriquece un pago con categoría/periodicidad estándar."""
+    """Enriquece un pago con categoría/periodicidad estándar (con caché en memoria)."""
     limpio = limpiar_texto(detalle)
     if not limpio:
         return None
+    if limpio in _LOOKUP_CACHE:
+        return _LOOKUP_CACHE[limpio]
     conn = get_conn()
     row = conn.execute(
         """SELECT categoria, periodicidad_std, requiere_revision
@@ -482,12 +487,13 @@ def lookup_gasto_por_detalle(detalle: str) -> dict[str, Any] | None:
         ).fetchone()
     conn.close()
     if not row:
+        _LOOKUP_CACHE[limpio] = None
         return None
     cats = mapa_categorias()
     pers = mapa_periodicidades()
     cat = cats.get(row[0], {})
     per = pers.get(row[1], {})
-    return {
+    result = {
         "categoria": row[0],
         "categoria_label": cat.get("label", row[0]),
         "categoria_icono": cat.get("icono", ""),
@@ -497,6 +503,8 @@ def lookup_gasto_por_detalle(detalle: str) -> dict[str, Any] | None:
         "periodicidad_icono": per.get("icono", ""),
         "requiere_revision": bool(row[2]),
     }
+    _LOOKUP_CACHE[limpio] = result
+    return result
 
 
 def exportar_excel_estandarizado() -> tuple[bytes, str]:

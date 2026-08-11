@@ -20,6 +20,7 @@ Puedo consultar y ejecutar acciones en estos módulos:
 • Pagos — aprobar pago #ID, rechazar pago #ID, listar pendientes
 • Correos — procesar correos, sincronizar reglas desde .env
 • Impuestos — listar vencimientos, sincronizar calendario DIAN/SHD, recordatorios 48h/24h
+• Personal/RRHH — vencimiento de contratos de trabajo
 • CXP/CXC — resumen cartera mora, bloquear cliente por nombre
 • Créditos — cartera mora, bloquear cliente
 • Comisiones — liquidar mes actual
@@ -27,7 +28,7 @@ Puedo consultar y ejecutar acciones en estos módulos:
 • Calendario — tareas de hoy, tareas vencidas
 • Pagos — revisión nómina
 • Presupuesto — análisis mensual
-Ejemplos: "aprobar pago 1", "verificar alertas", "tareas hoy", "liquidar comisiones"
+Ejemplos: "aprobar pago 1", "verificar alertas", "cuándo vencen los contratos", "tareas hoy"
 """
 
 
@@ -68,6 +69,12 @@ def detectar_intencion(mensaje: str) -> str | None:
         return "recordatorios_impuestos"
     if "impuestos" in t and any(x in t for x in ("venc", "próxim", "proxim", "estado", "calendario")):
         return "impuestos_vencimientos"
+    if any(x in t for x in ("contrato", "contratos")) and any(
+        x in t for x in ("venc", "vence", "vencen", "caduc", "termin", "fin ", "fecha")
+    ):
+        return "contratos_vencimientos"
+    if "contratos de trabajo" in t or "contrato de trabajo" in t:
+        return "contratos_vencimientos"
     if "cartera" in t or "mora" in t or "cxc" in t:
         return "cartera_mora"
     if "bloquear cliente" in t or "bloquear" in t and "cliente" in t:
@@ -190,6 +197,88 @@ def ejecutar_accion(intencion: str, mensaje: str) -> dict[str, Any]:
                 for r in df.itertuples()
             ]
             return {"ejecutada": True, "modulo": "impuestos", "resultado": "Impuestos:\n" + "\n".join(lineas)}
+
+        if intencion == "contratos_vencimientos":
+            from datetime import date, timedelta
+
+            hoy = date.today()
+            lim = (hoy + timedelta(days=90)).isoformat()
+            lineas: list[str] = []
+
+            try:
+                df_f = query_df(
+                    """SELECT nombre, vencimiento_contrato, fecha_preaviso
+                       FROM contratos_fijos_fenix
+                       WHERE vencimiento_contrato IS NOT NULL
+                         AND vencimiento_contrato <= ?
+                       ORDER BY vencimiento_contrato LIMIT 25""",
+                    (lim,),
+                )
+                for r in df_f.itertuples():
+                    extra = f" (preaviso {r.fecha_preaviso})" if getattr(r, "fecha_preaviso", None) else ""
+                    lineas.append(f"· {r.nombre} — vence {r.vencimiento_contrato}{extra}")
+            except Exception:
+                pass
+
+            try:
+                df_a = query_df(
+                    """SELECT nombre_completo, tipo_contrato, fecha_fin, estado
+                       FROM contratos_activos
+                       WHERE fecha_fin IS NOT NULL AND TRIM(fecha_fin) != ''
+                         AND fecha_fin <= ?
+                       ORDER BY fecha_fin LIMIT 25""",
+                    (lim,),
+                )
+                for r in df_a.itertuples():
+                    lineas.append(
+                        f"· {r.nombre_completo} ({r.tipo_contrato or 'N/D'}) — fin {r.fecha_fin} "
+                        f"[{r.estado or 'ACTIVO'}]"
+                    )
+            except Exception:
+                pass
+
+            try:
+                df_r = query_df(
+                    """SELECT empleado, tipo, fecha_fin, estado
+                       FROM contratos_rrhh
+                       WHERE fecha_fin IS NOT NULL AND fecha_fin <= ?
+                       ORDER BY fecha_fin LIMIT 25""",
+                    (lim,),
+                )
+                for r in df_r.itertuples():
+                    lineas.append(
+                        f"· {r.empleado} ({r.tipo or 'N/D'}) — fin {r.fecha_fin} [{r.estado or 'VIGENTE'}]"
+                    )
+            except Exception:
+                pass
+
+            vistos: set[str] = set()
+            unicos: list[str] = []
+            for ln in lineas:
+                if ln not in vistos:
+                    vistos.add(ln)
+                    unicos.append(ln)
+
+            if not unicos:
+                return {
+                    "ejecutada": True,
+                    "modulo": "personal",
+                    "resultado": (
+                        "No hay contratos con fecha de vencimiento en los próximos 90 días "
+                        "(o aún no hay datos sincronizados).\n"
+                        "Revise **Personal / RRHH → Contratos Activos** o **Archivo General** "
+                        "y pulse sincronizar."
+                    ),
+                }
+            return {
+                "ejecutada": True,
+                "modulo": "personal",
+                "resultado": (
+                    f"Contratos de trabajo con vencimiento en los proximos 90 dias (desde {hoy.isoformat()}):\n"
+                    + "\n".join(unicos[:30])
+                    + "\n\nDetalle completo en Personal / RRHH -> Contratos Activos."
+                ),
+            }
 
         if intencion == "cartera_mora":
             df = query_df(

@@ -62,8 +62,13 @@ st.set_page_config(
 )
 
 st.markdown(CSS, unsafe_allow_html=True)
-inicializar_db()
-get_engine()
+
+# Evitar re-inicializar BD y sync pesado en cada rerun de Streamlit
+if "db_ready" not in st.session_state:
+    inicializar_db()
+    get_engine()
+    st.session_state.db_ready = True
+
 if "rrhh_watcher_on" not in st.session_state:
     try:
         from modulos.watcher_carpetas import iniciar_watcher
@@ -84,8 +89,9 @@ if "calendario_executor_on" not in st.session_state:
 
         logging.getLogger(__name__).warning("Calendario maestro: %s", exc)
     st.session_state.calendario_executor_on = True
-if en_modo_demo():
+if en_modo_demo() and "demo_loaded" not in st.session_state:
     cargar_datos_demo()
+    st.session_state.demo_loaded = True
 
 if "alertas_verificadas" not in st.session_state:
     verificar_alertas_globales()
@@ -93,15 +99,18 @@ if "alertas_verificadas" not in st.session_state:
 
 if "pagos_sync" not in st.session_state:
     try:
-        from utils.sync_pagos import (
-            importar_excel_a_sqlite,
-            programar_tareas_calendario_pagos,
-            actualizar_estados_pagos,
-        )
+        from utils.sync_pagos import actualizar_estados_pagos, importar_excel_a_sqlite
+        from database import get_conn
 
-        st.session_state.pagos_sync = importar_excel_a_sqlite()
-        actualizar_estados_pagos()
-        programar_tareas_calendario_pagos()
+        # Solo importar Excel completo si la tabla pagos está vacía (evita ~20-30s cada sesión)
+        conn = get_conn()
+        n_pagos = conn.execute("SELECT COUNT(*) FROM pagos").fetchone()[0]
+        conn.close()
+        if n_pagos == 0:
+            st.session_state.pagos_sync = importar_excel_a_sqlite()
+        else:
+            actualizar_estados_pagos()
+            st.session_state.pagos_sync = {"skipped": True, "registros": n_pagos}
     except Exception as exc:
         import logging
 
@@ -137,15 +146,18 @@ if "chat_mensajes_ui" not in st.session_state:
 
 stats = obtener_estadisticas_hoy()
 
-# Contador urgentes CONTROL DE PAGOS para sidebar
-_pagos_urgentes = 0
-try:
-    from utils.alertas_pagos import resumen_pagos_widget
+# Contador urgentes CONTROL DE PAGOS para sidebar (cacheado por sesión)
+if "pagos_urgentes_n" not in st.session_state:
+    _pagos_urgentes = 0
+    try:
+        from utils.alertas_pagos import resumen_pagos_widget
 
-    _rw = resumen_pagos_widget()
-    _pagos_urgentes = int(_rw.get("vencidos", 0)) + int(_rw.get("hoy", 0))
-except Exception:
-    pass
+        _rw = resumen_pagos_widget()
+        _pagos_urgentes = int(_rw.get("vencidos", 0)) + int(_rw.get("hoy", 0))
+    except Exception:
+        pass
+    st.session_state.pagos_urgentes_n = _pagos_urgentes
+_pagos_urgentes = st.session_state.pagos_urgentes_n
 
 with st.sidebar:
     st.markdown("### 🤖 AGENTE ADMIN SHAKI")

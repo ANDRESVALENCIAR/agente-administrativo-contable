@@ -567,7 +567,7 @@ def iniciar_executor() -> threading.Thread:
                     _revisar_y_ejecutar_pendientes()
             except Exception as exc:
                 logger.error("Error en executor calendario: %s", exc)
-            time.sleep(60)
+            time.sleep(120)
 
     _executor_thread = threading.Thread(target=loop, daemon=True, name="calendario-maestro")
     _executor_thread.start()
