@@ -75,16 +75,21 @@ def revisar_vencimientos() -> None:
             if nivel:
                 titulo = f"{impuesto} {periodo} — vence en {dias} días"
                 desc = f"Formulario {fila.get('FORMULARIO', 'N/A')}. Vencimiento: {fv.strftime('%d/%m/%Y')}"
-                crear_alerta(nivel, "impuestos", titulo, desc)
-                alertas_generadas.append((nivel, impuesto, periodo, fv, dias))
+                alertas_generadas.append((nivel, impuesto, periodo, fv, dias, titulo, desc))
 
         conn.commit()
         conn.close()
 
+        # Las alertas se crean tras cerrar la conexión: crear_alerta abre su propia
+        # conexión y escribir con una segunda conexión mientras esta mantiene la
+        # transacción abierta provoca "database is locked".
+        for nivel, _imp, _per, _fv, _dias, titulo, desc in alertas_generadas:
+            crear_alerta(nivel, "impuestos", titulo, desc)
+
         if alertas_generadas:
             filas_html = "".join(
                 f"<tr><td>{n}</td><td>{i}</td><td>{p}</td><td>{fv.strftime('%d/%m/%Y')}</td><td>{d}</td></tr>"
-                for n, i, p, fv, d in alertas_generadas
+                for n, i, p, fv, d, _titulo, _desc in alertas_generadas
             )
             html = f"""
             <h2>Vencimientos de impuestos — {datetime.now().strftime('%d/%m/%Y')}</h2>
