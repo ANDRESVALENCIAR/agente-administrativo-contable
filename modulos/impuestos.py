@@ -48,38 +48,46 @@ def revisar_vencimientos() -> None:
 
         pendientes = df[df["ESTADO"].astype(str).str.upper() == "PENDIENTE"]
         alertas_generadas = []
-        conn = sqlite3.connect(cfg.DATABASE_PATH)
-        c = conn.cursor()
+        alertas_pendientes: list[tuple[str, str, str]] = []
+        conn = sqlite3.connect(cfg.DATABASE_PATH, timeout=30)
+        try:
+            c = conn.cursor()
 
-        for _, fila in pendientes.iterrows():
-            try:
-                fv = pd.to_datetime(fila["FECHA_VENCIMIENTO"]).date()
-            except Exception:
-                continue
-            dias = _calcular_dias_restantes(fv)
-            nivel = _nivel_alerta(dias)
-            impuesto = str(fila["IMPUESTO"])
-            periodo = str(fila["PERIODO"])
+            for _, fila in pendientes.iterrows():
+                try:
+                    fv = pd.to_datetime(fila["FECHA_VENCIMIENTO"]).date()
+                except Exception:
+                    continue
+                dias = _calcular_dias_restantes(fv)
+                nivel = _nivel_alerta(dias)
+                impuesto = str(fila["IMPUESTO"])
+                periodo = str(fila["PERIODO"])
 
-            c.execute(
-                """INSERT INTO estado_impuestos
-                (impuesto, periodo, fecha_vencimiento, dias_restantes, estado)
-                VALUES (?,?,?,?,?)
-                ON CONFLICT(impuesto, periodo) DO UPDATE SET
-                fecha_vencimiento=excluded.fecha_vencimiento,
-                dias_restantes=excluded.dias_restantes,
-                estado=excluded.estado""",
-                (impuesto, periodo, fv.isoformat(), dias, "PENDIENTE"),
-            )
+                c.execute(
+                    """INSERT INTO estado_impuestos
+                    (impuesto, periodo, fecha_vencimiento, dias_restantes, estado)
+                    VALUES (?,?,?,?,?)
+                    ON CONFLICT(impuesto, periodo) DO UPDATE SET
+                    fecha_vencimiento=excluded.fecha_vencimiento,
+                    dias_restantes=excluded.dias_restantes,
+                    estado=excluded.estado""",
+                    (impuesto, periodo, fv.isoformat(), dias, "PENDIENTE"),
+                )
 
-            if nivel:
-                titulo = f"{impuesto} {periodo} — vence en {dias} días"
-                desc = f"Formulario {fila.get('FORMULARIO', 'N/A')}. Vencimiento: {fv.strftime('%d/%m/%Y')}"
-                crear_alerta(nivel, "impuestos", titulo, desc)
-                alertas_generadas.append((nivel, impuesto, periodo, fv, dias))
+                if nivel:
+                    titulo = f"{impuesto} {periodo} — vence en {dias} días"
+                    desc = f"Formulario {fila.get('FORMULARIO', 'N/A')}. Vencimiento: {fv.strftime('%d/%m/%Y')}"
+                    # Se crea después del commit: crear_alerta abre otra conexión
+                    # y bloquearía esperando el lock de escritura de esta.
+                    alertas_pendientes.append((nivel, titulo, desc))
+                    alertas_generadas.append((nivel, impuesto, periodo, fv, dias))
 
-        conn.commit()
-        conn.close()
+            conn.commit()
+        finally:
+            conn.close()
+
+        for nivel, titulo, desc in alertas_pendientes:
+            crear_alerta(nivel, "impuestos", titulo, desc)
 
         if alertas_generadas:
             filas_html = "".join(

@@ -2,7 +2,7 @@
 from datetime import date
 
 from dashboard.utils.db_helper import query_df
-from database import obtener_alertas_activas, obtener_estadisticas_hoy, obtener_pagos_pendientes
+from database import obtener_alertas_activas, obtener_estadisticas_hoy
 
 
 def _tabla_existe(nombre: str) -> bool:
@@ -32,10 +32,14 @@ def construir_contexto_modulos() -> str:
     """Arma snapshot de todos los módulos para el system prompt del chat."""
     stats = obtener_estadisticas_hoy()
     alertas = obtener_alertas_activas()[:5]
-    pagos = obtener_pagos_pendientes()[:5]
+    from modulos.pagos import listar_pagos_abiertos
+
+    pagos = listar_pagos_abiertos(5)
 
     alertas_txt = "\n".join(f"  · [{a[3]}] {a[4]}: {a[5]}" for a in alertas) or "  · Sin alertas activas"
-    pagos_txt = "\n".join(f"  · #{p[0]} {p[2]}: ${p[4]:,.0f} ({p[7]})" for p in pagos) or "  · Sin pagos pendientes"
+    pagos_txt = "\n".join(
+        f"  · #{p['id']} {p['proveedor'] or p['detalle']}: ${p['saldo']:,.0f} ({p['estado']})" for p in pagos
+    ) or "  · Sin pagos pendientes"
 
     bloques = [
         f"=== RESUMEN GENERAL ({date.today().isoformat()}) ===",
@@ -66,7 +70,12 @@ def construir_contexto_modulos() -> str:
         "",
         "=== IMPUESTOS ===",
         _resumen_df(
-            "SELECT impuesto, periodo, fecha_vencimiento, estado FROM impuestos_maestro ORDER BY fecha_vencimiento LIMIT 8",
+            """SELECT impuesto, periodo, fecha_vencimiento,
+                      CASE WHEN fecha_vencimiento < date('now','localtime')
+                                AND estado NOT IN ('PRESENTADO','PAGADO') THEN 'VENCIDO' ELSE estado END AS estado
+               FROM impuestos_maestro
+               WHERE estado NOT IN ('PRESENTADO','PAGADO')
+               ORDER BY (fecha_vencimiento < date('now','localtime')), fecha_vencimiento LIMIT 8""",
             "Vencimientos",
             ["impuesto", "periodo", "fecha_vencimiento", "estado"],
         ),

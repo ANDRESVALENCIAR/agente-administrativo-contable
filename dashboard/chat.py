@@ -14,6 +14,7 @@ from database import (
     obtener_historial_chat,
 )
 from modulos.chat_interactivo import ACCIONES_AYUDA, detectar_intencion, ejecutar_accion, procesar_mensaje_interactivo
+from core.formato_col import fecha_larga_es
 
 logger = logging.getLogger(__name__)
 
@@ -127,7 +128,7 @@ def chat_responder(mensaje_usuario: str, historial: list[dict[str, str]] | None 
         )
 
     system = SYSTEM_CHAT.format(
-        fecha_hora=datetime.now().strftime("%A %d de %B de %Y, %H:%M"),
+        fecha_hora=fecha_larga_es(datetime.now(), sep=", "),
         acciones_disponibles=ACCIONES_AYUDA.strip(),
         datos_sistema=contexto,
         historial_acciones=historial_texto or "Sin acciones recientes.",

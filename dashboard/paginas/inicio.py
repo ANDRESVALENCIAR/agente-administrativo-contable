@@ -7,13 +7,14 @@ import streamlit as st
 
 from database import marcar_alerta_resuelta, obtener_alertas_activas, obtener_correos_ultimos_dias, obtener_estadisticas_hoy
 from utils.calendario_maestro import tareas_hoy, tareas_vencidas
+from core.formato_col import fecha_larga_es
 
 
 def render() -> None:
     """Renderiza el panel principal."""
     stats = obtener_estadisticas_hoy()
     st.markdown("## Panel principal")
-    st.caption(datetime.now().strftime("%A %d de %B de %Y · %H:%M"))
+    st.caption(fecha_larga_es(datetime.now()))
 
     m1, m2, m3, m4, m5 = st.columns(5)
     m1.metric("Alertas activas", stats["alertas_activas"])

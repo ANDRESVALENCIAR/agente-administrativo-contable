@@ -22,6 +22,7 @@ from modulos.pagos import (
     rechazar_pago_control,
     revision_nomina,
 )
+from core.formato_col import dia_semana_es
 from utils.sync_pagos import (
     CENTROS_COSTO,
     PERIODICIDADES,
@@ -355,7 +356,7 @@ def _tab_registrar() -> None:
                         "observaciones": observaciones or None,
                         "cuenta_origen_destino": cuenta or None,
                         "prioridad": prioridad,
-                        "dia_semana": fl.strftime("%A"),
+                        "dia_semana": dia_semana_es(fl).upper(),
                     },
                     aprobar=bool(guardar_ap),
                 )

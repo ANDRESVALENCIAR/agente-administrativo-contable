@@ -52,3 +52,22 @@ def ahora_bogota() -> datetime:
         registrar_uso_libreria("agente", "pytz")
         return datetime.now(TZ_BOGOTA)
     return datetime.now()
+
+
+_DIAS_ES = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"]
+_MESES_ES = [
+    "enero", "febrero", "marzo", "abril", "mayo", "junio",
+    "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+]
+
+
+def dia_semana_es(fecha) -> str:
+    """'lunes', 'martes'… sin depender del locale del sistema (Windows/Railway)."""
+    return _DIAS_ES[fecha.weekday()]
+
+
+def fecha_larga_es(fecha: datetime | None = None, con_hora: bool = True, sep: str = " · ") -> str:
+    """'Viernes 09 de octubre de 2026 · 16:28' en español, independiente del locale."""
+    f = fecha or ahora_bogota()
+    texto = f"{dia_semana_es(f).capitalize()} {f.day:02d} de {_MESES_ES[f.month - 1]} de {f.year}"
+    return f"{texto}{sep}{f:%H:%M}" if con_hora else texto

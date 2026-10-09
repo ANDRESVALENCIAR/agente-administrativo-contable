@@ -84,9 +84,16 @@ def leer_excel(file_id: str, hoja: str, rango: str | None = None) -> pd.DataFram
     """
     if en_modo_demo() or not microsoft_configurado():
         logger.info("Modo demo: retornando datos de ejemplo para hoja %s", hoja)
-        if "IMPUEST" in hoja.upper() or file_id == cfg.EXCEL_IMPUESTOS_ID:
+        # El nombre de hoja manda: en .env los IDs de ejemplo son el mismo placeholder,
+        # así que comparar solo por file_id devolvía impuestos para cualquier hoja.
+        h = hoja.upper()
+        if "IMPUEST" in h:
             return _datos_demo_impuestos()
-        if "CXP" in hoja.upper() or file_id == cfg.EXCEL_CXP_CXC_ID:
+        if "CXP" in h:
+            return _datos_demo_cxp()
+        if file_id and file_id == cfg.EXCEL_IMPUESTOS_ID != cfg.EXCEL_CXP_CXC_ID:
+            return _datos_demo_impuestos()
+        if file_id and file_id == cfg.EXCEL_CXP_CXC_ID != cfg.EXCEL_IMPUESTOS_ID:
             return _datos_demo_cxp()
         return pd.DataFrame()
 

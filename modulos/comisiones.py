@@ -68,7 +68,7 @@ def _persistir_comision_detalle(asesor: str, calc: dict, mes: int, anio: int, fi
     conn.close()
 
 
-def liquidar_comisiones_mes(mes: int, anio: int) -> None:
+def liquidar_comisiones_mes(mes: int, anio: int) -> int:
     """
     Liquida comisiones del mes para todos los asesores.
 
@@ -134,6 +134,8 @@ NETO A PAGAR: ${calc['neto_pagar']:,.0f}
             f"<pre>{df_consolidado.to_string()}</pre>",
         )
         registrar_accion("comisiones", "liquidar_comisiones_mes", f"{len(consolidado)} asesores", "EXITOSO")
+        return len(consolidado)
     except Exception as e:
         logger.error("Error liquidar_comisiones_mes: %s", e, exc_info=True)
         registrar_accion("comisiones", "liquidar_comisiones_mes", str(e), "ERROR", detalle_error=str(e))
+        raise

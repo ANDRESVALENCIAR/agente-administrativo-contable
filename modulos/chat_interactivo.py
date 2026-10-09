@@ -124,29 +124,40 @@ def ejecutar_accion(intencion: str, mensaje: str) -> dict[str, Any]:
 
         if intencion == "aprobar_pago":
             pid = _extraer_id(mensaje)
+            from modulos.pagos import aprobar_pago_control, listar_pagos_abiertos
+
             if not pid:
-                pagos = obtener_pagos_pendientes()[:3]
-                ids = ", ".join(f"#{p[0]}" for p in pagos) or "ninguno"
+                pagos = listar_pagos_abiertos(3)
+                ids = ", ".join(f"#{p['id']}" for p in pagos) or "ninguno"
                 return {
                     "ejecutada": False,
                     "modulo": "pagos",
                     "resultado": f"Indica el ID. Pendientes: {ids}",
                 }
-            aprobar_pago(pid, "chat-shaki")
+            if not aprobar_pago_control(pid, "chat-shaki"):
+                return {"ejecutada": False, "modulo": "pagos", "resultado": f"No existe el pago #{pid}."}
             return {"ejecutada": True, "modulo": "pagos", "resultado": f"Pago #{pid} aprobado por chat."}
 
         if intencion == "rechazar_pago":
             pid = _extraer_id(mensaje)
             if not pid:
                 return {"ejecutada": False, "modulo": "pagos", "resultado": "Indica el ID: rechazar pago 2"}
-            rechazar_pago(pid, "chat-shaki")
+            from modulos.pagos import rechazar_pago_control
+
+            if not rechazar_pago_control(pid, "chat-shaki"):
+                return {"ejecutada": False, "modulo": "pagos", "resultado": f"No existe el pago #{pid}."}
             return {"ejecutada": True, "modulo": "pagos", "resultado": f"Pago #{pid} rechazado."}
 
         if intencion == "listar_pagos":
-            pagos = obtener_pagos_pendientes()
+            from modulos.pagos import listar_pagos_abiertos
+
+            pagos = listar_pagos_abiertos(10)
             if not pagos:
                 return {"ejecutada": True, "modulo": "pagos", "resultado": "No hay pagos pendientes."}
-            lineas = [f"#{p[0]} {p[2]} — ${p[4]:,.0f} — {p[7]}" for p in pagos[:10]]
+            lineas = [
+                f"#{p['id']} {p['proveedor'] or p['detalle']} — ${p['saldo']:,.0f} — {p['estado']} ({p['fecha_limite']})"
+                for p in pagos
+            ]
             return {"ejecutada": True, "modulo": "pagos", "resultado": "Pagos pendientes:\n" + "\n".join(lineas)}
 
         if intencion == "procesar_correos":
@@ -186,17 +197,34 @@ def ejecutar_accion(intencion: str, mensaje: str) -> dict[str, Any]:
             }
 
         if intencion == "impuestos_vencimientos":
-            df = query_df(
-                """SELECT impuesto, periodo, fecha_vencimiento, estado
-                   FROM impuestos_maestro ORDER BY fecha_vencimiento LIMIT 10"""
+            from datetime import date
+
+            hoy = date.today().isoformat()
+            abiertos = "estado NOT IN ('PRESENTADO','PAGADO')"
+            vencidos = query_df(
+                f"""SELECT impuesto, periodo, fecha_vencimiento, estado FROM impuestos_maestro
+                    WHERE {abiertos} AND fecha_vencimiento < ? ORDER BY fecha_vencimiento DESC LIMIT 5""",
+                (hoy,),
             )
-            if df.empty:
-                return {"ejecutada": True, "modulo": "impuestos", "resultado": "Sin impuestos en tabla maestro."}
-            lineas = [
-                f"{r.impuesto} {r.periodo} — vence {r.fecha_vencimiento} ({r.estado})"
-                for r in df.itertuples()
-            ]
-            return {"ejecutada": True, "modulo": "impuestos", "resultado": "Impuestos:\n" + "\n".join(lineas)}
+            proximos = query_df(
+                f"""SELECT impuesto, periodo, fecha_vencimiento, estado FROM impuestos_maestro
+                    WHERE {abiertos} AND fecha_vencimiento >= ? ORDER BY fecha_vencimiento ASC LIMIT 8""",
+                (hoy,),
+            )
+            if vencidos.empty and proximos.empty:
+                return {"ejecutada": True, "modulo": "impuestos", "resultado": "Sin impuestos pendientes en tabla maestro."}
+            partes = []
+            if not proximos.empty:
+                partes.append("Próximos vencimientos:\n" + "\n".join(
+                    f"{r.impuesto} {r.periodo} — vence {r.fecha_vencimiento} ({r.estado})"
+                    for r in proximos.itertuples()
+                ))
+            if not vencidos.empty:
+                partes.append("⚠️ Vencidos sin presentar/pagar:\n" + "\n".join(
+                    f"{r.impuesto} {r.periodo} — venció {r.fecha_vencimiento} (VENCIDO)"
+                    for r in vencidos.itertuples()
+                ))
+            return {"ejecutada": True, "modulo": "impuestos", "resultado": "\n\n".join(partes)}
 
         if intencion == "contratos_vencimientos":
             from datetime import date, timedelta
@@ -332,8 +360,12 @@ def ejecutar_accion(intencion: str, mensaje: str) -> dict[str, Any]:
             from modulos.comisiones import liquidar_comisiones_mes
 
             hoy = date.today()
-            liquidar_comisiones_mes(hoy.month, hoy.year)
-            return {"ejecutada": True, "modulo": "comisiones", "resultado": f"Liquidación {hoy.month}/{hoy.year} ejecutada."}
+            n = liquidar_comisiones_mes(hoy.month, hoy.year)
+            return {
+                "ejecutada": True,
+                "modulo": "comisiones",
+                "resultado": f"Liquidación {hoy.month}/{hoy.year} ejecutada: {n or 0} asesor(es), PDF generados.",
+            }
 
         if intencion == "sincronizar_cartera":
             from modulos.cxp_cxc import sincronizar_cartera_desde_excel

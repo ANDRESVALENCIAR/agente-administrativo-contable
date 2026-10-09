@@ -229,6 +229,26 @@ def listar_proveedores() -> list[str]:
     return [r[0] for r in rows]
 
 
+def listar_pagos_abiertos(limite: int = 10) -> list[dict[str, Any]]:
+    """Pagos no pagados ni rechazados, más urgentes primero (misma fuente que el dashboard)."""
+    inicializar_tablas_pagos()
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute(
+        """SELECT id, proveedor, detalle, COALESCE(valor_a_pagar,0) - COALESCE(valor_pagado,0),
+                  fecha_limite, estado
+           FROM pagos WHERE estado NOT IN ('PAGADO','RECHAZADO')
+           ORDER BY CASE estado WHEN 'VENCIDO' THEN 1 WHEN 'HOY' THEN 2 WHEN 'URGENTE' THEN 3
+                    WHEN 'APROBADO' THEN 4 ELSE 5 END, fecha_limite ASC
+           LIMIT ?""",
+        (limite,),
+    )
+    cols = ["id", "proveedor", "detalle", "saldo", "fecha_limite", "estado"]
+    filas = [dict(zip(cols, r)) for r in c.fetchall()]
+    conn.close()
+    return filas
+
+
 def query_pagos(
     estados: list[str] | None = None,
     centros: list[str] | None = None,
@@ -410,7 +430,8 @@ def revisar_cxp_diario() -> None:
             return
 
         pendientes = df[df["ESTADO"].astype(str).str.upper() == "PENDIENTE"]
-        conn = sqlite3.connect(cfg.DATABASE_PATH)
+        inicializar_tablas_pagos()
+        conn = sqlite3.connect(cfg.DATABASE_PATH, timeout=30)
         c = conn.cursor()
         filas_html = []
 
@@ -445,6 +466,28 @@ def revisar_cxp_diario() -> None:
                     str(fila.get("TIPO_PAGO", "")),
                     proveedor,
                     concepto,
+                ),
+            )
+            # Espejo en la tabla `pagos` (fuente que usan el dashboard y el chat),
+            # para que los CXP de OneDrive no queden solo en la tabla legacy.
+            c.execute(
+                """INSERT INTO pagos (fecha_limite, detalle, proveedor, valor_a_pagar,
+                       cuenta_origen_destino, estado, origen, actualizado_en)
+                   SELECT ?,?,?,?,?,?,'CXP_ONEDRIVE',CURRENT_TIMESTAMP
+                   WHERE NOT EXISTS (
+                       SELECT 1 FROM pagos WHERE origen='CXP_ONEDRIVE'
+                         AND proveedor=? AND detalle=? AND fecha_limite=?
+                   )""",
+                (
+                    fv.isoformat(),
+                    concepto or proveedor,
+                    proveedor,
+                    monto,
+                    str(fila.get("CUENTA_BANCARIA", "")),
+                    calcular_estado(fv, None),
+                    proveedor,
+                    concepto or proveedor,
+                    fv.isoformat(),
                 ),
             )
             filas_html.append(

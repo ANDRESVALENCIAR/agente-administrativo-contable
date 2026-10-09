@@ -35,7 +35,10 @@ def run(fn, nombre: str) -> None:
         logger.error("✗ Error en %s: %s", nombre, e, exc_info=True)
         from database import crear_alerta
 
-        crear_alerta("URGENTE", "agente", f"Error en {nombre}", str(e))
+        try:
+            crear_alerta("URGENTE", "agente", f"Error en {nombre}", str(e))
+        except Exception as e2:  # nunca tumbar el agente por no poder registrar la alerta
+            logger.error("No se pudo registrar la alerta de error: %s", e2)
 
 
 if __name__ == "__main__":

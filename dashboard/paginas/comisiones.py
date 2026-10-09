@@ -73,16 +73,22 @@ def _render_liquidacion() -> None:
     with col2:
         if st.button("Liquidar mes actual", key="com_liq_act"):
             hoy = date.today()
-            liquidar_comisiones_mes(hoy.month, hoy.year)
-            st.success("Liquidación del mes actual ejecutada.")
+            try:
+                liquidar_comisiones_mes(hoy.month, hoy.year)
+                st.success("Liquidación del mes actual ejecutada.")
+            except Exception as e:
+                st.error(f"No se pudo liquidar: {e}")
 
     with col3:
         if st.button("Liquidar mes anterior", key="com_liq_ant"):
             from dateutil.relativedelta import relativedelta
 
             ref = date.today() - relativedelta(months=1)
-            liquidar_comisiones_mes(ref.month, ref.year)
-            st.success(f"Liquidación {ref.month}/{ref.year} ejecutada.")
+            try:
+                liquidar_comisiones_mes(ref.month, ref.year)
+                st.success(f"Liquidación {ref.month}/{ref.year} ejecutada.")
+            except Exception as e:
+                st.error(f"No se pudo liquidar: {e}")
 
     if not df.empty:
         asesor = st.selectbox("Asesor para revisión", df["asesor"].tolist(), key="com_asesor")
