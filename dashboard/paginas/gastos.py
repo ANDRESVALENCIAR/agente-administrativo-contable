@@ -246,10 +246,10 @@ def _tab_revision() -> None:
         gid = int(r["id"])
         st.markdown(
             f"""
-            <div style="border:1px solid #ffe08a;background:#fffbeb;border-radius:10px;
+            <div style="border:1px solid #3A3320;background:#15130C;color:#E8E8EA;border-radius:12px;
                         padding:12px;margin-bottom:8px">
               <strong>#{gid}</strong> {r.get('detalle_limpio') or ''}<br>
-              <span style="color:#8e8e93">{r.get('proveedor_limpio') or 'Sin proveedor'}</span>
+              <span style="color:#8B8B93">{r.get('proveedor_limpio') or 'Sin proveedor'}</span>
               · per: {r.get('periodicidad_std')}
             </div>
             """,

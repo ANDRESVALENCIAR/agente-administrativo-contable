@@ -5,6 +5,8 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
+from dashboard.estilos import PLOTLY_LAYOUT
+
 from config import cfg
 from dashboard.utils.db_helper import execute, query_df
 from dashboard.utils.reportes import generar_reporte
@@ -69,7 +71,7 @@ def render() -> None:
                     title="Próximos vencimientos tributarios",
                     height=380,
                 )
-                fig.update_layout(plot_bgcolor="#fff", paper_bgcolor="#fff")
+                fig.update_layout(**PLOTLY_LAYOUT)
                 st.plotly_chart(fig, use_container_width=True)
             st.dataframe(
                 cal[["entidad", "impuesto", "periodo", "fecha_vencimiento", "formulario", "dias", "color"]],

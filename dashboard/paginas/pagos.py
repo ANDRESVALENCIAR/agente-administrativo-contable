@@ -43,11 +43,11 @@ COLORES_ESTADO = {
 
 CSS = """
 <style>
-.pg-card{border:1px solid #e5e5ea;border-radius:12px;padding:14px 16px;margin-bottom:10px;background:#fff}
+.pg-card{border:1px solid #1F2024;border-radius:16px;padding:16px 18px;margin-bottom:10px;background:#0F1012;color:#E8E8EA}
 .pg-badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;color:#fff;margin-left:6px}
-.pg-chip{display:inline-block;background:#f2f2f7;color:#3a3a3c;padding:2px 8px;border-radius:999px;font-size:11px;margin-right:4px}
-.pg-muted{color:#8e8e93;font-size:13px}
-.pg-money{font-size:18px;font-weight:700;color:#1c1c1e}
+.pg-chip{display:inline-block;background:#1F2024;color:#C4C4CC;padding:2px 8px;border-radius:999px;font-size:11px;margin-right:4px}
+.pg-muted{color:#8B8B93;font-size:13px}
+.pg-money{font-size:22px;font-weight:300;letter-spacing:-0.02em;color:#FFFFFF}
 </style>
 """
 

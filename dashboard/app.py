@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config import cfg, en_modo_demo
 from dashboard.chat import chat_responder
-from dashboard.estilos import CSS
+from dashboard.estilos import CSS, LOGO_SVG
 from dashboard.paginas import (
     alertas,
     calendario,
@@ -36,27 +36,27 @@ from core.registro_libs import librerias_disponibles
 from database import cargar_datos_demo, inicializar_db, obtener_estadisticas_hoy
 
 PAGINAS = {
-    "🏠 Inicio": inicio.render,
-    "📅 Calendario": calendario.render,
-    "🔔 Alertas": alertas.render,
-    "📒 Contabilidad": contabilidad.render,
-    "🧾 Impuestos": impuestos.render,
-    "📋 CXP/CXC": cxp_cxc.render,
-    "💳 Pagos": pagos.render,
-    "📦 Gastos": gastos.render,
-    "📧 Correos": correos.render,
-    "🤝 Créditos": creditos.render,
-    "💰 Comisiones": comisiones.render,
-    "👤 Personal": personal.render,
-    "📊 Presupuesto": presupuesto.render,
-    "⚖️ Jurídico": juridico.render,
-    "📄 Documentos": documentos.render,
-    "📈 Estadísticas": estadisticas.render,
+    "Inicio": inicio.render,
+    "Calendario": calendario.render,
+    "Alertas": alertas.render,
+    "Contabilidad": contabilidad.render,
+    "Impuestos": impuestos.render,
+    "CXP / CXC": cxp_cxc.render,
+    "Pagos": pagos.render,
+    "Gastos": gastos.render,
+    "Correos": correos.render,
+    "Créditos": creditos.render,
+    "Comisiones": comisiones.render,
+    "Personal": personal.render,
+    "Presupuesto": presupuesto.render,
+    "Jurídico": juridico.render,
+    "Documentos": documentos.render,
+    "Estadísticas": estadisticas.render,
 }
 
 st.set_page_config(
     page_title=f"AGENTE ADMIN SHAKI · {cfg.NOMBRE_EMPRESA}",
-    page_icon="🤖",
+    page_icon="◼",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -160,13 +160,19 @@ if "pagos_urgentes_n" not in st.session_state:
 _pagos_urgentes = st.session_state.pagos_urgentes_n
 
 with st.sidebar:
-    st.markdown("### 🤖 AGENTE ADMIN SHAKI")
-    st.markdown(f"**{cfg.NOMBRE_EMPRESA}**")
     modo = "Demo" if en_modo_demo() else "Producción"
-    st.markdown(f'<p class="status-active">● Activo · {modo}</p>', unsafe_allow_html=True)
+    st.markdown(
+        f'''<div class="sk-brand"><div class="sk-logo">{LOGO_SVG}</div>
+        <div><div class="sk-brand-name">Shaki</div><div class="sk-brand-sub">{cfg.NOMBRE_EMPRESA}</div></div></div>
+        <span class="sk-pill"><span class="sk-dot"></span>Agente activo · {modo}</span>''',
+        unsafe_allow_html=True,
+    )
     if _pagos_urgentes:
-        st.warning(f"💳 {_pagos_urgentes} pagos urgentes")
-    st.divider()
+        st.markdown(
+            f'<div class="sk-urgent"><b>{_pagos_urgentes:,}</b>pagos urgentes</div>'.replace(",", "."),
+            unsafe_allow_html=True,
+        )
+    st.write("")
     pagina = st.radio("Navegación", list(PAGINAS.keys()), label_visibility="collapsed")
     st.divider()
     st.caption(f"Costo API hoy: **${stats['costo_hoy']}**")
@@ -174,18 +180,21 @@ with st.sidebar:
     libs_ok = sum(1 for v in librerias_disponibles().values() if v)
     st.caption(f"Librerías core: **{libs_ok}** activas")
 
-col_dashboard, col_chat = st.columns([2, 1])
+col_dashboard, col_chat = st.columns([2, 1], gap="large")
 
 with col_dashboard:
     PAGINAS[pagina]()
 
 with col_chat:
-    st.markdown("### 💬 Chat — AGENTE ADMIN SHAKI")
+    st.markdown(
+        f'<div class="sk-chat-h"><div class="sk-logo" style="width:26px;height:26px;border-radius:8px">{LOGO_SVG}</div>'
+        '<span>Pregúntale a Shaki</span></div>',
+        unsafe_allow_html=True,
+    )
     for msg in st.session_state.chat_mensajes_ui[-15:]:
         css = "chat-msg-user" if msg["rol"] == "user" else "chat-msg-agent"
         st.markdown(f'<div class="{css}">{msg["texto"]}</div>', unsafe_allow_html=True)
 
-    st.divider()
     preguntas = [
         "¿Qué alertas hay hoy?",
         "Pagos pendientes",
@@ -195,10 +204,9 @@ with col_chat:
         "Impuestos próximos",
         "¿Qué puedes hacer?",
     ]
-    q1, q2, q3 = st.columns(3)
-    cols = [q1, q2, q3]
+    cols = st.columns(2)
     for i, p in enumerate(preguntas):
-        col = cols[i % 3]
+        col = cols[i % 2]
         if col.button(p, key=f"qr_{i}", use_container_width=True):
             st.session_state.chat_mensajes_ui.append({"rol": "user", "texto": p})
             with st.spinner("Consultando..."):
@@ -207,8 +215,10 @@ with col_chat:
             st.rerun()
 
     with st.form("chat_form", clear_on_submit=True):
-        user_input = st.text_input("Mensaje", placeholder="Escribe aquí...", label_visibility="collapsed")
-        if st.form_submit_button("Enviar →", use_container_width=True) and user_input.strip():
+        user_input = st.text_input(
+            "Mensaje", placeholder="¿Qué pagos vencen esta semana?", label_visibility="collapsed"
+        )
+        if st.form_submit_button("Enviar", use_container_width=True) and user_input.strip():
             st.session_state.chat_mensajes_ui.append({"rol": "user", "texto": user_input})
             with st.spinner("Consultando..."):
                 r, st.session_state.chat_historial = chat_responder(user_input, st.session_state.chat_historial)

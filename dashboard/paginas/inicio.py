@@ -1,100 +1,196 @@
-"""Página Inicio — panel principal."""
-from datetime import datetime
+"""Página Inicio — panel principal (diseño "Shaki Black")."""
+from datetime import date, datetime
+from html import escape
 
 import pandas as pd
 import plotly.express as px
 import streamlit as st
 
+from core.formato_col import fecha_larga_es
+from dashboard.estilos import ACCENT, PLOTLY_LAYOUT
 from database import marcar_alerta_resuelta, obtener_alertas_activas, obtener_correos_ultimos_dias, obtener_estadisticas_hoy
 from utils.calendario_maestro import tareas_hoy, tareas_vencidas
-from core.formato_col import fecha_larga_es
+
+_MESES = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"]
+_TAG = {
+    "CRITICO": ("sk-tag-crit", "CRÍTICA"),
+    "URGENTE": ("sk-tag-urg", "URGENTE"),
+    "AVISO": ("sk-tag-av", "AVISO"),
+    "INFO": ("sk-tag-av", "INFO"),
+}
+
+
+def _miles(n: float | int) -> str:
+    return f"{n:,.0f}".replace(",", ".")
+
+
+def _resumen_pagos() -> dict:
+    try:
+        from utils.alertas_pagos import resumen_pagos_widget
+
+        return resumen_pagos_widget()
+    except Exception:
+        return {"vencidos": 0, "hoy": 0, "proximos_7d": 0, "total_pendiente": 0, "aprobados": 0}
+
+
+def _hero(w: dict, por_aprobar: int) -> None:
+    hoy = fecha_larga_es(datetime.now(), con_hora=False)
+    venc, hoy_n, prox, aprob = (int(w.get(k, 0) or 0) for k in ("vencidos", "hoy", "proximos_7d", "aprobados"))
+    total = max(venc + hoy_n + prox + aprob, 1)
+    seg = [
+        (venc, ACCENT, "VENCIDOS"),
+        (hoy_n + prox, "#E8E8EA", "HOY Y 7 DÍAS"),
+        (aprob, "#3F3F46", "APROBADOS"),
+    ]
+    barra = "".join(
+        f'<div style="flex:{max(n, 0)} 1 0;background:{c}"></div>' for n, c, _ in seg if n > 0
+    ) or '<div style="flex:1 1 0;background:#26272C"></div>'
+    leyenda = "".join(
+        f'<span style="color:{"#C4C4CC" if c == "#E8E8EA" else "#8B8B93"}">■ {lbl} {round(n * 100 / total)}%</span>'
+        for n, c, lbl in seg
+    )
+    st.markdown(
+        f"""
+        <div class="sk-hero">
+          <div class="sk-eyebrow">{escape(hoy)} · Pendiente por pagar</div>
+          <div class="sk-hero-num">${_miles(w.get("total_pendiente", 0) or 0)}</div>
+          <div class="sk-hero-sub">
+            <span><strong class="sk-acc">{_miles(venc)}</strong> vencidos</span>
+            <span><strong>{_miles(por_aprobar)}</strong> por aprobar</span>
+            <span><strong>{_miles(hoy_n)}</strong> vencen hoy</span>
+            <span><strong>{_miles(prox)}</strong> en 7 días</span>
+          </div>
+          <div class="sk-bar">{barra}</div>
+          <div class="sk-legend">{leyenda}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def _kpis(stats: dict, alertas: list, n_tareas: int) -> None:
+    criticas = sum(1 for a in alertas if a[2] == "CRITICO")
+    items = [
+        ("Alertas", stats["alertas_activas"], f"{criticas} CRÍTICAS" if criticas else "SIN CRÍTICAS"),
+        ("Por aprobar", stats["pagos_pendientes"], "7 DÍAS"),
+        ("Correos", stats["correos_hoy"], "HOY"),
+        ("Tareas", n_tareas, "HOY"),
+        ("Costo IA", f"${stats['costo_hoy']}", f"MES ${stats['costo_mes']}"),
+    ]
+    html = "".join(
+        f'<div class="sk-kpi"><span class="sk-kpi-l">{l}</span>'
+        f'<span class="sk-kpi-v">{v}</span><span class="sk-kpi-f">{f}</span></div>'
+        for l, v, f in items
+    )
+    st.markdown(f'<div class="sk-kpis">{html}</div>', unsafe_allow_html=True)
+
+
+def _atencion(alertas: list) -> None:
+    st.markdown(
+        f'<div class="sk-card-h"><h4>Requiere tu atención</h4>'
+        f'<span class="sk-row-s">{len(alertas)} abiertas</span></div>',
+        unsafe_allow_html=True,
+    )
+    if not alertas:
+        st.markdown('<div class="sk-row"><span class="sk-row-s">Todo en orden. Sin alertas activas.</span></div>',
+                    unsafe_allow_html=True)
+        return
+    for a in alertas[:6]:
+        clase, etiqueta = _TAG.get(a[2], ("sk-tag-av", str(a[2])))
+        c1, c2 = st.columns([4, 1.4], vertical_alignment="center")
+        with c1:
+            st.markdown(
+                f'<div class="sk-row"><span class="sk-tag {clase}">{etiqueta}</span>'
+                f'<div><div class="sk-row-t">{escape(str(a[4]))}</div>'
+                f'<div class="sk-row-s">{escape(str(a[3]).capitalize())} · {escape(str(a[5] or ""))}</div></div></div>',
+                unsafe_allow_html=True,
+            )
+        with c2:
+            if st.button("Resolver", key=f"alerta_{a[0]}", use_container_width=True):
+                marcar_alerta_resuelta(a[0])
+                st.rerun()
+
+
+def _calendario_tributario() -> None:
+    st.markdown('<div class="sk-card-h"><h4>Calendario tributario</h4></div>', unsafe_allow_html=True)
+    try:
+        from dashboard.utils.db_helper import query_df
+
+        hoy = date.today().isoformat()
+        df = query_df(
+            """SELECT impuesto, periodo, fecha_vencimiento, estado FROM impuestos_maestro
+               WHERE estado NOT IN ('PRESENTADO','PAGADO')
+               ORDER BY (fecha_vencimiento < ?) DESC, fecha_vencimiento ASC LIMIT 5""",
+            (hoy,),
+        )
+    except Exception:
+        df = pd.DataFrame()
+    if df.empty:
+        st.markdown('<div class="sk-row"><span class="sk-row-s">Sin vencimientos pendientes.</span></div>',
+                    unsafe_allow_html=True)
+        return
+    filas = []
+    hoy_d = date.today()
+    for r in df.itertuples():
+        try:
+            f = date.fromisoformat(str(r.fecha_vencimiento)[:10])
+        except ValueError:
+            continue
+        dias = (f - hoy_d).days
+        if dias < 0:
+            estado = f'<span class="sk-venc">Vencido hace {-dias} días</span>'
+        elif dias == 0:
+            estado = '<span class="sk-venc">Vence hoy</span>'
+        else:
+            estado = f"{escape(str(r.estado).capitalize())} · {dias} días"
+        filas.append(
+            f'<div class="sk-row"><div class="sk-date"><b>{f.day:02d}</b><span>{_MESES[f.month - 1]}</span></div>'
+            f'<div><div class="sk-row-t">{escape(str(r.impuesto))} {escape(str(r.periodo))}</div>'
+            f'<div class="sk-row-s">{estado}</div></div></div>'
+        )
+    st.markdown("".join(filas), unsafe_allow_html=True)
 
 
 def render() -> None:
     """Renderiza el panel principal."""
     stats = obtener_estadisticas_hoy()
-    st.markdown("## Panel principal")
-    st.caption(fecha_larga_es(datetime.now()))
+    alertas = obtener_alertas_activas()
+    df_hoy = tareas_hoy()
 
-    m1, m2, m3, m4, m5 = st.columns(5)
-    m1.metric("Alertas activas", stats["alertas_activas"])
-    m2.metric("Pagos por aprobar", stats["pagos_pendientes"])
-    m3.metric("Correos hoy", stats["correos_hoy"])
-    m4.metric("Tareas hoy", len(tareas_hoy()))
-    m5.metric("Costo API hoy", f"${stats['costo_hoy']}")
-
-    try:
-        from utils.alertas_pagos import resumen_pagos_widget
-
-        w = resumen_pagos_widget()
-        st.markdown(
-            f"""
-            <div style="border:1px solid #e5e5ea;border-radius:12px;padding:14px 18px;margin:12px 0;background:#fafafa">
-              <div style="font-weight:700;font-size:15px;margin-bottom:8px">💳 PAGOS</div>
-              <div style="font-size:14px">
-                🔴 Vencidos: <strong>{w['vencidos']}</strong>
-                &nbsp;&nbsp;🟠 Hoy: <strong>{w['hoy']}</strong>
-                &nbsp;&nbsp;📅 7d: <strong>{w['proximos_7d']}</strong>
-                &nbsp;&nbsp;🔵 Aprobados: <strong>{w['aprobados']}</strong>
-              </div>
-              <div style="margin-top:6px;font-size:14px">
-                Total pendiente:
-                <strong>${w['total_pendiente']:,.0f}</strong>
-              </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        st.caption("Abra 💳 Pagos en el menú para ver el detalle.")
-    except Exception:
-        pass
+    _hero(_resumen_pagos(), stats["pagos_pendientes"])
+    _kpis(stats, alertas, len(df_hoy))
 
     df_venc = tareas_vencidas()
     if not df_venc.empty:
-        st.warning(f"⚠️ {len(df_venc)} tarea(s) del calendario vencida(s). Revise el módulo Calendario.")
+        st.warning(f"{len(df_venc)} tarea(s) del calendario vencida(s). Revise el módulo Calendario.")
 
-    st.divider()
-    st.markdown('<p class="section-title">Alertas activas</p>', unsafe_allow_html=True)
-    alertas = obtener_alertas_activas()
-    if alertas:
-        for alerta in alertas[:5]:
-            nivel_css = {"CRITICO": "alert-critico", "URGENTE": "alert-urgente", "AVISO": "alert-aviso"}.get(
-                alerta[3], "alert-aviso"
+    izq, der = st.columns([1.55, 1], gap="large")
+    with izq:
+        _atencion(alertas)
+    with der:
+        _calendario_tributario()
+
+    st.write("")
+    izq, der = st.columns([1.55, 1], gap="large")
+    with izq:
+        if not df_hoy.empty:
+            st.markdown('<div class="sk-card-h"><h4>Agenda del agente — hoy</h4></div>', unsafe_allow_html=True)
+            st.dataframe(
+                df_hoy[["titulo", "modulo", "prioridad", "tipo"]].head(8),
+                use_container_width=True,
+                hide_index=True,
             )
-            col_a, col_b = st.columns([5, 1])
-            with col_a:
-                st.markdown(
-                    f'<div class="{nivel_css}"><strong>[{alerta[3]}]</strong> {alerta[4]}'
-                    f"<br><small>{alerta[5]}</small></div>",
-                    unsafe_allow_html=True,
-                )
-            with col_b:
-                if st.button("Resolver", key=f"alerta_{alerta[0]}"):
-                    marcar_alerta_resuelta(alerta[0])
-                    st.rerun()
-    else:
-        st.success("Sin alertas activas.")
-
-    df_hoy = tareas_hoy()
-    if not df_hoy.empty:
-        st.divider()
-        st.markdown('<p class="section-title">Tareas del calendario — hoy</p>', unsafe_allow_html=True)
-        st.dataframe(
-            df_hoy[["titulo", "modulo", "prioridad", "tipo"]].head(8),
-            use_container_width=True,
-            hide_index=True,
-        )
-
-    st.divider()
-    st.markdown('<p class="section-title">Últimas acciones</p>', unsafe_allow_html=True)
-    for acc in stats.get("ultimas_acciones", []) or []:
-        icono = "✅" if acc[3] == "EXITOSO" else "❌"
-        st.caption(f"{icono} **{acc[0]}** · {acc[2]}")
-
-    datos = obtener_correos_ultimos_dias(7)
-    if datos:
-        st.divider()
-        df = pd.DataFrame(datos, columns=["fecha", "total", "categoria"])
-        fig = px.bar(df, x="fecha", y="total", color="categoria", height=200)
-        fig.update_layout(plot_bgcolor="#fff", paper_bgcolor="#fff")
-        st.plotly_chart(fig, use_container_width=True)
+        datos = obtener_correos_ultimos_dias(7)
+        if datos:
+            df = pd.DataFrame(datos, columns=["fecha", "total", "categoria"])
+            fig = px.bar(df, x="fecha", y="total", color="categoria", height=220,
+                         title="Correos clasificados · 7 días")
+            fig.update_layout(**PLOTLY_LAYOUT, legend_title_text="")
+            st.plotly_chart(fig, use_container_width=True)
+    with der:
+        st.markdown('<div class="sk-card-h"><h4>Actividad reciente</h4></div>', unsafe_allow_html=True)
+        filas = []
+        for acc in (stats.get("ultimas_acciones") or [])[:8]:
+            marca = "" if acc[3] == "EXITOSO" else ' <span class="sk-venc">· error</span>'
+            filas.append(f'<div class="sk-log"><b>{escape(str(acc[0]))}</b> · {escape(str(acc[2] or ""))[:90]}{marca}</div>')
+        st.markdown("".join(filas) or '<div class="sk-log">Sin actividad todavía.</div>', unsafe_allow_html=True)

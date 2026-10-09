@@ -33,7 +33,7 @@ CSS_CONTRATOS = """
 .ca-cell-no { background: #ffcdd2 !important; color: #b71c1c; font-weight: 600; }
 .ca-cell-pend { background: #fff59d !important; color: #e65100; }
 .ca-row-label {
-    background: #e8e8e8; font-weight: 600; font-size: 11px;
+    background: #e8e8e8; color: #000; font-weight: 600; font-size: 11px;
     padding: 6px 8px; border: 1px solid #ccc; min-width: 140px;
 }
 .ca-empleado-titulo {
@@ -115,12 +115,12 @@ def _render_tabla_resumen(df: pd.DataFrame) -> None:
                         "RECIBO LUZ/AGUA", "CROQUIS", "DECLARACIÓN JURADA", "CERTIFICADOS",
                         "SCTR", "VIDA LEY", "EXAMEN MÉDICO", "INDUCCIÓN", "EPP"):
             return vista[col.name].apply(
-                lambda x: "background-color:#ffcdd2" if str(x).upper() == "NO"
-                else "background-color:#c8e6c9" if str(x).upper() == "SI"
-                else "background-color:#fff59d" if str(x).upper() == "PENDIENTE"
-                else "background-color:#fff9c4"
+                lambda x: "background-color:#ffcdd2;color:#000" if str(x).upper() == "NO"
+                else "background-color:#c8e6c9;color:#000" if str(x).upper() == "SI"
+                else "background-color:#fff59d;color:#000" if str(x).upper() == "PENDIENTE"
+                else "background-color:#fff9c4;color:#000"
             )
-        return ["background-color:#fff9c4"] * len(vista)
+        return ["background-color:#fff9c4;color:#000"] * len(vista)
 
     styled = vista.style.apply(_color, axis=0)
     st.dataframe(styled, use_container_width=True, hide_index=True, height=400)

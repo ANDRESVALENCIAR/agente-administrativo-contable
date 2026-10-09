@@ -4,6 +4,7 @@ import plotly.express as px
 
 from core.registro_libs import LIBRERIAS_POR_MODULO, librerias_disponibles
 from dashboard.utils.db_helper import query_df
+from dashboard.estilos import PLOTLY_LAYOUT
 
 
 def render() -> None:
@@ -34,7 +35,7 @@ def render() -> None:
     if not df_tokens.empty:
         st.markdown("#### Costo API últimos 30 días")
         fig = px.area(df_tokens, x="fecha", y="costo", height=220)
-        fig.update_layout(plot_bgcolor="#fff", paper_bgcolor="#fff")
+        fig.update_layout(**PLOTLY_LAYOUT)
         st.plotly_chart(fig, use_container_width=True)
     elif not df_diario.empty:
         st.markdown("#### Actividad diaria (log_acciones)")
