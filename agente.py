@@ -45,6 +45,12 @@ if __name__ == "__main__":
     inicializar_db()
     get_engine()
     resumen_libs = verificar_librerias()
+    try:
+        from modulos.control_pagos import inicializar_y_cargar
+
+        inicializar_y_cargar()
+    except Exception as exc:
+        logger.warning("Control de pagos al arrancar: %s", exc)
     if en_modo_demo():
         cargar_datos_demo()
         logger.warning("Modo DEMO activo — configure .env con credenciales reales.")
@@ -54,6 +60,7 @@ if __name__ == "__main__":
     logger.info("Empresa: %s", cfg.NOMBRE_EMPRESA)
     logger.info("Librerías activas: %s", len(resumen_libs["activas"]))
     logger.info("Calendario maestro: única fuente de programación")
+    logger.info("Botón 'Ya lo pagué' apunta a: %s", cfg.APP_PUBLIC_URL)
     logger.info("=" * 60)
 
     run(revisar_vencimientos, "Revisión inicial impuestos")

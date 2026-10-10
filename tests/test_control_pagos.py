@@ -83,13 +83,104 @@ class TestControlPagos(unittest.TestCase):
         self.assertEqual(cp.fecha_sugerida(date(2026, 10, 12), {date(2026, 10, 12)}), date(2026, 10, 9))
 
     def test_alerta_24h_una_sola_vez(self):
+        from unittest import mock
+
         pendientes = cp.pagos_para_alerta(date(2026, 10, 12))  # mañana = martes 13
         self.assertEqual([p["id_pago"] for p in pendientes], ["P03"])
-        r = cp.enviar_alertas_24h(date(2026, 10, 12))
-        self.assertEqual(r["pagos"], 1)
-        self.assertEqual(r["correos"], 1)
-        self.assertEqual(r["whatsapp"], 1)
-        self.assertEqual(cp.enviar_alertas_24h(date(2026, 10, 12))["pagos"], 0)
+        # Sin canal configurado: NO se marca como avisada (antes el modo demo la daba por enviada)
+        with mock.patch("conexiones.notificador.enviar_email", return_value=None), \
+                mock.patch("conexiones.notificador.enviar_whatsapp", return_value=None):
+            r = cp.enviar_alertas_24h(date(2026, 10, 12))
+        self.assertTrue(r["sin_canal"])
+        self.assertEqual(len(cp.pagos_para_alerta(date(2026, 10, 12))), 1)
+        # Si todo falla también se libera para reintentar
+        with mock.patch("conexiones.notificador.enviar_email", return_value=False), \
+                mock.patch("conexiones.notificador.enviar_whatsapp", return_value=False):
+            self.assertEqual(cp.enviar_alertas_24h(date(2026, 10, 12))["pagos"], 0)
+        self.assertEqual(len(cp.pagos_para_alerta(date(2026, 10, 12))), 1)
+        # Con canal real: sale y se marca una sola vez
+        with mock.patch("conexiones.notificador.enviar_email", return_value=True) as em, \
+                mock.patch("conexiones.notificador.enviar_whatsapp", return_value=True) as wa:
+            r = cp.enviar_alertas_24h(date(2026, 10, 12))
+            self.assertEqual((r["pagos"], r["correos"], r["whatsapp"]), (1, 1, 1))
+            self.assertEqual(cp.enviar_alertas_24h(date(2026, 10, 12))["pagos"], 0)
+            self.assertEqual(em.call_count, 1)
+            self.assertEqual(wa.call_count, 1)
+            self.assertIn("?pagar=", wa.call_args.args[1])  # texto con el enlace
+            self.assertEqual(wa.call_args.args[2]["1"], "GRABAR PLANILLA")  # variables de plantilla
+
+    def test_recupera_alerta_del_mismo_dia(self):
+        """Si el PC estuvo apagado el día anterior, avisa el mismo día del pago."""
+        hoy = date(2026, 11, 13)  # P03 vence viernes 13 nov
+        ids = [p["id_pago"] for p in cp.pagos_para_alerta(hoy)]
+        self.assertIn("P03", ids)
+        p = [x for x in cp.pagos_para_alerta(hoy) if x["id_pago"] == "P03"][0]
+        self.assertIn("vence hoy", cp.texto_whatsapp(p, hoy))
+
+    def test_smtp_real_envia_html_con_boton(self):
+        from unittest import mock
+
+        from conexiones import notificador
+
+        enviados = []
+
+        class FakeSMTP:
+            def __init__(self, host, port, timeout=None):
+                self.host, self.port = host, port
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                return False
+
+            def ehlo(self):
+                pass
+
+            def has_extn(self, n):
+                return True
+
+            def starttls(self, context=None):
+                pass
+
+            def login(self, u, p):
+                enviados.append(("login", u))
+
+            def sendmail(self, de, para, msg):
+                enviados.append(("mail", para, msg))
+
+        with mock.patch.object(cfg, "SMTP_HOST", "smtp.gmail.com"), mock.patch.object(cfg, "SMTP_USER", "a@b.co"), \
+                mock.patch.object(cfg, "SMTP_PASSWORD", "x"), mock.patch.object(cfg, "SMTP_FROM", "a@b.co"), \
+                mock.patch("conexiones.notificador.smtplib.SMTP", FakeSMTP):
+            self.assertTrue(notificador.enviar_email("pagos@empresa.com", "Prueba", "<a href='x'>Ya lo pagué</a>", "t"))
+        self.assertEqual(enviados[0], ("login", "a@b.co"))
+        self.assertEqual(enviados[1][1], ["pagos@empresa.com"])
+
+    def test_programador_corre_a_la_hora_local_y_una_vez(self):
+        import json
+        from datetime import datetime
+
+        from database import get_conn
+        from utils import calendario_maestro as cm
+
+        cm.inicializar_tablas_calendario_maestro()
+        conn = get_conn()
+        conn.execute("DELETE FROM calendario_maestro WHERE titulo='TEST 08:00'")
+        conn.execute(
+            """INSERT INTO calendario_maestro (titulo, modulo, tipo, prioridad, fecha_inicio, recurrencia,
+               recurrencia_config, activa, fecha_proxima_ejecucion, funcion_callback, creada_por)
+               VALUES ('TEST 08:00','PAGOS','ALERTA','MEDIA','2026-10-12T00:00:00','DIARIA',?,1,
+                       '2026-10-12T08:00:00', NULL, 'TEST')""",
+            (json.dumps({"hora": "08:00"}),),
+        )
+        conn.commit()
+        tid = conn.execute("SELECT id FROM calendario_maestro WHERE titulo='TEST 08:00'").fetchone()[0]
+        conn.execute("UPDATE calendario_maestro SET activa=0 WHERE id!=?", (tid,))
+        conn.commit()
+        conn.close()
+        self.assertEqual(cm._revisar_y_ejecutar_pendientes(datetime(2026, 10, 12, 7, 59)), [])
+        self.assertEqual(cm._revisar_y_ejecutar_pendientes(datetime(2026, 10, 12, 8, 0)), [tid])
+        self.assertEqual(cm._revisar_y_ejecutar_pendientes(datetime(2026, 10, 12, 8, 2)), [])  # ya reclamada
 
     def test_mensajes_dicen_pendiente_y_traen_boton(self):
         p = cp.listar(date(2026, 10, 16), date(2026, 10, 16), cp.ABIERTOS)[0]

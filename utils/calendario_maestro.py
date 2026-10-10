@@ -528,17 +528,35 @@ def ejecutar_tarea_por_id(tarea_id: int) -> None:
         logger.error("✗ Calendario #%s %s: %s", tarea_id, titulo, exc)
 
 
-def _revisar_y_ejecutar_pendientes() -> None:
+def _revisar_y_ejecutar_pendientes(ahora: datetime | None = None) -> list[int]:
+    """
+    Lanza las tareas vencidas. Las fechas se guardan en hora local ISO ('2026-10-12T08:00:00'),
+    así que se comparan con la hora local en el mismo formato (antes se usaba datetime('now')
+    de SQLite, que es UTC y con espacio: las tareas de las 08:00 corrían hacia las 19:00).
+    Cada tarea se "reclama" con un UPDATE condicional para que, si corren a la vez agente.py y
+    el dashboard, solo uno de los dos la ejecute.
+    """
+    ahora_iso = (ahora or datetime.now()).isoformat(timespec="seconds")
     conn = get_conn()
     c = conn.cursor()
     c.execute(
-        """SELECT id FROM calendario_maestro
+        """SELECT id, fecha_proxima_ejecucion FROM calendario_maestro
            WHERE activa=1
              AND fecha_proxima_ejecucion IS NOT NULL
-             AND fecha_proxima_ejecucion <= datetime('now')
-           ORDER BY prioridad DESC, fecha_proxima_ejecucion"""
+             AND replace(fecha_proxima_ejecucion, ' ', 'T') <= ?
+           ORDER BY prioridad DESC, fecha_proxima_ejecucion""",
+        (ahora_iso,),
     )
-    ids = [r[0] for r in c.fetchall()]
+    pendientes = c.fetchall()
+    ids = []
+    for tarea_id, programada in pendientes:
+        c.execute(
+            "UPDATE calendario_maestro SET fecha_proxima_ejecucion=NULL WHERE id=? AND fecha_proxima_ejecucion=?",
+            (tarea_id, programada),
+        )
+        if c.rowcount == 1:
+            ids.append(tarea_id)
+    conn.commit()
     conn.close()
 
     for tarea_id in ids:
@@ -548,6 +566,7 @@ def _revisar_y_ejecutar_pendientes() -> None:
             daemon=True,
             name=f"cal-task-{tarea_id}",
         ).start()
+    return ids
 
 
 def iniciar_executor() -> threading.Thread:

@@ -16,3 +16,4 @@ reportes/
 data/*.xlsx
 data/*.bak
 *.xlsx.bak
+logs/

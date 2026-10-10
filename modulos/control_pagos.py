@@ -561,8 +561,13 @@ def _miles(v: float | None) -> str:
     return f"${v:,.0f}".replace(",", ".") if v else "Por definir"
 
 
-def html_correo(pagos: list[dict[str, Any]]) -> str:
-    """Correo compatible con Gmail/Outlook: tablas e estilos en línea, un botón por pago."""
+def _cuando(p: dict[str, Any], hoy: date | None = None) -> str:
+    d = (date.fromisoformat(str(p["fecha_sugerida"])) - (hoy or date.today())).days
+    return "VENCE HOY" if d <= 0 else "VENCE MAÑANA" if d == 1 else f"VENCE EN {d} DÍAS"
+
+
+def html_correo(pagos: list[dict[str, Any]], hoy: date | None = None) -> str:
+    """Correo compatible con Gmail/Outlook: tablas y estilos en línea, un botón por pago."""
     bloques = []
     for p in pagos:
         f = date.fromisoformat(str(p["fecha_sugerida"]))
@@ -573,14 +578,14 @@ def html_correo(pagos: list[dict[str, Any]]) -> str:
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
                  style="border:1px solid #E4E4E7;border-radius:12px;background:#FFFFFF" bgcolor="#FFFFFF">
             <tr><td style="padding:18px 20px;font-family:Arial,Helvetica,sans-serif;color:#18181B">
-              <div style="font-size:11px;letter-spacing:.08em;color:#C2410C;font-weight:bold">PENDIENTE DE PAGO · VENCE MAÑANA</div>
+              <div style="font-size:11px;letter-spacing:.08em;color:#C2410C;font-weight:bold">PENDIENTE DE PAGO · {_cuando(p, hoy)}</div>
               <div style="font-size:18px;font-weight:bold;margin:6px 0 4px 0">{escape(p['detalle'] or '')}</div>
               <div style="font-size:14px;color:#52525B;line-height:1.5">
                 {escape(p['proveedor'] or '')} · {escape(p['centro_costos'] or '')}{ref}<br>
                 Fecha de pago: <b>{_fecha_humana(f)}</b> · Valor: <b>{_miles(p.get('valor'))}</b>
               </div>
               <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:14px"><tr>
-                <td style="background:#18181B;border-radius:999px">
+                <td style="background:#18181B;border-radius:999px" bgcolor="#18181B">
                   <a href="{escape(enlace_confirmacion(p['id']))}"
                      style="display:inline-block;padding:12px 22px;font-family:Arial,Helvetica,sans-serif;
                             font-size:14px;font-weight:bold;color:#FFFFFF;text-decoration:none">✓ {accion}</a>
@@ -595,7 +600,7 @@ def html_correo(pagos: list[dict[str, Any]]) -> str:
           <tr><td style="padding:0 0 18px 0;font-family:Arial,Helvetica,sans-serif">
             <div style="font-size:20px;font-weight:bold;color:#18181B">Shaki · {escape(cfg.NOMBRE_EMPRESA)}</div>
             <div style="font-size:14px;color:#52525B;margin-top:4px">
-              Tienes {len(pagos)} pago(s) pendiente(s) para mañana. Cuando lo pagues, toca el botón y el agente
+              Tienes {len(pagos)} pago(s) pendiente(s) de pago. Cuando lo pagues, toca el botón y el agente
               lo deja al día.</div>
           </td></tr>
           {''.join(bloques)}
@@ -607,11 +612,11 @@ def html_correo(pagos: list[dict[str, Any]]) -> str:
     </table></body></html>"""
 
 
-def texto_whatsapp(p: dict[str, Any]) -> str:
+def texto_whatsapp(p: dict[str, Any], hoy: date | None = None) -> str:
     f = date.fromisoformat(str(p["fecha_sugerida"]))
     accion = "Ya lo pagué" if p["tipo"] == "PAGO" else "Ya lo hice"
     lineas = [
-        "⏰ *PENDIENTE DE PAGO · vence mañana*",
+        f"⏰ *PENDIENTE DE PAGO · {_cuando(p, hoy).lower()}*",
         f"*{p['detalle']}*",
         f"{p['proveedor'] or ''} · {p['centro_costos'] or ''}".strip(" ·"),
     ]
@@ -623,6 +628,17 @@ def texto_whatsapp(p: dict[str, Any]) -> str:
         f"✅ {accion}: {enlace_confirmacion(p['id'])}",
     ]
     return "\n".join(lineas)
+
+
+def variables_plantilla(p: dict[str, Any]) -> dict[str, str]:
+    """Variables para la plantilla aprobada de WhatsApp: {{1}} detalle {{2}} fecha {{3}} valor {{4}} enlace."""
+    f = date.fromisoformat(str(p["fecha_sugerida"]))
+    return {"1": str(p["detalle"] or ""), "2": _fecha_humana(f), "3": _miles(p.get("valor")),
+            "4": enlace_confirmacion(p["id"])}
+
+
+def texto_correo_plano(pagos: list[dict[str, Any]], hoy: date | None = None) -> str:
+    return "\n\n".join(texto_whatsapp(p, hoy).replace("*", "") for p in pagos)
 
 
 def _registrar_envio(pago_id: int, canal: str, destino: str, ok: bool) -> None:
@@ -639,70 +655,142 @@ def _destinos_correo() -> list[str]:
     return [e.strip() for e in (cfg.PAGOS_ALERTA_EMAILS or "").replace(";", ",").split(",") if e.strip()]
 
 
+def _destinos_whatsapp() -> list[str]:
+    from conexiones.whatsapp_client import _parse_destinatarios
+
+    return _parse_destinatarios(cfg.PAGOS_ALERTA_WHATSAPP)
+
+
+def estado_canales() -> dict[str, Any]:
+    """Qué falta para que las alertas salgan solas (para el panel)."""
+    from conexiones.notificador import canal_correo, canal_whatsapp
+
+    url = cfg.APP_PUBLIC_URL
+    return {
+        "correo": canal_correo(),
+        "whatsapp": canal_whatsapp(),
+        "destinos_correo": _destinos_correo(),
+        "destinos_whatsapp": [d.replace("whatsapp:", "") for d in _destinos_whatsapp()],
+        "url_publica": not any(x in url for x in ("localhost", "127.0.0.1", "0.0.0.0")),
+        "url": url,
+    }
+
+
 def pagos_para_alerta(hoy: date | None = None) -> list[dict[str, Any]]:
-    """Cuotas abiertas cuya fecha sugerida es mañana y aún no tienen alerta 24 h."""
+    """
+    Cuotas abiertas sin aviso cuya fecha sugerida es mañana (alerta 24 h) u hoy
+    (recuperación: si el PC estuvo apagado ayer, se avisa hoy temprano).
+    """
     hoy = hoy or date.today()
-    manana = (hoy + timedelta(days=1)).isoformat()
     conn = get_conn()
     rows = conn.execute(
         f"""SELECT {', '.join(COLUMNAS)} FROM pagos_calendario
-            WHERE estado IN ('PENDIENTE','EN PROCESO') AND fecha_sugerida = ? AND alerta_24h_enviada IS NULL
-            ORDER BY prioridad, id_pago""",
-        (manana,),
+            WHERE estado IN ('PENDIENTE','EN PROCESO') AND fecha_sugerida IN (?, ?)
+              AND alerta_24h_enviada IS NULL
+            ORDER BY fecha_sugerida, prioridad, id_pago""",
+        (hoy.isoformat(), (hoy + timedelta(days=1)).isoformat()),
     ).fetchall()
     conn.close()
     return [dict(zip(COLUMNAS, r)) for r in rows]
 
 
-def enviar_alerta(pagos: list[dict[str, Any]], marcar: bool = True) -> dict[str, int]:
-    """Envía correo (uno con todos) y WhatsApp (uno por pago) para la lista dada."""
-    from conexiones.gmail_client import enviar_correo
-    from conexiones.whatsapp_client import _parse_destinatarios, enviar_whatsapp
-
-    if not pagos:
-        return {"pagos": 0, "correos": 0, "whatsapp": 0}
-    correos = whats = 0
-    html = html_correo(pagos)
-    asunto = (
-        f"Pendiente de pago mañana: {pagos[0]['detalle']}"
-        if len(pagos) == 1 else f"{len(pagos)} pagos pendientes para mañana"
-    )
-    for dest in _destinos_correo():
-        ok = bool(enviar_correo(dest, asunto, html))
-        correos += ok
-        for p in pagos:
-            _registrar_envio(p["id"], "correo", dest, ok)
-    destinos_wa = _parse_destinatarios(cfg.PAGOS_ALERTA_WHATSAPP)
-    for p in pagos:
-        n = enviar_whatsapp(texto_whatsapp(p), destinos_wa) if destinos_wa else 0
-        whats += n
-        _registrar_envio(p["id"], "whatsapp", ",".join(destinos_wa) or "-", n > 0)
-    if marcar:
-        conn = get_conn()
-        conn.executemany(
-            "UPDATE pagos_calendario SET alerta_24h_enviada=CURRENT_TIMESTAMP WHERE id=?",
-            [(p["id"],) for p in pagos],
+def _reclamar(ids: list[int]) -> list[int]:
+    """Marca como avisadas solo las que nadie más reclamó (evita duplicados entre procesos)."""
+    conn = get_conn()
+    ok = []
+    for i in ids:
+        cur = conn.execute(
+            "UPDATE pagos_calendario SET alerta_24h_enviada=datetime('now','localtime') "
+            "WHERE id=? AND alerta_24h_enviada IS NULL",
+            (i,),
         )
-        conn.commit()
-        conn.close()
-    return {"pagos": len(pagos), "correos": correos, "whatsapp": whats}
+        if cur.rowcount == 1:
+            ok.append(i)
+    conn.commit()
+    conn.close()
+    return ok
 
 
-def enviar_alertas_24h(hoy: date | None = None) -> dict[str, int]:
-    """Tarea programada diaria: alerta 24 h antes de la fecha sugerida de pago."""
+def _liberar(ids: list[int]) -> None:
+    conn = get_conn()
+    conn.executemany("UPDATE pagos_calendario SET alerta_24h_enviada=NULL WHERE id=?", [(i,) for i in ids])
+    conn.commit()
+    conn.close()
+
+
+def enviar_alerta(pagos: list[dict[str, Any]], marcar: bool = True, hoy: date | None = None) -> dict[str, Any]:
+    """
+    Envía un correo (con todos los pagos y un botón por pago) y un WhatsApp por pago.
+    Con marcar=True la cuota queda como avisada SOLO si salió por algún canal real;
+    si no hay canal configurado o todo falla, se libera para reintentar en la próxima ronda.
+    """
+    from conexiones.notificador import enviar_email, enviar_whatsapp
+
+    vacio = {"pagos": 0, "correos": 0, "whatsapp": 0, "sin_canal": False}
+    if not pagos:
+        return vacio
+    if marcar:
+        reclamados = set(_reclamar([p["id"] for p in pagos]))
+        pagos = [p for p in pagos if p["id"] in reclamados]
+        if not pagos:
+            return vacio
+
+    correos = whats = 0
+    exito: set[int] = set()
+    sin_canal = True
+    asunto = (
+        f"Pendiente de pago: {pagos[0]['detalle']} · {_cuando(pagos[0], hoy).lower()}"
+        if len(pagos) == 1 else f"{len(pagos)} pagos pendientes de pago"
+    )
+    html, plano = html_correo(pagos, hoy), texto_correo_plano(pagos, hoy)
+    for dest in _destinos_correo():
+        r = enviar_email(dest, asunto, html, plano)
+        if r is None:
+            continue
+        sin_canal = False
+        correos += bool(r)
+        for p in pagos:
+            _registrar_envio(p["id"], "correo", dest, bool(r))
+            if r:
+                exito.add(p["id"])
+    for p in pagos:
+        for dest in _destinos_whatsapp():
+            r = enviar_whatsapp(dest, texto_whatsapp(p, hoy), variables_plantilla(p))
+            if r is None:
+                continue
+            sin_canal = False
+            whats += bool(r)
+            _registrar_envio(p["id"], "whatsapp", dest.replace("whatsapp:", ""), bool(r))
+            if r:
+                exito.add(p["id"])
+    if marcar:
+        fallidos = [p["id"] for p in pagos if p["id"] not in exito]
+        if fallidos:
+            _liberar(fallidos)
+    return {"pagos": len(exito), "correos": correos, "whatsapp": whats, "sin_canal": sin_canal,
+            "pendientes": len(pagos) - len(exito)}
+
+
+def enviar_alertas_24h(hoy: date | None = None) -> dict[str, Any]:
+    """Tarea programada: alerta 24 h antes de la fecha sugerida (y recuperación del mismo día)."""
     inicializar_tablas()
     try:
         importar_si_existe()
     except Exception as exc:  # seguir con lo que hay en la BD
         logger.warning("Control de pagos: no se pudo releer el Excel: %s", exc)
     pagos = pagos_para_alerta(hoy)
-    res = enviar_alerta(pagos)
-    if pagos:
+    res = enviar_alerta(pagos, hoy=hoy)
+    if pagos and res["sin_canal"]:
         crear_alerta(
-            "AVISO", "pagos", f"{len(pagos)} pago(s) vencen mañana",
+            "URGENTE", "pagos", "Alertas de pago SIN ENVIAR: falta configurar correo o WhatsApp",
+            f"{len(pagos)} cuota(s) por avisar. Configure SMTP_* o Twilio en .env.",
+        )
+    elif res["pagos"]:
+        crear_alerta(
+            "AVISO", "pagos", f"Alerta enviada: {res['pagos']} pago(s) por vencer",
             "; ".join(p["detalle"] or "" for p in pagos)[:400],
         )
-    registrar_accion("pagos", "alertas_24h", str(res), "EXITOSO")
+    registrar_accion("pagos", "alertas_24h", str(res), "EXITOSO" if not res.get("pendientes") else "ERROR")
     return res
 
 

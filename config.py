@@ -57,6 +57,16 @@ class Config:
     TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
     TWILIO_WHATSAPP_FROM = os.getenv("TWILIO_WHATSAPP_FROM")
     WHATSAPP_DESTINATARIOS = os.getenv("WHATSAPP_DESTINATARIOS")
+    # Plantilla aprobada de WhatsApp (Twilio Content SID, empieza por HX). Necesaria en producción
+    # para mensajes que inicia la empresa; sin ella se envía texto libre (sirve en el sandbox).
+    TWILIO_WHATSAPP_CONTENT_SID = os.getenv("TWILIO_WHATSAPP_CONTENT_SID")
+
+    # Correo saliente por SMTP (lo más simple: Gmail con "contraseña de aplicación" u Office 365)
+    SMTP_HOST = os.getenv("SMTP_HOST")
+    SMTP_PORT = int(os.getenv("SMTP_PORT") or 587)
+    SMTP_USER = os.getenv("SMTP_USER")
+    SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
+    SMTP_FROM = os.getenv("SMTP_FROM") or os.getenv("SMTP_USER")
 
     # Open data impuestos
     PERFIL_TRIBUTARIO = os.getenv("PERFIL_TRIBUTARIO", "personas-juridicas")

@@ -108,33 +108,70 @@ def _indicadores(r: dict) -> None:
     )
 
 
-def _panel_alertas() -> None:
-    correos = [e for e in (cfg.PAGOS_ALERTA_EMAILS or "").replace(";", ",").split(",") if e.strip()]
-    from conexiones.whatsapp_client import _parse_destinatarios
+def _estado_auto() -> tuple[bool, list[tuple[bool, str, str]]]:
+    """Lista de chequeo para que la alerta salga sola."""
+    e = cp.estado_canales()
+    try:
+        from utils.calendario_maestro import executor_esta_activo
 
-    whats = _parse_destinatarios(cfg.PAGOS_ALERTA_WHATSAPP)
-    local = "localhost" in cfg.APP_PUBLIC_URL or "127.0.0.1" in cfg.APP_PUBLIC_URL
-    manana = cp.pagos_para_alerta()
-    aviso_url = (
-        '<br><span class="cp-warn">El botón solo abre en este computador. Para usarlo desde el celular '
-        'publique el panel y ponga su dirección en APP_PUBLIC_URL.</span>' if local else ""
+        prog = executor_esta_activo()
+    except Exception:
+        prog = False
+    items = [
+        (prog, "Agente encendido", "Programador activo: revisa cada 2 min" if prog
+         else "Inicie el agente (scripts/iniciar_shaki_24x7.ps1)"),
+        (bool(e["correo"] and e["destinos_correo"]), "Correo",
+         f'{e["correo"]} → {", ".join(e["destinos_correo"])}' if e["correo"] and e["destinos_correo"]
+         else ("Falta SMTP_HOST/SMTP_USER/SMTP_PASSWORD" if not e["correo"] else "Falta PAGOS_ALERTA_EMAILS")),
+        (bool(e["whatsapp"] and e["destinos_whatsapp"]), "WhatsApp",
+         f'{e["whatsapp"]} → {", ".join(e["destinos_whatsapp"])}' if e["whatsapp"] and e["destinos_whatsapp"]
+         else ("Falta TWILIO_ACCOUNT_SID/TOKEN/FROM" if not e["whatsapp"] else "Falta PAGOS_ALERTA_WHATSAPP")),
+        (e["url_publica"], 'Botón "Ya lo pagué"',
+         e["url"] if e["url_publica"] else f'{e["url"]} solo abre en este PC · configure NGROK_DOMAIN o APP_PUBLIC_URL'),
+    ]
+    listo = items[0][0] and (items[1][0] or items[2][0]) and items[3][0]
+    return listo, items
+
+
+def _panel_alertas() -> None:
+    listo, items = _estado_auto()
+    pendientes = cp.pagos_para_alerta()
+    filas = "".join(
+        f'<div style="display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-top:1px solid #1F2024">'
+        f'<span style="color:{"#4ADE80" if ok else "#F5C542"};font-family:Geist Mono,monospace;font-size:12px;'
+        f'min-width:16px">{"●" if ok else "○"}</span>'
+        f'<div><b style="color:#E8E8EA;font-weight:500">{escape(t)}</b>'
+        f'<div style="font-size:12px;color:#8B8B93">{escape(d)}</div></div></div>'
+        for ok, t, d in items
     )
+    estado = ('<span style="color:#4ADE80">AUTOMÁTICO · ACTIVO</span>' if listo
+              else '<span style="color:#F5C542">FALTA CONFIGURAR</span>')
     st.markdown(
-        f'<div class="cp-card"><h4>Alerta 24 horas</h4><div class="cp-kv">'
-        f'Envío automático: <b>todos los días 08:00</b> (repaso 16:30)<br>'
-        f'Correo: <b>{escape(", ".join(correos)) or "<span class=cp-warn>sin configurar</span>"}</b><br>'
-        f'WhatsApp: <b>{escape(", ".join(w.replace("whatsapp:", "") for w in whats)) or "<span class=cp-warn>sin configurar</span>"}</b><br>'
-        f'Botón "Ya lo pagué": <b>{escape(cfg.APP_PUBLIC_URL)}</b>{aviso_url}<br>'
-        f'Pendientes por avisar para mañana: <b>{len(manana)}</b></div></div>',
+        f'<div class="cp-card"><h4>Alerta 24 horas</h4>'
+        f'<div class="sk-kpi-f" style="margin-bottom:6px">{estado} · 08:00 Y 16:30 · '
+        f'{len(pendientes)} POR AVISAR</div>{filas}</div>',
         unsafe_allow_html=True,
     )
-    c1, c2 = st.columns(2)
-    if c1.button("Enviar ahora", key="cp_send_now", use_container_width=True,
-                 disabled=not manana):
-        res = cp.enviar_alerta(manana)
-        st.success(f"Enviado: {res['pagos']} pago(s) · {res['correos']} correo(s) · {res['whatsapp']} WhatsApp.")
-    with c2.popover("Ver ejemplo", use_container_width=True):
-        muestra = manana or cp.listar(date.today(), date.today() + timedelta(days=31), estados=cp.ABIERTOS)[:1]
+    c1, c2, c3 = st.columns(3)
+    if c1.button("Enviar ahora", key="cp_send_now", use_container_width=True, disabled=not pendientes):
+        res = cp.enviar_alerta(pendientes)
+        if res["sin_canal"]:
+            st.error("No salió: configure correo (SMTP) o WhatsApp (Twilio).")
+        else:
+            st.success(f"Enviado: {res['pagos']} pago(s) · {res['correos']} correo(s) · {res['whatsapp']} WhatsApp.")
+    if c2.button("Probar envío", key="cp_test", use_container_width=True,
+                 help="Manda un mensaje de prueba a los destinatarios, sin marcar nada como avisado"):
+        muestra = cp.listar(date.today(), date.today() + timedelta(days=31), estados=cp.ABIERTOS)[:1]
+        if not muestra:
+            st.info("No hay cuotas pendientes para usar de ejemplo.")
+        else:
+            res = cp.enviar_alerta(muestra, marcar=False)
+            if res["sin_canal"]:
+                st.error("No hay canal configurado todavía.")
+            else:
+                st.success(f"Prueba: {res['correos']} correo(s) · {res['whatsapp']} WhatsApp. Revise el historial.")
+    with c3.popover("Ver ejemplo", use_container_width=True):
+        muestra = pendientes or cp.listar(date.today(), date.today() + timedelta(days=31), estados=cp.ABIERTOS)[:1]
         if muestra:
             components.html(cp.html_correo(muestra[:2]), height=520, scrolling=True)
             st.code(cp.texto_whatsapp(muestra[0]), language=None)
@@ -232,8 +269,11 @@ def _fila(p: dict) -> None:
             with b2.popover("Más", use_container_width=True):
                 st.caption(f"{p['id_pago']} · cuota {p['ocurrencia']}")
                 if st.button("Enviar alerta ahora", key=f"cp_al_{p['id']}", use_container_width=True):
-                    r = cp.enviar_alerta([p])
-                    st.success(f"{r['correos']} correo(s) · {r['whatsapp']} WhatsApp")
+                    r = cp.enviar_alerta([p], marcar=False)
+                    if r["sin_canal"]:
+                        st.error("Sin canal configurado")
+                    else:
+                        st.success(f"{r['correos']} correo(s) · {r['whatsapp']} WhatsApp")
                 if p["estado"] != "EN PROCESO" and st.button("En proceso", key=f"cp_ep_{p['id']}",
                                                              use_container_width=True):
                     cp.cambiar_estado(p["id"], "EN PROCESO")
