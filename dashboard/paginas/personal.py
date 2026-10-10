@@ -44,6 +44,7 @@ def render() -> None:
     empleados = _lista_empleados()
     tabs = st.tabs(
         [
+            "Tablero",
             "📂 Expedientes",
             "📋 Archivo General",
             "📑 Contratos Activos",
@@ -58,15 +59,20 @@ def render() -> None:
     )
 
     with tabs[0]:
-        render_expedientes_vivo()
+        from dashboard.paginas import personal_dashboard
+
+        personal_dashboard.render()
 
     with tabs[1]:
-        render_archivo_general()
+        render_expedientes_vivo()
 
     with tabs[2]:
-        render_contratos_activos()
+        render_archivo_general()
 
     with tabs[3]:
+        render_contratos_activos()
+
+    with tabs[4]:
         with st.form("form_novedad"):
             c1, c2 = st.columns(2)
             with c1:
@@ -110,7 +116,7 @@ def render() -> None:
             hide_index=True,
         )
 
-    with tabs[4]:
+    with tabs[5]:
         st.caption("Cálculo local: 15 días por año trabajado; disfrutados = novedades tipo Vacaciones.")
         res = resumen_vacaciones_todos()
         if res.empty:
@@ -126,7 +132,7 @@ def render() -> None:
                 if fi:
                     st.json(calcular_vacaciones(sel, fi))
 
-    with tabs[5]:
+    with tabs[6]:
         df_emp = query_df(
             """SELECT e.nombre, e.cargo, e.fecha_ingreso, e.salario, e.tipo_contrato, e.cedula,
                       c.nombre_carpeta
@@ -189,7 +195,7 @@ def render() -> None:
                     except Exception as e:
                         st.error(f"Error al generar PDF: {e}")
 
-    with tabs[6]:
+    with tabs[7]:
         with st.form("form_dotacion"):
             c1, c2 = st.columns(2)
             with c1:
@@ -232,7 +238,7 @@ def render() -> None:
             )
         st.dataframe(df_dot, use_container_width=True, hide_index=True)
 
-    with tabs[7]:
+    with tabs[8]:
         with st.form("form_candidato"):
             c1, c2 = st.columns(2)
             with c1:
@@ -290,7 +296,7 @@ def render() -> None:
         else:
             st.info("Sin candidatos registrados.")
 
-    with tabs[8]:
+    with tabs[9]:
         with st.form("form_contrato"):
             c1, c2 = st.columns(2)
             with c1:
@@ -316,7 +322,7 @@ def render() -> None:
             hide_index=True,
         )
 
-    with tabs[9]:
+    with tabs[10]:
         with st.form("form_examen"):
             emp_e = st.text_input("Empleado examen")
             tipo_e = st.selectbox("Tipo examen", ["Ingreso", "Periódico", "Retiro"])
