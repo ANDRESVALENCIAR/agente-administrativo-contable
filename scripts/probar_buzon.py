@@ -14,7 +14,8 @@ b.agregar_buzon(correo)
 bz = next(x for x in b.listar_buzones() if x["email"] == correo)
 r = b.probar(bz["id"])
 if r["ok"]:
-    print(f"CONECTADO: {r.get('mensajes')} correos en la bandeja de {correo}")
+    print(f"CONECTADO: {r.get('mensajes')} correos en la bandeja de {correo}"
+          + (f" (servidor {r['servidor']})" if r.get("servidor") else ""))
 else:
     print(f"ERROR: {r['error']}")
     sys.exit(1)

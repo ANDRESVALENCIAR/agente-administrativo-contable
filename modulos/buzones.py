@@ -311,6 +311,41 @@ def _conectar(b: dict[str, Any]) -> imaplib.IMAP4_SSL:
     return m
 
 
+def nombres_certificado(host: str, port: int = 993) -> list[str]:
+    """Nombres (DNS) del certificado que presenta el servidor, sin validarlo (solo para diagnóstico)."""
+    from cryptography import x509
+
+    pem = ssl.get_server_certificate((host, port), timeout=15)
+    cert = x509.load_pem_x509_certificate(pem.encode())
+    try:
+        san = cert.extensions.get_extension_for_class(x509.SubjectAlternativeName).value
+        return [str(n) for n in san.get_values_for_type(x509.DNSName)]
+    except x509.ExtensionNotFound:
+        return [a.value for a in cert.subject.get_attributes_for_oid(x509.oid.NameOID.COMMON_NAME)]
+
+
+def _corregir_servidor(b: dict[str, Any]) -> str | None:
+    """Hosting compartido: el certificado es del servidor real (p. ej. srv12.hosting.com), no de mail.<dominio>.
+    Prueba esos nombres con verificación completa y, si alguno funciona, lo guarda para ese dominio."""
+    try:
+        nombres = [n for n in nombres_certificado(b["imap_host"], int(b.get("imap_port") or 993)) if "*" not in n]
+    except Exception:
+        return None
+    for n in nombres:
+        try:
+            prueba = {**b, "imap_host": n}
+            m = _conectar(prueba)
+            m.logout()
+        except imaplib.IMAP4.error:
+            pass  # el servidor sí es ese (TLS correcto) aunque la clave falle: igual sirve el nombre
+        except Exception:
+            continue
+        dominio = b["email"].split("@")[-1]
+        _ex("UPDATE correo_buzones SET imap_host=? WHERE imap_host=? AND email LIKE ?", (n, b["imap_host"], f"%@{dominio}"))
+        return n
+    return None
+
+
 def probar(bid: int) -> dict[str, Any]:
     b = next((x for x in listar_buzones() if x["id"] == bid), None)
     if not b:
@@ -325,6 +360,13 @@ def probar(bid: int) -> dict[str, Any]:
         _ex("UPDATE correo_buzones SET estado='OK', ultimo_error=NULL WHERE id=?", (bid,))
         return {"ok": True, "mensajes": n}
     except Exception as e:
+        if (isinstance(e, ssl.SSLCertVerificationError) or "CERTIFICATE" in str(e).upper()) and not b.get("_reintento"):
+            nuevo = _corregir_servidor(b)
+            if nuevo:
+                r = probar(bid)
+                if r["ok"]:
+                    r["servidor"] = nuevo
+                return r
         err = _explicar_error(e, b)
         _ex("UPDATE correo_buzones SET estado='ERROR', ultimo_error=? WHERE id=?", (err, bid))
         return {"ok": False, "error": err}

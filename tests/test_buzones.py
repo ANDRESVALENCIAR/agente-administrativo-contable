@@ -67,3 +67,33 @@ def test_bandeja_alertas_y_niveles():
     assert not [a for a in bz.alertas(date.today()) if a["clave"].startswith("correo:")]
     bz.marcar(nuevos[0]["id"])
     assert not bz.bandeja()
+
+
+def test_corrige_servidor_por_certificado(monkeypatch):
+    import imaplib
+    import ssl
+
+    bz.inicializar()
+    b = next(x for x in bz.listar_buzones() if x["email"] == "gerencia@viaindustrial.com")
+    monkeypatch.setenv(bz.env_clave(b["email"]), "x")
+    monkeypatch.setattr(bz, "nombres_certificado", lambda h, p=993: ["*.hosting.com", "srv7.hosting.com"])
+
+    class Falso:
+        def select(self, *a, **k):
+            return "OK", [b"12"]
+
+        def logout(self):
+            pass
+
+    def conectar(buz):
+        if buz["imap_host"] == "mail.viaindustrial.com":
+            raise ssl.SSLCertVerificationError("certificate verify failed: Hostname mismatch")
+        return Falso()
+
+    monkeypatch.setattr(bz, "_conectar", conectar)
+    r = bz.probar(b["id"])
+    assert r["ok"] and r["servidor"] == "srv7.hosting.com" and r["mensajes"] == 12
+    hosts = {x["email"]: x["imap_host"] for x in bz.listar_buzones()}
+    assert hosts["gerenciafenix@viaindustrial.com"] == "srv7.hosting.com"      # mismo dominio, mismo servidor
+    assert hosts["equiposindustrialesfenix@gmail.com"] == "imap.gmail.com"
+    _ = imaplib
