@@ -14,5 +14,4 @@ git pull
 $py = "C:\venvs\shaki\Scripts\python.exe"
 if (-not (Test-Path $py)) { $py = "python" }
 Write-Host "Abriendo Shaki en http://localhost:8501 (no cierre esta ventana)" -ForegroundColor Green
-Start-Process "http://localhost:8501"
 & $py -m streamlit run dashboard/app.py --server.port 8501
