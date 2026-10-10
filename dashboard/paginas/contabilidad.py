@@ -9,11 +9,25 @@ from conexiones.claude_client import llamar_claude
 from dashboard.utils.db_helper import query_df
 from dashboard.utils.reportes import generar_reporte
 from modulos.contable import generar_informe_gerencia, verificar_conciliacion_bancaria
+from dashboard.utils.pestanas import abierta, pestanas
 
 
 def render() -> None:
     """Renderiza módulo contable."""
     st.markdown("## Contabilidad")
+    t_tab, t_inf = pestanas(["Tablero", "Informe y conciliación"], key="ct_tabs")
+    with t_tab:
+        if abierta(t_tab):
+            from dashboard.paginas import contabilidad_dashboard
+
+            contabilidad_dashboard.render()
+    with t_inf:
+        if abierta(t_inf):
+            _herramientas()
+
+
+def _herramientas() -> None:
+    """Informe de gerencia con IA y conciliación bancaria (módulo anterior)."""
     tab1, tab2 = st.tabs(["Informe Gerencia", "Conciliación Bancaria"])
 
     with tab1:

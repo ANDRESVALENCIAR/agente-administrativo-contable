@@ -272,14 +272,25 @@ def buscar_tercero(texto: str) -> dict[str, Any] | None:
     return info
 
 
+_RE_DEVOL = re.compile(r"DEVOLUC|NOTA CR|\bNC\b|\bDMC\b")
+
+
 def _cruce(t: pd.DataFrame, deuda_nuestra: bool) -> dict[str, Any]:
     """Cruza facturas con pagos (y abonos parciales) por número de factura / consecutivo / orden de compra.
-    Los movimientos que comparten algún número quedan en el mismo grupo; un grupo con saldo es una factura abierta."""
+    Los movimientos que comparten algún número quedan en el mismo grupo; un grupo con saldo es una factura abierta.
+    En Python puro (sin pandas por fila): se puede correr para cientos de terceros en un instante."""
     if t is None or t.empty:
         return {}
+    filas = list(zip(t["fecha"], t["detalle"].fillna("").astype(str),
+                     (t["comprobante"] if "comprobante" in t else pd.Series([""] * len(t))).fillna("").astype(str),
+                     t["valor"].astype(float)))
+    return cruce_filas(filas, deuda_nuestra)
+
+
+def cruce_filas(filas: list[tuple], deuda_nuestra: bool) -> dict[str, Any]:
+    """filas: (fecha, detalle, comprobante, valor). Ver _cruce."""
     signo = -1 if deuda_nuestra else 1  # pasivo: factura = crédito (valor < 0); cartera: al revés
-    t = t.reset_index(drop=True)
-    padre = list(range(len(t)))
+    padre = list(range(len(filas)))
 
     def raiz(i: int) -> int:
         while padre[i] != i:
@@ -288,33 +299,52 @@ def _cruce(t: pd.DataFrame, deuda_nuestra: bool) -> dict[str, Any]:
         return i
 
     dueno: dict[str, int] = {}
-    for i, r in t.iterrows():
-        for k in _num_factura(f"{r.get('detalle', '')} {r.get('comprobante', '')}"):
+    for i, (_, det, comp, _v) in enumerate(filas):
+        for k in _num_factura(f"{det} {comp}"):
             if k in dueno:
                 padre[raiz(i)] = raiz(dueno[k])
             else:
                 dueno[k] = i
-    t["grupo"] = [raiz(i) for i in range(len(t))]
-    devol = t.apply(lambda r: bool(re.search(r"DEVOLUC|NOTA CR|\bNC\b|\bDMC\b", f"{r.get('detalle', '')} "
-                                                                     f"{r.get('comprobante', '')}".upper())
-                                    and "PAGO" not in str(r.get("detalle", "")).upper()), axis=1)
-    fact = t[t["valor"] * signo > 0]
-    pagos = t[(t["valor"] * signo < 0) & ~devol]
-    devoluciones = float(abs(t[(t["valor"] * signo < 0) & devol]["valor"].sum()))
+    facturado = pagado = devoluciones = neto = 0.0
+    grupos: dict[int, list[int]] = {}
+    for i, (_, det, comp, v) in enumerate(filas):
+        grupos.setdefault(raiz(i), []).append(i)
+        neto += v
+        sv = v * signo
+        if sv > 0:
+            facturado += abs(v)
+        elif sv < 0:
+            if _RE_DEVOL.search(f"{det} {comp}".upper()) and "PAGO" not in det.upper():
+                devoluciones += abs(v)
+            else:
+                pagado += abs(v)
     abiertas = []
-    for g, sub in t.groupby("grupo"):
-        saldo = float((sub["valor"] * signo).sum())
-        f = sub[sub["valor"] * signo > 0]
-        if saldo > 1000 and not f.empty:
-            r = f.iloc[0]
-            nums = [k for k in _num_factura(r["detalle"]) if not k.startswith("OC")] or _num_factura(r["detalle"])
-            abiertas.append({"fecha": r["fecha"], "detalle": r["detalle"], "valor": saldo,
-                             "total": float(abs(f["valor"].sum())), "factura": nums[0] if nums else "",
-                             "abono": saldo < abs(f["valor"].sum()) - 1})
-    return {"facturado": float(abs(fact["valor"].sum())) - devoluciones, "pagado": float(abs(pagos["valor"].sum())),
-            "devoluciones": devoluciones,
-            "neto": float(-t["valor"].sum() if deuda_nuestra else t["valor"].sum()),
-            "abiertas": sorted(abiertas, key=lambda x: x["fecha"]),
+    for idx in grupos.values():
+        saldo = sum(filas[i][3] * signo for i in idx)
+        fact = [i for i in idx if filas[i][3] * signo > 0]
+        if saldo > 1000 and fact:
+            f0 = filas[fact[0]]
+            total = abs(sum(filas[i][3] for i in fact))
+            nums = [k for k in _num_factura(f0[1]) if not k.startswith("OC")] or _num_factura(f0[1])
+            abiertas.append({"fecha": f0[0], "detalle": f0[1], "valor": float(saldo), "total": float(total),
+                             "factura": nums[0] if nums else "", "abono": saldo < total - 1})
+    abiertas.sort(key=lambda x: x["fecha"])
+    if not deuda_nuestra:
+        # Los clientes casi nunca citan la factura al pagar: lo abierto no puede superar lo que quedó debiendo
+        # en el año. Los pagos sin número se aplican a las facturas más antiguas primero.
+        sobra = sum(a["valor"] for a in abiertas) - max(neto, 0.0)
+        while sobra > 1 and abiertas:
+            a = abiertas[0]
+            if a["valor"] <= sobra:
+                sobra -= a["valor"]
+                abiertas.pop(0)
+            else:
+                a["valor"] -= sobra
+                a["abono"] = True
+                sobra = 0
+    return {"facturado": facturado - devoluciones, "pagado": pagado, "devoluciones": devoluciones,
+            "neto": float(-neto if deuda_nuestra else neto),
+            "abiertas": abiertas,
             "pendiente": float(sum(a["valor"] for a in abiertas))}
 
 

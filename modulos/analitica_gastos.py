@@ -53,7 +53,7 @@ def guardar_subida(nombre: str, contenido: bytes) -> Path:
 
 def _clave(ruta: Path) -> str:
     st = ruta.stat()
-    return hashlib.md5(f"v2|{ruta}|{st.st_mtime}|{st.st_size}".encode()).hexdigest()[:16]
+    return hashlib.md5(f"v3|{ruta}|{st.st_mtime}|{st.st_size}".encode()).hexdigest()[:16]
 
 
 _MEMORIA: dict[str, dict[str, Any]] = {}
@@ -101,6 +101,7 @@ def _leer(ruta: Path) -> dict[str, Any] | None:
             return None
         mov = pd.DataFrame(libro.auxiliar(("4", "5", "6", "7")))
         terc = pd.DataFrame(libro.auxiliar(("1305", "1330", "2205", "2335", "2380")))
+        caja = pd.DataFrame(libro.auxiliar(("11",)))
         pr = libro.prueba()
     finally:
         libro.cerrar()
@@ -128,7 +129,13 @@ def _leer(ruta: Path) -> dict[str, Any] | None:
         terc["tercero"] = terc["nombre"].fillna("").astype(str).str.split(" Nit:").str[0].str.strip()
         terc["cuenta4"] = terc["cuenta"].astype(str).str[:4]
         terc["nombre_cuenta4"] = terc["cuenta4"].map(lambda c: nombres.get(c, c))
-    return {"terceros": terc, "mov": mov[["fecha", "mes", "cuenta", "cuenta4", "cuenta6", "clase", "grupo", "nombre_grupo",
+    if not caja.empty:
+        caja["fecha"] = pd.to_datetime(caja["fecha"], errors="coerce")
+        caja = caja.dropna(subset=["fecha"])
+        caja["cuenta"] = caja["cuenta"].astype(str)
+        caja["tercero"] = caja["nombre"].fillna("").astype(str).str.split(" Nit:").str[0].str.strip()
+        caja["mes"] = caja["fecha"].dt.to_period("M").dt.to_timestamp()
+    return {"prueba": pr, "caja": caja, "terceros": terc, "mov": mov[["fecha", "mes", "cuenta", "cuenta4", "cuenta6", "clase", "grupo", "nombre_grupo",
                         "nombre_cuenta4", "nombre_cuenta6", "nit", "tercero", "detalle", "comprobante", "monto"]],
             "cuentas": nombres, "fuente": str(ruta), "leido": date.today().isoformat()}
 
