@@ -10,7 +10,7 @@ import streamlit as st
 from database import crear_alerta
 from modulos import motor_alertas as ma
 
-BOTON = {"pagar": "Pagué ✓", "presentar": "Presenté ✓", "ejecutar": "Reintentar"}
+BOTON = {"pagar": "Pagué ✓", "presentar": "Presenté ✓", "ejecutar": "Reintentar", "atender": "Atendido ✓"}
 
 CSS = """
 <style>

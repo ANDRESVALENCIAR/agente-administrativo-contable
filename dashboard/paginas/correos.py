@@ -8,10 +8,20 @@ from modulos.correos import procesar_correos, sincronizar_reglas_desde_config
 
 def render() -> None:
     """Renderiza módulo correos."""
+    from dashboard.paginas import correos_buzones
+
     st.markdown("## Correos")
+    tb, tz, tn, t1, t2 = st.tabs(["Bandeja inteligente", "Buzones conectados", "Alertas de correo",
+                                  "Procesados (anterior)", "Reglas de reenvío"])
+    with tb:
+        correos_buzones.render_bandeja()
+    with tz:
+        correos_buzones.render_buzones()
+    with tn:
+        correos_buzones.render_niveles()
     if en_modo_demo():
-        st.info("Modo demo: la clasificación usa respuestas simuladas. Configure Gmail/Outlook en `.env` para producción.")
-    t1, t2 = st.tabs(["Procesados", "Reglas de reenvío"])
+        with t1:
+            st.info("Modo demo: la clasificación usa respuestas simuladas.")
 
     with t1:
         if st.button("Procesar correos ahora"):

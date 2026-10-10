@@ -35,7 +35,7 @@ PESO = {"CRITICO": 25, "URGENTE": 10, "AVISO": 3, "INFO": 0}
 COLOR = {"CRITICO": "#E5484D", "URGENTE": "#FF6A3D", "AVISO": "#F5C542", "INFO": "#8B8B93"}
 NOMBRE_NIVEL = {"CRITICO": "Crítica", "URGENTE": "Urgente", "AVISO": "Aviso", "INFO": "Info"}
 MODULOS = {"pagos": "Pagos", "impuestos": "Impuestos", "revision": "Revisión impuestos", "agente": "Agente",
-           "personal": "Personal", "creditos": "Cartera", "sistema": "Sistema", "juridico": "Jurídico",
+           "personal": "Personal", "creditos": "Cartera", "correos": "Correos", "sistema": "Sistema", "juridico": "Jurídico",
            "manual": "Manual"}
 
 
@@ -410,6 +410,11 @@ def r_cartera_cxp(hoy: date) -> list[dict]:
     return out
 
 
+def r_correos(hoy: date) -> list[dict]:
+    from modulos import buzones
+    return buzones.alertas(hoy)
+
+
 REGLAS: dict[str, dict[str, Any]] = {
     "pagos": {"nombre": "Pagos del control de pagos", "fn": r_pagos,
               "desc": "Vencidos (crítica), fecha sugerida pasada u hoy (urgente), mañana (aviso), pagos viejos sin marcar y Excel sin actualizar."},
@@ -422,6 +427,8 @@ REGLAS: dict[str, dict[str, Any]] = {
     "canales": {"nombre": "Canales de aviso", "fn": r_canales, "desc": "Correo de alertas sin configurar."},
     "personal": {"nombre": "Personal", "fn": r_personal,
                  "desc": "Preavisos y vencimientos de contrato, exámenes médicos, dotación y vacaciones por aprobar."},
+    "correos": {"nombre": "Correos (buzones conectados)", "fn": r_correos,
+                "desc": "Correos importantes de los buzones conectados, con el nivel elegido por categoría en Correos."},
     "cartera": {"nombre": "Cartera y proveedores", "fn": r_cartera_cxp,
                 "desc": "Clientes con más de 30/60 días de mora y pagos programados a proveedores."},
 }

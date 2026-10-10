@@ -344,6 +344,9 @@ def ejecutar_accion(accion: tuple[str, int], por: str = "agenda") -> dict[str, A
     if tipo == "presentar":
         from modulos import radar_tributario as rt
         return rt.marcar_presentado(oid, por=por)
+    if tipo == "atender":
+        from modulos import buzones
+        return buzones.marcar(oid, "ATENDIDO")
     if tipo == "ejecutar":
         from utils.calendario_maestro import ejecutar_tarea_por_id
         ejecutar_tarea_por_id(oid)

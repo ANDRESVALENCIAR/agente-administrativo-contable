@@ -764,6 +764,16 @@ def sembrar_tareas_iniciales() -> int:
             "funcion_callback": "alertas_escanear",
         },
         {
+            "titulo": "Correos: leer buzones conectados (cada 10 min)",
+            "modulo": "CORREOS",
+            "tipo": "AUTOMATICA",
+            "descripcion": "Lee en solo lectura gerencia@, gerenciafenix@, equiposindustrialesfenix@ y los que se agreguen",
+            "fecha_inicio": ahora,
+            "recurrencia": "INTERVALO",
+            "recurrencia_config": {"minutos": 10},
+            "funcion_callback": "leer_buzones",
+        },
+        {
             "titulo": "Alertas: resumen diario por correo",
             "modulo": "SISTEMA",
             "tipo": "ALERTA",
