@@ -20,3 +20,6 @@ logs/
 
 # Revisión de impuestos: insumos del contador e informes (datos reales: no subir)
 data/revisiones/
+
+# Ícono y lanzador de escritorio (locales)
+data/escritorio/
