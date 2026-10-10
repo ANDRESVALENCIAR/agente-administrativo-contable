@@ -69,6 +69,21 @@ def _retiro(obs: Any) -> pd.Timestamp | None:
     return _fecha(m.group(0)) if m else None
 
 
+def _json(v: Any) -> dict:
+    import json
+    try:
+        return json.loads(v) if isinstance(v, str) and v.strip() else {}
+    except ValueError:
+        return {}
+
+
+def _desde_json(orig: dict, claves: tuple[str, ...], actual: Any) -> Any:
+    for k, v in orig.items():
+        if any(_n(k).startswith(c) for c in claves) and v not in (None, "", "NaT", "nan"):
+            return v
+    return actual
+
+
 def _mes(v: Any) -> int | None:
     s = _n(v).lower().replace(".0", "")
     if s.isdigit() and 1 <= int(s) <= 12:
@@ -145,6 +160,15 @@ def cargar(hoy: date | None = None) -> dict[str, Any]:
     emp = _q("SELECT * FROM empleados_fenix")
     out: dict[str, Any] = {"hoy": hoy}
     if not emp.empty:
+        # la fila original del Excel (datos_json) manda: en varias filas las columnas quedaron corridas
+        orig = emp["datos_json"].map(_json) if "datos_json" in emp.columns else pd.Series([{}] * len(emp))
+        for col, claves in (("cargo", ("CARGO",)), ("departamento", ("DEPARTAMENTO",)),
+                            ("fecha_ingreso", ("FECHA INICIO DE CONTRATO", "FECHA DE INGRESO")),
+                            ("fecha_nacimiento", ("FECHA DE NACIMIENTO",)), ("ciudad", ("CIUDAD",)),
+                            ("salud", ("SALUD",)), ("caja_compensacion", ("CAJA DE COMPENSACION",)),
+                            ("tipo_contrato", ("TIPO DE CONTRATO",)), ("salario_ibc", ("VALOR CONTRATO", "SALARIO")),
+                            ("observaciones", ("OBSERVACIONES",))):
+            emp[col] = [_desde_json(o, claves, v) for o, v in zip(orig, emp[col] if col in emp.columns else [None] * len(emp))]
         emp["nombre"] = emp["nombre_completo"].map(lambda x: _n(x).title())
         emp["activo"] = emp["activo"].astype(str).isin(["1", "True", "true"])
         emp["vinculo"] = emp["tipo_plantilla"].map({"nomina_activo": "Nómina", "prestacion_servicios": "Prestación de servicios",
