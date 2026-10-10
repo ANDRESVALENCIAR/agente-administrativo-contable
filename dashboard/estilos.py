@@ -208,6 +208,55 @@ CSS = f"""
         padding: 10px 12px; box-shadow: 0 24px 60px rgba(0,0,0,.45);
     }}
     [data-testid="stForm"] .stTextInput input {{ background: transparent !important; border: none !important; font-size: 15px; }}
+
+    /* ═════════ Responsive: celular · portátil 13" · TV ═════════ */
+    img, svg, video, canvas {{ max-width: 100%; }}
+    [data-testid="stMarkdownContainer"] {{ overflow-wrap: anywhere; }}
+    [data-testid="stMarkdownContainer"] table {{ display: block; overflow-x: auto; max-width: 100%; }}
+    .st-key-nav_movil_box {{ display: none !important; }}
+    .st-key-chat_btn_box {{ align-items: flex-end; margin-bottom: -0.6rem; }}
+    .st-key-chat_btn_box [data-testid="stElementContainer"] {{ width: auto !important; align-self: flex-end; }}
+    .st-key-chat_btn_box button {{ width: auto !important; }}
+    /* Celular */
+    @media (max-width: 640px) {{
+        .st-key-nav_movil_box {{ display: block !important; position: sticky; top: 2.6rem; z-index: 50;
+            background: {BG}; padding: 6px 0 8px 0; border-bottom: 1px solid {BORDER}; margin-bottom: 8px; }}
+        .st-key-nav_movil_box [data-testid="stHorizontalBlock"] {{ flex-wrap: nowrap !important; }}
+        .st-key-nav_movil_box [data-testid="stColumn"] {{ min-width: 0 !important; }}
+        .st-key-chat_btn_box {{ display: none !important; }}
+        /* botones de acción en 2 columnas en vez de uno debajo del otro */
+        [class*="st-key-albtn_"] [data-testid="stHorizontalBlock"] {{ flex-wrap: wrap !important; }}
+        [class*="st-key-albtn_"] [data-testid="stColumn"] {{ flex: 1 1 calc(50% - 0.5rem) !important;
+            min-width: calc(50% - 0.5rem) !important; width: auto !important; }}
+        .main .block-container, [data-testid="stMainBlockContainer"] {{
+            padding: 3.2rem 0.9rem 3rem 0.9rem !important;
+        }}
+        .stApp h2 {{ font-size: 1.35rem !important; }}
+        .sk-hero-num {{ font-size: 44px !important; }}
+        .sk-kpis {{ grid-template-columns: repeat(2, minmax(0, 1fr)) !important; margin: 18px 0 !important; }}
+        .sk-kpi {{ padding: 14px 14px !important; }}
+        .sk-kpi-v {{ font-size: 28px !important; }}
+        .sk-hero-sub {{ flex-wrap: wrap; gap: 10px 16px !important; }}
+        [data-testid="stHorizontalBlock"] {{ gap: 0.5rem !important; }}
+        [data-testid="stTabs"] [role="tablist"] {{ overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; }}
+        [data-testid="stTabs"] button[role="tab"] {{ white-space: nowrap; }}
+        div[data-testid="stDialog"] div[role="dialog"] {{ width: 100vw !important; max-width: 100vw !important; }}
+    }}
+    /* Portátil 13" (1280–1440 px) */
+    @media (min-width: 641px) and (max-width: 1440px) {{
+        .main .block-container, [data-testid="stMainBlockContainer"] {{ padding-left: 2rem; padding-right: 2rem; }}
+    }}
+    /* TV y monitores grandes: todo crece en proporción */
+    @media (min-width: 1900px) {{
+        .main .block-container, [data-testid="stMainBlockContainer"] {{ max-width: 1680px; }}
+        [data-testid="stAppViewContainer"] {{ zoom: 1.12; }}
+    }}
+    @media (min-width: 2500px) {{
+        [data-testid="stAppViewContainer"] {{ zoom: 1.45; }}
+    }}
+    @media (min-width: 3400px) {{
+        [data-testid="stAppViewContainer"] {{ zoom: 1.9; }}
+    }}
 </style>
 """
 

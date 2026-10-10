@@ -128,7 +128,7 @@ def _tarjeta(a: dict, clave: str, historial: bool = False) -> None:
     )
     if historial:
         return
-    cols = st.columns([1.3, 1.3, 1, 1, 1])
+    cols = st.container(key=f"albtn_{clave}_{a['id']}").columns([1.3, 1.3, 1, 1, 1])
     acc = a.get("accion")
     if acc and acc[0] in BOTON:
         if cols[0].button(BOTON[acc[0]], key=f"{clave}_acc_{a['id']}", type="primary", use_container_width=True):

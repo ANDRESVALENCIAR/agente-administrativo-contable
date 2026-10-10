@@ -86,7 +86,7 @@ CSS = """
 .cm-mc{display:block;font-size:10.5px;color:#E4E4E7;border-radius:6px;padding:2px 5px;margin-top:3px;white-space:nowrap;
  overflow:hidden;text-overflow:ellipsis}
 .cm-more{font-size:10px;color:#8B8B93;margin-top:3px;font-family:'Geist Mono',monospace}
-@media(max-width:900px){.cm-kpis{grid-template-columns:repeat(3,1fr)}.cm-week{grid-template-columns:1fr}
+@media(max-width:900px){.cm-kpis{grid-template-columns:repeat(2,1fr)}.cm-k b{font-size:20px}.cm-week{grid-template-columns:1fr}
  .cm-pulse{grid-template-columns:repeat(15,1fr)}.cm-day{font-size:32px}}
 </style>
 """

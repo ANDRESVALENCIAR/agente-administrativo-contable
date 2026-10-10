@@ -156,6 +156,8 @@ def _hero(prox: dict | None, obls: list[dict], hoy: date, r: dict) -> None:
 .r{{position:relative;flex:none}}
 .leg{{display:flex;gap:16px;justify-content:center;font-family:'Geist Mono',monospace;font-size:10px;color:#8B8B93;margin-top:-6px}}
 .leg i{{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px}}
+@media(max-width:600px){{.r{{display:none}}.t{{font-size:24px}}.u{{min-width:0;flex:1}}.u b{{font-size:26px}}
+  .eb{{font-size:9.5px;letter-spacing:.08em}}}}
 </style></head><body><div class="wrap"><div class="grid"></div>
 <div class="l">
   <div class="eb"><i></i>RADAR TRIBUTARIO · NIT {nit} · DIAN DÍGITO {cal.NIT_ULTIMO_DIGITO} · SHD BOGOTÁ</div>

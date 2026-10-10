@@ -58,7 +58,7 @@ st.set_page_config(
     page_title=f"AGENTE ADMIN SHAKI · {cfg.NOMBRE_EMPRESA}",
     page_icon="◼",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="auto",
 )
 
 st.markdown(CSS, unsafe_allow_html=True)
@@ -227,47 +227,75 @@ with st.sidebar:
     libs_ok = sum(1 for v in librerias_disponibles().values() if v)
     st.caption(f"Librerías core: **{libs_ok}** activas")
 
-col_dashboard, col_chat = st.columns([2, 1], gap="large")
+def _chat_cuerpo(en_dialogo: bool = False) -> None:
+    """Chat con Shaki (se usa al lado del tablero o dentro de una ventana emergente)."""
+    def _rerun() -> None:
+        st.rerun(scope="fragment") if en_dialogo else st.rerun()
 
-with col_dashboard:
-    PAGINAS[pagina]()
-
-with col_chat:
-    st.markdown(
-        f'<div class="sk-chat-h"><div class="sk-logo" style="width:26px;height:26px;border-radius:8px">{LOGO_SVG}</div>'
-        '<span>Pregúntale a Shaki</span></div>',
-        unsafe_allow_html=True,
-    )
     for msg in st.session_state.chat_mensajes_ui[-15:]:
         css = "chat-msg-user" if msg["rol"] == "user" else "chat-msg-agent"
         st.markdown(f'<div class="{css}">{msg["texto"]}</div>', unsafe_allow_html=True)
-
-    preguntas = [
-        "¿Qué alertas hay hoy?",
-        "Pagos pendientes",
-        "Verificar alertas",
-        "Procesar correos",
-        "Cartera en mora",
-        "Impuestos próximos",
-        "¿Qué puedes hacer?",
-    ]
+    preguntas = ["¿Qué alertas hay hoy?", "Pagos pendientes", "Verificar alertas", "Procesar correos",
+                 "Cartera en mora", "Impuestos próximos", "¿Qué puedes hacer?"]
     cols = st.columns(2)
     for i, p in enumerate(preguntas):
-        col = cols[i % 2]
-        if col.button(p, key=f"qr_{i}", use_container_width=True):
+        if cols[i % 2].button(p, key=f"qr_{i}_{int(en_dialogo)}", use_container_width=True):
             st.session_state.chat_mensajes_ui.append({"rol": "user", "texto": p})
             with st.spinner("Consultando..."):
                 r, st.session_state.chat_historial = chat_responder(p, st.session_state.chat_historial)
             st.session_state.chat_mensajes_ui.append({"rol": "agent", "texto": r})
-            st.rerun()
-
-    with st.form("chat_form", clear_on_submit=True):
-        user_input = st.text_input(
-            "Mensaje", placeholder="¿Qué pagos vencen esta semana?", label_visibility="collapsed"
-        )
+            _rerun()
+    with st.form(f"chat_form_{int(en_dialogo)}", clear_on_submit=True):
+        user_input = st.text_input("Mensaje", placeholder="¿Qué pagos vencen esta semana?",
+                                   label_visibility="collapsed")
         if st.form_submit_button("Enviar", use_container_width=True) and user_input.strip():
             st.session_state.chat_mensajes_ui.append({"rol": "user", "texto": user_input})
             with st.spinner("Consultando..."):
                 r, st.session_state.chat_historial = chat_responder(user_input, st.session_state.chat_historial)
             st.session_state.chat_mensajes_ui.append({"rol": "agent", "texto": r})
-            st.rerun()
+            _rerun()
+
+
+@st.dialog("Pregúntale a Shaki", width="large")
+def _chat_dialogo() -> None:
+    _chat_cuerpo(en_dialogo=True)
+
+
+# Por defecto el tablero usa todo el ancho (celular, portátil de 13" y TV); el chat se abre en una
+# ventana emergente. Quien prefiera el chat fijo a la derecha lo activa en la barra lateral.
+with st.sidebar:
+    chat_lado = st.toggle("Chat fijo a la derecha", value=False, key="chat_lado",
+                          help="Recomendado solo en pantallas grandes")
+
+if chat_lado:
+    col_dashboard, col_chat = st.columns([2.4, 1], gap="large")
+else:
+    col_dashboard, col_chat = st.container(), None
+
+def _nav_movil() -> None:
+    st.session_state["nav"] = st.session_state["nav_movil"]
+
+
+with col_dashboard:
+    # Celular: menú arriba (la barra lateral queda oculta); en pantallas grandes este bloque no se ve
+    with st.container(key="nav_movil_box"):
+        m1, m2 = st.columns([3, 1.2])
+        st.session_state["nav_movil"] = pagina
+        m1.selectbox("Ir a", list(PAGINAS.keys()), key="nav_movil", on_change=_nav_movil,
+                     label_visibility="collapsed")
+        if m2.button("Shaki", key="abrir_chat_movil", use_container_width=True, icon=":material/chat:"):
+            _chat_dialogo()
+    if not chat_lado:
+        c_btn = st.container(key="chat_btn_box")
+        if c_btn.button("Pregúntale a Shaki", key="abrir_chat", use_container_width=True, icon=":material/chat:"):
+            _chat_dialogo()
+    PAGINAS[pagina]()
+
+if col_chat is not None:
+    with col_chat:
+        st.markdown(
+            f'<div class="sk-chat-h"><div class="sk-logo" style="width:26px;height:26px;border-radius:8px">{LOGO_SVG}</div>'
+            '<span>Pregúntale a Shaki</span></div>',
+            unsafe_allow_html=True,
+        )
+        _chat_cuerpo()
