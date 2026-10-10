@@ -102,6 +102,7 @@ def proximo_vencimiento(inicio: pd.Timestamp | None, venc: pd.Timestamp | None, 
                         hoy: date | None = None) -> pd.Timestamp | None:
     """Los contratos a término fijo se renuevan solos: lleva el vencimiento al próximo futuro."""
     hoy_ts = pd.Timestamp(hoy or date.today())
+    meses = None if meses is None or pd.isna(meses) else int(meses)
     if venc is None:
         if inicio is None or not meses:
             return None
