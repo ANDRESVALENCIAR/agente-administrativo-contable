@@ -39,8 +39,15 @@ def test_ciclo_completo():
     crear_alerta("AVISO", "juridico", "Revisar poder", "x")
     crear_alerta("AVISO", "JURIDICO", "Revisar poder", "x")
     ma.inicializar()
+    crear_alerta("CRITICO", "impuestos", "IMPUESTO: IVA 4", "x")             # genérica vieja: la reemplaza el motor
+    ma.meta("migracion_v3", "")                                              # forzar re-migración en esta prueba
+    conn = get_conn()
+    conn.execute("DELETE FROM alertas_meta WHERE clave='migracion_v3'")
+    conn.commit()
+    conn.close()
+    ma.inicializar()
     viejas = [a for a in ma.listar() if a.get("origen") != "MOTOR"]
-    assert len(viejas) == 1 and viejas[0]["titulo"] == "Revisar poder"     # migración: obsoletas y duplicadas fuera
+    assert [a["titulo"] for a in viejas] == ["Revisar poder"]                # migración: obsoletas y duplicadas fuera
 
     cid = _cxp(date.today())
     r1 = ma.escanear(notificar=False)

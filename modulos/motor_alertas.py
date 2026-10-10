@@ -102,6 +102,7 @@ def inicializar() -> None:
     conn.commit()
     conn.close()
     _migrar_una_vez()
+    _migrar_v3()
 
 
 def meta(clave: str, valor: str | None = None) -> str | None:
@@ -131,6 +132,30 @@ def _apagar_generadores_viejos() -> int:
         return n
     except Exception:
         return 0
+
+
+def _migrar_v3() -> None:
+    """Las alertas viejas automáticas de pagos, impuestos y cartera (sin clave) las reemplaza el motor."""
+    if meta("migracion_v3"):
+        return
+    _apagar_generadores_viejos()
+    try:
+        conn = get_conn()
+        ahora = datetime.now().isoformat(sep=" ", timespec="seconds")
+        n = conn.execute(
+            "UPDATE alertas SET resuelto=1, fecha_resolucion=?, resuelta_por='migración: reemplazada por el motor nuevo' "
+            "WHERE resuelto=0 AND clave IS NULL AND COALESCE(origen,'MODULO')!='MANUAL' "
+            "AND LOWER(modulo) IN ('pagos','impuestos','creditos')", (ahora,)).rowcount
+        n += conn.execute(
+            """UPDATE alertas SET resuelto=1, fecha_resolucion=?, resuelta_por='migración: duplicada'
+               WHERE resuelto=0 AND clave IS NULL AND id NOT IN (
+                 SELECT MIN(id) FROM alertas WHERE resuelto=0 AND clave IS NULL GROUP BY LOWER(modulo), LOWER(titulo))""",
+            (ahora,)).rowcount
+        conn.commit()
+        conn.close()
+        meta("migracion_v3", f"{datetime.now():%Y-%m-%d %H:%M} · {n} alertas viejas cerradas")
+    except Exception as e:
+        logger.warning("Migración v3 de alertas: %s", e)
 
 
 def _migrar_una_vez() -> None:
