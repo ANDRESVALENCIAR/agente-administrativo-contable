@@ -501,6 +501,18 @@ def _local(pregunta: str) -> str:
             return "\n".join(out)
         return _resumen_hoy(manana="manana" in t)
 
+    # ¿escribió solo un nombre? → ficha de la persona o del proveedor/cliente
+    try:
+        from modulos import conocimiento as co
+        info = co.buscar_persona(pregunta)
+        if info:
+            return co.responder_persona(pregunta, info)
+        info = co.buscar_tercero(pregunta)
+        if info:
+            return co.responder_tercero(pregunta, info)
+    except Exception as e:
+        logger.warning("Conocimiento (nombre suelto): %s", e)
+
     # última opción: buscar las palabras de la pregunta
     palabras = [w for w in re.findall(r"[a-z0-9]{4,}", t) if w not in ("cual", "cuales", "donde", "como", "esta", "este",
                                                                         "tengo", "sobre", "para", "quiero", "saber")]

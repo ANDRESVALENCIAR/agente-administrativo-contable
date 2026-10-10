@@ -31,7 +31,7 @@ PALABRAS_VACIAS = {"cuanto", "cuantos", "cuantas", "cual", "cuales", "que", "qui
                    "debo", "plata", "dinero", "total", "mucho", "ingreso", "ingresar", "entro", "desde", "fecha", "hace",
                    "nuestra", "nuestro", "su", "sus", "ese", "esa", "este", "nomina", "salario", "gana", "sueldo",
                    "clientes", "proveedores", "mora", "cartera", "quien", "trabaja", "hemos", "cuesta", "hace", "pagos",
-                   "semana", "mes", "hoy", "manana", "nos", "facturo", "facturado", "facturamos", "vendio"}
+                   "semana", "mes", "hoy", "manana", "nos", "nostros", "nosotras", "facturo", "facturado", "facturamos", "vendio"}
 
 
 def _p(v: float | None) -> str:
@@ -61,15 +61,53 @@ def candidatos_texto(pregunta: str) -> str:
     return " ".join(pal)
 
 
+COMUNES = {"sas", "s.a.s", "ltda", "s.a", "sa", "cia", "y", "e.u", "eu", "esp", "de", "del", "la", "los"}
+
+
+def _tok(t: str) -> list[str]:
+    return [w for w in re.findall(r"[a-z0-9&]+", _n(t).lower()) if len(w) >= 3 and w not in COMUNES]
+
+
+def _parecida(a: str, b: str) -> bool:
+    """Dos palabras son la misma aunque tengan un error de digitación (valenvia ≈ valencia)."""
+    if a == b:
+        return True
+    if min(len(a), len(b)) < 4:
+        return False
+    if len(a) >= 4 and b.startswith(a):  # «codi» → «codifer», «andr» → «andres»
+        return True
+    try:
+        from rapidfuzz import fuzz
+        return fuzz.ratio(a, b) >= 85
+    except ImportError:
+        import difflib
+        return difflib.SequenceMatcher(None, a, b).ratio() >= 0.85
+
+
 def _mejor(nombre: str, opciones: list[str], minimo: float = 80) -> list[tuple[str, float]]:
-    if not nombre or not opciones:
+    """Busca el nombre por palabras: las palabras de la pregunta que no aparecen en ningún nombre
+    («nostros», «entro», «cuanto») se ignoran solas; luego gana quien tenga más palabras en común."""
+    opciones = [o for o in dict.fromkeys(opciones) if o and str(o).strip()]
+    q = list(dict.fromkeys(_tok(nombre)))
+    if not q or not opciones:
         return []
-    puntajes = sorted(((o, parecido(nombre, o)) for o in set(opciones) if o), key=lambda x: -x[1])
-    # exige que al menos una palabra del nombre buscado aparezca (evita falsos positivos con palabras sueltas)
-    toks = [t for t in _n(nombre).split() if len(t) >= 4]
-    puntajes = [(o, s) for o, s in puntajes if s >= minimo and (not toks or any(t in _n(o) for t in toks)
-                                                                 or s >= 92)]
-    return puntajes[:5]
+    toks_op = {o: set(_tok(o)) for o in opciones}
+    vocab = set().union(*toks_op.values())
+    utiles = [w for w in q if w in vocab or any(_parecida(w, v) for v in vocab if v[:1] == w[:1])]
+    if not utiles:
+        return []
+    puntajes = []
+    for o, ts in toks_op.items():
+        m = sum(1 for w in utiles if any(_parecida(w, v) for v in ts))
+        if not m:
+            continue
+        cubre = 100 * m / len(utiles)
+        if cubre < 60:
+            continue
+        final = 0.7 * cubre + 0.3 * parecido(" ".join(utiles), o)
+        puntajes.append((o, round(final, 1)))
+    puntajes.sort(key=lambda x: (-x[1], len(x[0])))
+    return [p for p in puntajes if p[1] >= min(minimo, 75)][:5]
 
 
 # ───────────────────────── Personas ─────────────────────────
@@ -88,6 +126,9 @@ def buscar_persona(texto: str) -> dict[str, Any] | None:
     hallados = _mejor(q, e["nombre"].tolist(), 78)
     if not hallados:
         return None
+    empates = [h[0] for h in hallados if h[1] >= hallados[0][1] - 1]
+    if len(empates) > 1:
+        return {"ambiguo": empates}
     nombre = hallados[0][0]
     fila = e[e["nombre"] == nombre].sort_values("activo", ascending=False).iloc[0]
     info: dict[str, Any] = {"nombre": nombre, "activo": bool(fila["activo"]), "vinculo": fila["vinculo"],
@@ -111,19 +152,24 @@ def buscar_persona(texto: str) -> dict[str, Any] | None:
 
 
 def responder_persona(pregunta: str, info: dict[str, Any]) -> str:
+    if info.get("ambiguo"):
+        return ("Hay varias personas con ese nombre: " + ", ".join(f"**{x}**" for x in info["ambiguo"])
+                + ". ¿Por cuál me pregunta? Escriba el nombre y un apellido.")
     t = _n(pregunta).lower()
     n = info["nombre"]
     lineas = []
     if not info["activo"]:
         lineas.append(f"**{n}** ya no está en la empresa" + (f" (retiro: {_f(info['retiro'])})." if _ok(info["retiro"]) else "."))
-    if re.search(r"anos|lleva|antiguedad|desde cuando|cuando (entro|ingreso)|hace cuanto|tiempo", t):
+    pide_edad = bool(re.search(r"edad|anos tiene|nacio|cumple", t))
+    if re.search(r"lleva|antiguedad|desde cuando|cuando (entro|ingreso)|hace cuanto|tiempo|trabaja", t) or \
+            (re.search(r"anos", t) and not pide_edad):
         if _ok(info["ingreso"]):
             lineas.append(f"**{n}** lleva **{_anios(info['antiguedad'])}** con nosotros: ingresó el {_f(info['ingreso'])}"
                           + (f" y salió el {_f(info['retiro'])}." if not info["activo"] and _ok(info["retiro"]) else "."))
         else:
             lineas.append(f"No tengo la fecha de ingreso de **{n}**. Complétela en el Excel «Archivo General» "
                           "(columna FECHA INICIO DE CONTRATO) o en Personal → Contratos Activos.")
-    if re.search(r"edad|cuantos anos tiene|nacio|cumple", t) and "lleva" not in t:
+    if pide_edad:
         if _ok(info["nacimiento"]):
             nac = pd.Timestamp(info["nacimiento"])
             lineas.append(f"**{n}** tiene **{int(info['edad'])} años**; cumple el {nac.day} de {MESES[nac.month - 1]}.")
@@ -144,9 +190,19 @@ def responder_persona(pregunta: str, info: dict[str, Any]) -> str:
         lineas.append(f"Salario/IBC registrado de **{n}**: {_p(info['salario'])}." if info["salario"] else
                       f"No hay salario registrado para **{n}**.")
     if not lineas or (len(lineas) == 1 and not info["activo"]):
-        lineas.append(f"**{n}** · {info['cargo']} · {info['area']} · {info['vinculo']}"
-                      + (f" · ingresó {_f(info['ingreso'])} ({_anios(info['antiguedad'])})" if _ok(info["ingreso"]) else "")
-                      + (f" · {int(info['edad'])} años" if info["edad"] is not None and not pd.isna(info["edad"]) else ""))
+        partes = [f"**{n}**"] + [x for x in (info["cargo"], info["area"], info["vinculo"]) if x and x != "Sin dato"]
+        lineas.append(" · ".join(partes))
+        if _ok(info["ingreso"]):
+            lineas.append(f"• Ingresó el {_f(info['ingreso'])} · lleva {_anios(info['antiguedad'])}")
+        if _ok(info["nacimiento"]):
+            nac = pd.Timestamp(info["nacimiento"])
+            lineas.append(f"• {int(info['edad'])} años · cumple el {nac.day} de {MESES[nac.month - 1]}")
+        if "vacaciones" in info:
+            lineas.append(f"• {info['vacaciones']:.0f} días de vacaciones pendientes")
+        if _ok(info.get("vence")):
+            lineas.append(f"• Contrato vence el {_f(info['vence'])}")
+        if info.get("eps") and info["eps"] != "Sin dato":
+            lineas.append(f"• EPS: {info['eps']}")
     if info.get("otros"):
         lineas.append(f"_(También hay nombres parecidos: {', '.join(info['otros'])}.)_")
     return "\n".join(lineas)

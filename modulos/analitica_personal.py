@@ -199,7 +199,8 @@ def cargar(hoy: date | None = None) -> dict[str, Any]:
         emp["retiro"] = emp["observaciones"].map(_retiro)
         # fecha de ingreso faltante: se busca la misma persona en las otras tablas de personal
         otras = []
-        for sql in ("SELECT nombre_completo n, COALESCE(NULLIF(fecha_ingreso,'NaT'), fecha_inicio) f FROM contratos_activos",
+        for sql in ("SELECT nombre_completo n, fecha_ingreso f FROM novedades_fenix",
+                    "SELECT nombre_completo n, COALESCE(NULLIF(fecha_ingreso,'NaT'), fecha_inicio) f FROM contratos_activos",
                     "SELECT nombre n, fecha_ingreso f FROM empleados",
                     "SELECT nombre_completo n, fecha_inicio f FROM contratos_fijos_fenix"):
             t = _q(sql)
@@ -228,7 +229,9 @@ def cargar(hoy: date | None = None) -> dict[str, Any]:
     if not vac.empty:
         vac["nombre"] = vac["nombre_completo"].map(lambda x: _n(x).title())
         vac["dias"] = pd.to_numeric(vac["dias_pendientes"], errors="coerce")
-        vac = vac.dropna(subset=["dias"]).sort_values("dias", ascending=False).drop_duplicates("nombre")
+        # la hoja propia de la persona (ej. «VACACIONES AFVR 2025-2026») está más al día que la hoja general
+        vac["propia"] = vac["hoja_origen"].fillna("").map(lambda h: bool(re.search(r"VACACIONES\s+[A-Z]{2,}", _n(h))))
+        vac = vac.dropna(subset=["dias"]).sort_values(["propia", "dias"], ascending=[False, False]).drop_duplicates("nombre")
         out["vacaciones"] = vac[["nombre", "dias", "hoja_origen"]]
     # contratos a término fijo → próximo vencimiento y preaviso (30 días antes)
     cf = _q("SELECT nombre_completo, cargo, fecha_inicio, termino, vencimiento_contrato FROM contratos_fijos_fenix")

@@ -89,3 +89,11 @@ def test_desconocidos_y_contabilidad():
     assert "No encontré a «ecopetrol»" in asistente.responder("cuanto nos debe ecopetrol")
     assert "$1.200.000" in asistente.responder("cuanto gastamos en reparaciones")
     assert "$2.000.000" in asistente.responder("cuanto vendimos en septiembre")
+
+
+def test_nombre_con_errores_y_solo_el_nombre():
+    r = asistente.responder("cuando entro andres valencia cuanto lleva con nostros?")
+    assert "ANDRES FELIPE VALENCIA RAMIREZ" in r and "1 de marzo de 2017" in r
+    assert "ANDRES FELIPE VALENCIA RAMIREZ" in asistente.responder("ANDRES VALENCIA")
+    assert "ANDRES FELIPE VALENCIA RAMIREZ" in asistente.responder("cuantos años lleva andres valenvia")
+    assert "CODIFER" in asistente.responder("cuanto le debemos a codifr")
