@@ -175,15 +175,7 @@ if "gastos_std" not in st.session_state:
 if "chat_historial" not in st.session_state:
     st.session_state.chat_historial = []
 if "chat_mensajes_ui" not in st.session_state:
-    st.session_state.chat_mensajes_ui = [
-        {
-            "rol": "agent",
-            "texto": (
-                f"Buenos días. Soy AGENTE ADMIN SHAKI de {cfg.NOMBRE_EMPRESA}. "
-                "Puedo ayudarte con alertas, pagos, impuestos, créditos y más. ¿En qué te ayudo?"
-            ),
-        }
-    ]
+    st.session_state.chat_mensajes_ui = []
 
 stats = obtener_estadisticas_hoy()
 
@@ -228,31 +220,44 @@ with st.sidebar:
     st.caption(f"Librerías core: **{libs_ok}** activas")
 
 def _chat_cuerpo(en_dialogo: bool = False) -> None:
-    """Chat con Shaki (se usa al lado del tablero o dentro de una ventana emergente)."""
+    """Chat con Shaki: responde con los datos reales (pagos, impuestos, alertas, correos, revisión…)."""
     def _rerun() -> None:
         st.rerun(scope="fragment") if en_dialogo else st.rerun()
 
-    for msg in st.session_state.chat_mensajes_ui[-15:]:
-        css = "chat-msg-user" if msg["rol"] == "user" else "chat-msg-agent"
-        st.markdown(f'<div class="{css}">{msg["texto"]}</div>', unsafe_allow_html=True)
-    preguntas = ["¿Qué alertas hay hoy?", "Pagos pendientes", "Verificar alertas", "Procesar correos",
-                 "Cartera en mora", "Impuestos próximos", "¿Qué puedes hacer?"]
-    cols = st.columns(2)
-    for i, p in enumerate(preguntas):
-        if cols[i % 2].button(p, key=f"qr_{i}_{int(en_dialogo)}", use_container_width=True):
-            st.session_state.chat_mensajes_ui.append({"rol": "user", "texto": p})
-            with st.spinner("Consultando..."):
-                r, st.session_state.chat_historial = chat_responder(p, st.session_state.chat_historial)
-            st.session_state.chat_mensajes_ui.append({"rol": "agent", "texto": r})
-            _rerun()
-    with st.form(f"chat_form_{int(en_dialogo)}", clear_on_submit=True):
-        user_input = st.text_input("Mensaje", placeholder="¿Qué pagos vencen esta semana?",
-                                   label_visibility="collapsed")
-        if st.form_submit_button("Enviar", use_container_width=True) and user_input.strip():
-            st.session_state.chat_mensajes_ui.append({"rol": "user", "texto": user_input})
-            with st.spinner("Consultando..."):
-                r, st.session_state.chat_historial = chat_responder(user_input, st.session_state.chat_historial)
-            st.session_state.chat_mensajes_ui.append({"rol": "agent", "texto": r})
+    def _preguntar(texto: str) -> None:
+        st.session_state.chat_mensajes_ui.append({"rol": "user", "texto": texto})
+        with st.spinner("Shaki está consultando…"):
+            r, st.session_state.chat_historial = chat_responder(texto, st.session_state.chat_historial)
+        st.session_state.chat_mensajes_ui.append({"rol": "agent", "texto": r})
+
+    caja = st.container(height=430 if en_dialogo else 520, border=False)
+    with caja:
+        if not st.session_state.chat_mensajes_ui:
+            with st.chat_message("assistant", avatar=":material/auto_awesome:"):
+                st.markdown("Hola, soy **Shaki**. Pregúnteme con sus palabras: *¿qué tengo hoy?*, *pagos de esta "
+                            "semana*, *¿cuándo vence la retención?*, *correos importantes*…")
+        for msg in st.session_state.chat_mensajes_ui[-20:]:
+            # $ escapado (si no, Streamlit lo toma como fórmula) y saltos de línea respetados
+            texto = str(msg["texto"]).replace("$", "\\$").replace("\n", "  \n")
+            if msg["rol"] == "user":
+                with st.chat_message("user", avatar=":material/person:"):
+                    st.markdown(texto)
+            else:
+                with st.chat_message("assistant", avatar=":material/auto_awesome:"):
+                    st.markdown(texto)
+    preguntas = ["¿Qué tengo hoy?", "Pagos de esta semana", "¿Qué impuestos vienen?", "Alertas críticas",
+                 "Correos importantes", "¿Cómo quedó la revisión de retención?"]
+    n = st.session_state.get("chat_sug_n", 0)
+    elegida = st.pills("Sugerencias", preguntas, key=f"sug_{int(en_dialogo)}_{n}", label_visibility="collapsed")
+    if elegida:
+        st.session_state.chat_sug_n = n + 1
+        _preguntar(elegida)
+        _rerun()
+    with st.form(f"chat_form_{int(en_dialogo)}", clear_on_submit=True, border=False):
+        c1, c2 = st.columns([5, 1])
+        user_input = c1.text_input("Mensaje", placeholder="Escriba su pregunta…", label_visibility="collapsed")
+        if c2.form_submit_button("Enviar", use_container_width=True, type="primary") and user_input.strip():
+            _preguntar(user_input.strip())
             _rerun()
 
 

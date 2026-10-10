@@ -67,6 +67,35 @@ def _safe_guardar(rol: str, contenido: str, tokens: int = 0) -> None:
 
 
 def chat_responder(mensaje_usuario: str, historial: list[dict[str, str]] | None = None) -> tuple[str, list[dict[str, str]]]:
+    """Responde con los datos reales de Shaki (modulos.asistente); acciones: escanear alertas, leer correos."""
+    historial = historial or []
+    _safe_guardar("user", mensaje_usuario)
+    t = mensaje_usuario.lower()
+    try:
+        if any(x in t for x in ("verificar alertas", "escanear alertas", "revisar alertas")):
+            from modulos import motor_alertas
+            r = motor_alertas.escanear()
+            respuesta = (f"Listo: revisé todo. {r['nuevas']} alerta(s) nueva(s), {r['resueltas']} se cerraron solas, "
+                         f"{r['vivas']} siguen abiertas. Pregúnteme «alertas críticas» para verlas.")
+        elif any(x in t for x in ("procesar correos", "leer correos", "revisar correos", "leer buzones")):
+            from modulos import buzones
+            r = buzones.leer_todos()
+            errores = [b["buzon"] for b in r["buzones"] if b.get("error")]
+            respuesta = (f"Leí los buzones: {r['nuevos']} correo(s) nuevo(s)."
+                         + (f" No pude leer: {', '.join(errores)}." if errores else "")
+                         + " Pregúnteme «correos importantes» para verlos.")
+        else:
+            from modulos import asistente
+            respuesta = asistente.responder(mensaje_usuario, historial)
+    except Exception as e:
+        logger.exception("chat_responder: %s", e)
+        respuesta = f"Tuve un problema consultando los datos ({e}). Intente de nuevo."
+    _safe_guardar("assistant", respuesta)
+    historial = historial + [{"role": "user", "content": mensaje_usuario}, {"role": "assistant", "content": respuesta}]
+    return respuesta, historial[-20:]
+
+
+def chat_responder_anterior(mensaje_usuario: str, historial: list[dict[str, str]] | None = None) -> tuple[str, list[dict[str, str]]]:
     """
     Procesa un mensaje del usuario y retorna la respuesta del agente.
 
