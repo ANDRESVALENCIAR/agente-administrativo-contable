@@ -30,6 +30,7 @@ from utils.sync_pagos import (
     ruta_excel_pagos,
     sincronizar_bidireccional,
 )
+from dashboard.utils.pestanas import abierta, pestanas
 
 COLORES_ESTADO = {
     "PENDIENTE": "#8E8E93",
@@ -121,17 +122,21 @@ def render() -> None:
     from dashboard.paginas import pagos_control, pagos_hoy_semana
 
     st.markdown("## Pagos")
-    t_hoy, t_semana, t_control, t_anterior = st.tabs(
-        ["Hoy", "Semana", "Control de pagos", "Archivo anterior (CONTROL DE PAGOS)"]
+    t_hoy, t_semana, t_control, t_anterior = pestanas(
+        ["Hoy", "Semana", "Control de pagos", "Archivo anterior (CONTROL DE PAGOS)"], key="pg_tabs"
     )
     with t_hoy:
-        pagos_hoy_semana.render_hoy()
+        if abierta(t_hoy):
+            pagos_hoy_semana.render_hoy()
     with t_semana:
-        pagos_hoy_semana.render_semana()
+        if abierta(t_semana):
+            pagos_hoy_semana.render_semana()
     with t_control:
-        pagos_control.render()
+        if abierta(t_control):
+            pagos_control.render()
     with t_anterior:
-        _render_anterior()
+        if abierta(t_anterior):
+            _render_anterior()
 
 
 def _render_anterior() -> None:
@@ -290,7 +295,7 @@ def _tab_pendientes(hoy: date) -> None:
                         if c in venc_viejos.columns
                     ]
                 ].head(500),
-                use_container_width=True,
+                width="stretch",
                 hide_index=True,
             )
 
@@ -445,7 +450,7 @@ def _tab_historial() -> None:
         "periodicidad_std",
     ]
     if not df.empty:
-        st.dataframe(df[[c for c in show_cols if c in df.columns]], use_container_width=True, hide_index=True)
+        st.dataframe(df[[c for c in show_cols if c in df.columns]], width="stretch", hide_index=True)
         total_apagar = float(df["valor_a_pagar"].fillna(0).sum())
         total_pagado = float(df["valor_pagado"].fillna(0).sum())
         m1, m2, m3 = st.columns(3)

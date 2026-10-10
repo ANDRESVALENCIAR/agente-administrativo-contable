@@ -39,7 +39,7 @@ def render() -> None:
         if not df.empty:
             st.dataframe(
                 df[["id", "cliente", "cupo_solicitado", "decision", "estado_habilitacion"]],
-                use_container_width=True,
+                width="stretch",
             )
             st.markdown("**Actualizar habilitación en VIA**")
             for _, row in df.head(10).iterrows():

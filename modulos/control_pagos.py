@@ -319,13 +319,20 @@ def importar_excel(path: Path | None = None) -> dict[str, int]:
     return {"nuevos": nuevos, "actualizados": actualizados, "total": len(filas)}
 
 
-def importar_si_existe() -> dict[str, int] | None:
-    """Importa el libro configurado si existe (tarea programada / arranque)."""
+def importar_si_existe(forzar: bool = False) -> dict[str, int] | None:
+    """Importa el libro configurado si existe (tarea programada / arranque).
+    Si el Excel no ha cambiado desde la última lectura no se vuelve a leer (salvo forzar=True)."""
     p = ruta_excel()
     if not p.is_file():
         logger.info("Control de pagos: no se encontró %s", p)
         return None
+    st = p.stat()
+    huella = f"{p}|{st.st_mtime_ns}|{st.st_size}"
+    if not forzar and _meta("huella_excel") == huella:
+        escribir_pendientes_excel()
+        return {"nuevos": 0, "actualizados": 0, "total": 0, "sin_cambios": True}
     res = importar_excel(p)
+    _meta("huella_excel", huella)
     escribir_pendientes_excel()
     return res
 

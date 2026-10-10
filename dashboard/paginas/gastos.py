@@ -17,6 +17,7 @@ from utils.estandarizar_gastos import (
     ruta_excel_estandarizar,
     sincronizar_periodicidad_control_pagos,
 )
+from dashboard.utils.pestanas import abierta, pestanas
 
 MIME_XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
@@ -25,11 +26,13 @@ def render() -> None:
     from dashboard.paginas import gastos_dashboard
 
     st.markdown("## Gastos")
-    t_tab, t_est = st.tabs(["Tablero", "Catálogo y estandarización"])
+    t_tab, t_est = pestanas(["Tablero", "Catálogo y estandarización"], key="gs_tabs")
     with t_tab:
-        gastos_dashboard.render()
+        if abierta(t_tab):
+            gastos_dashboard.render()
     with t_est:
-        _render_estandarizacion()
+        if abierta(t_est):
+            _render_estandarizacion()
 
 
 def _render_estandarizacion() -> None:
@@ -100,7 +103,7 @@ def _tab_resumen() -> None:
             if st.button(
                 f"{icono} {label} — {qty} · {pers}",
                 key=f"catbtn_{r['categoria']}",
-                use_container_width=True,
+                width="stretch",
             ):
                 st.session_state.gst_cat_sel = r["categoria"]
         cols[1].markdown(
@@ -132,7 +135,7 @@ def _tab_resumen() -> None:
                     if c in det.columns
                 ]
             ],
-            use_container_width=True,
+            width="stretch",
             hide_index=True,
             height=360,
         )
@@ -167,7 +170,7 @@ def _tab_todos() -> None:
             "requiere_revision",
         ]
     ].copy()
-    st.dataframe(show, use_container_width=True, hide_index=True, height=420)
+    st.dataframe(show, width="stretch", hide_index=True, height=420)
 
     st.subheader("Clasificar fila en revisión")
     pendientes = df[df["requiere_revision"] == 1]
@@ -198,12 +201,12 @@ def _tab_periodicidades() -> None:
     )
     st.dataframe(
         df[["etiqueta", "codigo", "qty"]],
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
     )
     fig = px.bar(df, x="etiqueta", y="qty", title="Gastos por periodicidad estándar")
     fig.update_layout(xaxis_title="", yaxis_title="Cantidad", height=380)
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 
 def _tab_exportar() -> None:

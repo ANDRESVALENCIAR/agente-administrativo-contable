@@ -38,7 +38,7 @@ def _render_liquidacion() -> None:
     if filtro:
         df = df[df["asesor"].str.contains(filtro, case=False, na=False)]
 
-    st.dataframe(df, use_container_width=True, hide_index=True)
+    st.dataframe(df, width="stretch", hide_index=True)
 
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -103,4 +103,4 @@ def _render_liquidacion() -> None:
             st.download_button("Descargar", data, nombre)
 
     st.subheader("Tabla paramétrica retenciones")
-    st.dataframe(ret, use_container_width=True, hide_index=True)
+    st.dataframe(ret, width="stretch", hide_index=True)

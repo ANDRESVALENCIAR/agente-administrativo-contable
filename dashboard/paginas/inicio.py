@@ -137,7 +137,7 @@ def _atencion(alertas: list) -> None:
                 unsafe_allow_html=True,
             )
         with c2:
-            if st.button("Resolver", key=f"alerta_{a[0]}", use_container_width=True):
+            if st.button("Resolver", key=f"alerta_{a[0]}", width="stretch"):
                 marcar_alerta_resuelta(a[0])
                 st.rerun()
 
@@ -210,7 +210,7 @@ def render() -> None:
             st.markdown('<div class="sk-card-h"><h4>Agenda del agente — hoy</h4></div>', unsafe_allow_html=True)
             st.dataframe(
                 df_hoy[["titulo", "modulo", "prioridad", "tipo"]].head(8),
-                use_container_width=True,
+                width="stretch",
                 hide_index=True,
             )
         datos = obtener_correos_ultimos_dias(7)
@@ -219,7 +219,7 @@ def render() -> None:
             fig = px.bar(df, x="fecha", y="total", color="categoria", height=220,
                          title="Correos clasificados · 7 días")
             fig.update_layout(**PLOTLY_LAYOUT, legend_title_text="")
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
     with der:
         st.markdown('<div class="sk-card-h"><h4>Actividad reciente</h4></div>', unsafe_allow_html=True)
         filas = []

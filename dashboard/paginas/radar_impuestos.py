@@ -7,7 +7,7 @@ from datetime import date, datetime, timedelta
 from html import escape
 
 import streamlit as st
-import streamlit.components.v1 as components
+from dashboard.utils import incrustar
 
 from config import cfg
 from modulos import calendario_tributario_2026 as cal
@@ -185,7 +185,7 @@ function tick(){{ if(!T) return; let ms=new Date(T)-new Date(); if(ms<0) ms=0;
   document.getElementById('x').textContent=pad(s%60); }}
 tick(); setInterval(tick,1000);
 </script></body></html>"""
-    components.html(html, height=372)
+    incrustar.html(html, height=372)
 
 
 # ───────────────────────── Bloques ─────────────────────────
@@ -254,7 +254,7 @@ def _tarjetas_proximas(obls: list[dict], hoy: date) -> None:
                 f'<div class="rt-d"><b>{dias}</b><span>DÍAS</span></div></div></div>',
                 unsafe_allow_html=True,
             )
-            if st.button("Ya lo presenté", key=f"rt_np_{o['id']}", type="primary", use_container_width=True):
+            if st.button("Ya lo presenté", key=f"rt_np_{o['id']}", type="primary", width="stretch"):
                 rt.marcar_presentado(o["id"], por="dashboard")
                 st.rerun()
 
@@ -284,17 +284,17 @@ def _fila(o: dict, hoy: date) -> None:
     with c4:
         if o["estado"] == "PENDIENTE":
             b1, b2 = st.columns([1.5, 1])
-            if b1.button("Presentado", key=f"rt_ok_{o['id']}", type="primary", use_container_width=True):
+            if b1.button("Presentado", key=f"rt_ok_{o['id']}", type="primary", width="stretch"):
                 rt.marcar_presentado(o["id"], por="dashboard")
                 st.rerun()
-            with b2.popover("Más", use_container_width=True):
-                if st.button("Enviar alerta ahora", key=f"rt_al_{o['id']}", use_container_width=True):
+            with b2.popover("Más", width="stretch"):
+                if st.button("Enviar alerta ahora", key=f"rt_al_{o['id']}", width="stretch"):
                     res = rt.enviar_alerta([o], marcar=False)
                     st.error("Sin canal de correo") if res["sin_canal"] else st.success(f"{res['correos']} correo(s)")
-                if st.button("No aplica", key=f"rt_na_{o['id']}", use_container_width=True):
+                if st.button("No aplica", key=f"rt_na_{o['id']}", width="stretch"):
                     rt.cambiar_estado(o["id"], "NO APLICA")
                     st.rerun()
-        elif st.button("Reabrir", key=f"rt_re_{o['id']}", use_container_width=True):
+        elif st.button("Reabrir", key=f"rt_re_{o['id']}", width="stretch"):
             rt.cambiar_estado(o["id"], "PENDIENTE")
             st.rerun()
 
@@ -361,10 +361,10 @@ def _configuracion() -> None:
             unsafe_allow_html=True,
         )
         b1, b2 = st.columns(2)
-        if b1.button("Enviar ahora", key="rt_send", use_container_width=True, disabled=not pend):
+        if b1.button("Enviar ahora", key="rt_send", width="stretch", disabled=not pend):
             res = rt.enviar_alerta(pend)
             st.error("Sin canal de correo") if res["sin_canal"] else st.success(f"Enviado a {res['correos']} correo(s)")
-        if b2.button("Probar envío", key="rt_test", use_container_width=True):
+        if b2.button("Probar envío", key="rt_test", width="stretch"):
             muestra = rt.listar(date.today(), None, estados=("PENDIENTE",))[:1]
             if not muestra:
                 st.info("No hay declaraciones pendientes para usar de ejemplo.")

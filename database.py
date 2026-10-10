@@ -1,6 +1,8 @@
 """
 Base de datos SQLite local. Guarda todo el estado, logs y estadísticas del agente.
 """
+import functools
+import os
 import sqlite3
 import logging
 from datetime import datetime, date, timedelta
@@ -11,12 +13,108 @@ from config import cfg
 logger = logging.getLogger(__name__)
 
 
+_WAL_LISTO: set[str] = set()
+
+
 def get_conn() -> sqlite3.Connection:
-    """Retorna conexión a SQLite."""
-    conn = sqlite3.connect(cfg.DATABASE_PATH, check_same_thread=False, timeout=30)
-    conn.execute("PRAGMA journal_mode=WAL")
-    conn.execute("PRAGMA busy_timeout=30000")
+    """Retorna conexión a SQLite.
+
+    WAL queda guardado en el archivo, así que solo se fija la primera vez por base (antes se pedía en cada
+    conexión y era lo más lento). synchronous=NORMAL es seguro con WAL y escribe mucho más rápido; la caché
+    de páginas y las tablas temporales van en memoria."""
+    ruta = cfg.DATABASE_PATH
+    conn = sqlite3.connect(ruta, check_same_thread=False, timeout=30)
+    if ruta not in _WAL_LISTO:
+        try:
+            conn.execute("PRAGMA journal_mode=WAL")
+            _WAL_LISTO.add(ruta)
+        except sqlite3.OperationalError:
+            pass  # base ocupada: se reintenta en la próxima conexión
+    conn.execute("PRAGMA synchronous=NORMAL")
+    conn.execute("PRAGMA temp_store=MEMORY")
+    conn.execute("PRAGMA cache_size=-16000")
     return conn
+
+
+def version_bd() -> tuple:
+    """Huella barata de la base (ruta + fecha de modificación del archivo y de su WAL): cambia en cuanto
+    alguien escribe. Sirve para cachear lecturas pesadas sin mostrar datos viejos."""
+    ruta = cfg.DATABASE_PATH
+    huella: list = [ruta]
+    for f in (ruta, ruta + "-wal"):
+        try:
+            st = os.stat(f)
+            huella += [st.st_mtime_ns, st.st_size]
+        except OSError:
+            huella += [0, 0]
+    return tuple(huella)
+
+
+def cache_bd(fn=None, *, maximo: int = 4096):
+    """Cachea el resultado de una lectura hasta que la base cambie (o cambien los argumentos).
+    Devuelve el mismo objeto: quien lo use no debe modificarlo."""
+
+    def decorar(f):
+        estado: dict = {"version": None, "datos": {}}
+
+        @functools.wraps(f)
+        def envoltura(*args, **kwargs):
+            v = version_bd()
+            if v != estado["version"]:
+                estado["version"], estado["datos"] = v, {}
+            datos = estado["datos"]
+            clave = (args, tuple(sorted(kwargs.items())))
+            try:
+                return datos[clave]
+            except KeyError:
+                pass
+            except TypeError:  # argumento no hasheable: sin caché
+                return f(*args, **kwargs)
+            if len(datos) >= maximo:
+                datos.clear()
+            datos[clave] = r = f(*args, **kwargs)
+            return r
+
+        envoltura.limpiar = lambda: estado.update(version=None, datos={})
+        return envoltura
+
+    return decorar(fn) if fn is not None else decorar
+
+
+INDICES = [
+    ("pagos_calendario", ("fecha_sugerida",)), ("pagos_calendario", ("estado",)),
+    ("pagos", ("estado",)), ("pagos", ("fecha_pago",)), ("pagos", ("proveedor",)),
+    ("alertas", ("resuelto", "nivel")), ("alertas", ("clave",)),
+    ("gastos_maestro", ("detalle_limpio",)), ("cartera_cxc", ("cliente",)),
+    ("log_acciones", ("timestamp",)), ("log_ejecuciones_calendario", ("fecha_ejecucion",)),
+    ("log_ejecuciones_calendario", ("tarea_id",)), ("empleados_fenix", ("nombre_completo",)),
+]
+
+
+def asegurar_indices() -> int:
+    """Crea índices en las columnas que más se filtran (solo si la tabla y las columnas existen)."""
+    conn = get_conn()
+    creados = 0
+    try:
+        for tabla, cols in INDICES:
+            existentes = {r[1] for r in conn.execute(f"PRAGMA table_info('{tabla}')")}
+            if not existentes or not set(cols) <= existentes:
+                continue
+            # ya hay un índice que empieza por esa columna: no se duplica
+            primeras = {conn.execute(f"PRAGMA index_info('{ix[1]}')").fetchone()[2]
+                        for ix in conn.execute(f"PRAGMA index_list('{tabla}')")}
+            if cols[0] in primeras:
+                continue
+            nombre = f"ix_{tabla}_{'_'.join(cols)}"
+            conn.execute(f"CREATE INDEX IF NOT EXISTS {nombre} ON {tabla} ({', '.join(cols)})")
+            creados += 1
+        conn.execute("PRAGMA optimize")
+        conn.commit()
+    except sqlite3.Error as e:
+        logger.warning("Índices: %s", e)
+    finally:
+        conn.close()
+    return creados
 
 
 def inicializar_db() -> None:

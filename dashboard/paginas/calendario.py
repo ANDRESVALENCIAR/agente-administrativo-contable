@@ -22,6 +22,7 @@ from utils.calendario_maestro import (
     obtener_log_reciente,
     tareas_vencidas,
 )
+from dashboard.utils.pestanas import abierta, pestanas
 
 DIAS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
 DIAS_C = ["LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB", "DOM"]
@@ -178,7 +179,7 @@ def _lista_con_acciones(evs: list[dict], clave: str, mostrar_fecha: bool = False
         if e["accion"] and not e["hecho"]:
             c1, c2 = st.columns([4, 1.5], vertical_alignment="center")
             c1.markdown(_fila(e, mostrar_fecha), unsafe_allow_html=True)
-            if c2.button(BOTON[e["accion"][0]], key=f"{clave}_{e['uid']}", use_container_width=True):
+            if c2.button(BOTON[e["accion"][0]], key=f"{clave}_{e['uid']}", width="stretch"):
                 res = ag.ejecutar_accion(e["accion"], por="calendario maestro")
                 if res.get("ok", True):
                     st.toast(f"Listo: {e['titulo']}")
@@ -215,10 +216,10 @@ def _tab_hoy(hoy: date, fuentes: tuple[str, ...]) -> None:
 def _tab_semana(hoy: date, fuentes: tuple[str, ...]) -> None:
     c1, c2, c3 = st.columns([1, 3, 1])
     off = st.session_state.get("cm_sem", 0)
-    if c1.button("← Semana anterior", use_container_width=True):
+    if c1.button("← Semana anterior", width="stretch"):
         st.session_state.cm_sem = off - 1
         st.rerun()
-    if c3.button("Semana siguiente →", use_container_width=True):
+    if c3.button("Semana siguiente →", width="stretch"):
         st.session_state.cm_sem = off + 1
         st.rerun()
     lunes = hoy - timedelta(days=hoy.weekday()) + timedelta(weeks=off)
@@ -309,13 +310,13 @@ def _tab_automatizaciones(hoy: date) -> None:
                 if c2.button("Ejecutar", key=f"run_venc_{row['id']}"):
                     ejecutar_tarea_por_id(int(row["id"]))
                     st.rerun()
-        st.dataframe(df_activas, use_container_width=True, hide_index=True)
+        st.dataframe(df_activas, width="stretch", hide_index=True)
     with t2:
         log = obtener_log_reciente(80)
         if log.empty:
             st.info("Sin ejecuciones registradas aún.")
         else:
-            st.dataframe(log, use_container_width=True, hide_index=True)
+            st.dataframe(log, width="stretch", hide_index=True)
     with t3:
         with st.form("nueva_tarea_cal"):
             titulo = st.text_input("Título *")
@@ -369,14 +370,19 @@ def render() -> None:
     sel = st.pills("Mostrar", opciones, selection_mode="multi", default=[f for f in opciones if f != "AGENTE"],
                    format_func=lambda f: ag.FUENTES[f]["nombre"], key="cm_fuentes", label_visibility="collapsed")
     fuentes = tuple(sel or opciones)
-    t_hoy, t_sem, t_mes, t_ag, t_auto = st.tabs(["Hoy", "Semana", "Mes", "Agenda", "Automatizaciones"])
+    t_hoy, t_sem, t_mes, t_ag, t_auto = pestanas(["Hoy", "Semana", "Mes", "Agenda", "Automatizaciones"], key="ca_tabs")
     with t_hoy:
-        _tab_hoy(hoy, fuentes)
+        if abierta(t_hoy):
+            _tab_hoy(hoy, fuentes)
     with t_sem:
-        _tab_semana(hoy, fuentes)
+        if abierta(t_sem):
+            _tab_semana(hoy, fuentes)
     with t_mes:
-        _tab_mes(hoy, fuentes)
+        if abierta(t_mes):
+            _tab_mes(hoy, fuentes)
     with t_ag:
-        _tab_agenda(hoy, fuentes)
+        if abierta(t_ag):
+            _tab_agenda(hoy, fuentes)
     with t_auto:
-        _tab_automatizaciones(hoy)
+        if abierta(t_auto):
+            _tab_automatizaciones(hoy)

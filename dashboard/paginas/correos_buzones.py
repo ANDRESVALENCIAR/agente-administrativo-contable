@@ -65,7 +65,7 @@ def render_bandeja() -> None:
     sel_e = c3.selectbox("Estado", ["NUEVO", "ATENDIDO", "ARCHIVADO", "Todos"], key="bz_est",
                          format_func=lambda e: {"NUEVO": "Sin atender", "ATENDIDO": "Atendidos",
                                                 "ARCHIVADO": "Archivados", "Todos": "Todos"}[e])
-    if c4.button("Leer correos ahora", type="primary", use_container_width=True):
+    if c4.button("Leer correos ahora", type="primary", width="stretch"):
         with st.spinner("Leyendo buzones…"):
             r = bz.leer_todos()
         errores = [x for x in r["buzones"] if x.get("error")]
@@ -100,10 +100,10 @@ def render_bandeja() -> None:
             unsafe_allow_html=True)
         if f["estado"] == "NUEVO":
             a, b, c = st.columns([1, 1, 2])
-            if a.button("Atendido ✓", key=f"bz_at_{f['id']}", use_container_width=True):
+            if a.button("Atendido ✓", key=f"bz_at_{f['id']}", width="stretch"):
                 bz.marcar(f["id"], "ATENDIDO")
                 st.rerun()
-            if b.button("Archivar", key=f"bz_ar_{f['id']}", use_container_width=True):
+            if b.button("Archivar", key=f"bz_ar_{f['id']}", width="stretch"):
                 bz.marcar(f["id"], "ARCHIVADO")
                 st.rerun()
             nueva = c.selectbox("Corregir categoría", list(bz.CATEGORIAS), key=f"bz_rc_{f['id']}",
@@ -129,14 +129,14 @@ def render_buzones() -> None:
                 c1.code(f'powershell -ExecutionPolicy Bypass -File scripts\\configurar_buzon.ps1 -Correo {b["email"]}',
                         language="powershell")
             x1, x2, x3 = c2.columns(3)
-            if x1.button("Probar", key=f"bzp_{b['id']}", use_container_width=True):
+            if x1.button("Probar", key=f"bzp_{b['id']}", width="stretch"):
                 r = bz.probar(b["id"])
                 (st.success if r["ok"] else st.error)(
                     f"Conectado: {r.get('mensajes')} correos en la bandeja" if r["ok"] else r["error"])
-            if x2.button("Pausar" if b["activo"] else "Activar", key=f"bza_{b['id']}", use_container_width=True):
+            if x2.button("Pausar" if b["activo"] else "Activar", key=f"bza_{b['id']}", width="stretch"):
                 bz.actualizar_buzon(b["id"], activo=0 if b["activo"] else 1)
                 st.rerun()
-            with x3.popover("Ajustes", use_container_width=True):
+            with x3.popover("Ajustes", width="stretch"):
                 host = st.text_input("Servidor IMAP", b["imap_host"], key=f"bzh_{b['id']}")
                 puerto = st.number_input("Puerto", value=int(b["imap_port"] or 993), key=f"bzpt_{b['id']}")
                 usuario = st.text_input("Usuario", b["usuario"] or b["email"], key=f"bzu_{b['id']}")

@@ -129,7 +129,7 @@ def _tarjeta(p: dict, hoy: date, clave: str, mostrar_alerta: bool = False) -> No
     )
     if p["estado"] in cp.ABIERTOS:
         if st.button("Ya lo pagué" if p["tipo"] == "PAGO" else "Ya lo hice", key=f"{clave}_{p['id']}",
-                     type="primary", use_container_width=True):
+                     type="primary", width="stretch"):
             cp.marcar_pagado(p["id"], por="dashboard")
             st.rerun()
 
@@ -237,13 +237,13 @@ def render_semana() -> None:
     c1, c2, c3, c4 = st.columns([4, 1, 1, 1], vertical_alignment="center")
     c1.markdown(f'<div class="hs-eyebrow">{etiqueta}</div><div class="hs-day" style="font-size:44px">{rango}</div>',
                 unsafe_allow_html=True)
-    if c2.button("‹ Anterior", key="wk_prev", use_container_width=True):
+    if c2.button("‹ Anterior", key="wk_prev", width="stretch"):
         st.session_state.wk_off = off - 1
         st.rerun()
-    if c3.button("Hoy", key="wk_today", use_container_width=True, disabled=off == 0):
+    if c3.button("Hoy", key="wk_today", width="stretch", disabled=off == 0):
         st.session_state.wk_off = 0
         st.rerun()
-    if c4.button("Siguiente ›", key="wk_next", use_container_width=True):
+    if c4.button("Siguiente ›", key="wk_next", width="stretch"):
         st.session_state.wk_off = off + 1
         st.rerun()
 
@@ -290,9 +290,9 @@ def render_semana() -> None:
             st.markdown(f'<div class="wk-body">{tarjetas}</div>', unsafe_allow_html=True)
             abiertas_dia = [p for p in del_dia if p["estado"] in cp.ABIERTOS]
             if abiertas_dia:
-                with st.popover(f"✓ {len(abiertas_dia)}", use_container_width=True, help="Marcar como pagado"):
+                with st.popover(f"✓ {len(abiertas_dia)}", width="stretch", help="Marcar como pagado"):
                     for p in abiertas_dia:
-                        if st.button(f"✓ {p['detalle']}", key=f"wk_ok_{p['id']}", use_container_width=True):
+                        if st.button(f"✓ {p['detalle']}", key=f"wk_ok_{p['id']}", width="stretch"):
                             cp.marcar_pagado(p["id"], por="dashboard")
                             st.rerun()
 

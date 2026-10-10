@@ -36,20 +36,20 @@ def render() -> None:
         st.markdown("#### Costo API últimos 30 días")
         fig = px.area(df_tokens, x="fecha", y="costo", height=220)
         fig.update_layout(**PLOTLY_LAYOUT)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
     elif not df_diario.empty:
         st.markdown("#### Actividad diaria (log_acciones)")
         fig = px.bar(df_diario, x="fecha", y="acciones", height=220)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
     if not df_log.empty:
         st.markdown("#### Costo y acciones por módulo")
         col1, col2 = st.columns(2)
         with col1:
             fig2 = px.pie(df_log, names="modulo", values="costo", title="Costo API por módulo", height=280)
-            st.plotly_chart(fig2, use_container_width=True)
+            st.plotly_chart(fig2, width="stretch")
         with col2:
-            st.dataframe(df_log, use_container_width=True, hide_index=True)
+            st.dataframe(df_log, width="stretch", hide_index=True)
 
     st.markdown("#### Librerías conectadas al agente")
     estado = librerias_disponibles()

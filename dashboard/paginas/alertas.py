@@ -131,25 +131,25 @@ def _tarjeta(a: dict, clave: str, historial: bool = False) -> None:
     cols = st.container(key=f"albtn_{clave}_{a['id']}").columns([1.3, 1.3, 1, 1, 1])
     acc = a.get("accion")
     if acc and acc[0] in BOTON:
-        if cols[0].button(BOTON[acc[0]], key=f"{clave}_acc_{a['id']}", type="primary", use_container_width=True):
+        if cols[0].button(BOTON[acc[0]], key=f"{clave}_acc_{a['id']}", type="primary", width="stretch"):
             r = ma.ejecutar_accion(a)
             st.toast("Listo ✓" if r.get("ok", True) else f"No se pudo: {r}")
             st.rerun()
     if a.get("ir_a"):
         cols[1].button(f"Ir a {a['ir_a']}", key=f"{clave}_ir_{a['id']}", on_click=_ir, args=(a["ir_a"],),
-                       use_container_width=True)
+                       width="stretch")
     if a.get("pospuesta_hasta"):
-        if cols[2].button("Reactivar", key=f"{clave}_re_{a['id']}", use_container_width=True):
+        if cols[2].button("Reactivar", key=f"{clave}_re_{a['id']}", width="stretch"):
             ma.reactivar(a["id"])
             st.rerun()
     else:
-        if cols[2].button("Mañana", key=f"{clave}_p1_{a['id']}", use_container_width=True, help="Posponer 24 horas"):
+        if cols[2].button("Mañana", key=f"{clave}_p1_{a['id']}", width="stretch", help="Posponer 24 horas"):
             ma.posponer(a["id"], 24)
             st.rerun()
-        if cols[3].button("1 semana", key=f"{clave}_p7_{a['id']}", use_container_width=True, help="Posponer 7 días"):
+        if cols[3].button("1 semana", key=f"{clave}_p7_{a['id']}", width="stretch", help="Posponer 7 días"):
             ma.posponer(a["id"], 24 * 7)
             st.rerun()
-    if cols[4].button("Resolver", key=f"{clave}_ok_{a['id']}", use_container_width=True,
+    if cols[4].button("Resolver", key=f"{clave}_ok_{a['id']}", width="stretch",
                       help="Se cierra y no vuelve en 7 días, salvo que empeore"):
         ma.resolver(a["id"], por="usuario")
         st.rerun()
@@ -217,7 +217,7 @@ def _tab_reglas() -> None:
             st.error("No se pudo enviar: revise la configuración de correo.")
     envios = ma._filas("SELECT enviado_en, tipo, destino, n_alertas, ok FROM alertas_envios ORDER BY id DESC LIMIT 30")
     if envios:
-        st.dataframe(pd.DataFrame(envios), use_container_width=True, hide_index=True)
+        st.dataframe(pd.DataFrame(envios), width="stretch", hide_index=True)
     st.divider()
     with st.expander("Crear alerta manual"):
         with st.form("alerta_manual"):
@@ -238,7 +238,7 @@ def render() -> None:
     ma.inicializar()
     top = st.columns([4, 1])
     top[0].markdown("## Alertas")
-    if top[1].button("Escanear ahora", use_container_width=True, type="primary"):
+    if top[1].button("Escanear ahora", width="stretch", type="primary"):
         r = ma.escanear()
         st.toast(f"{r['nuevas']} nueva(s) · {r['resueltas']} se cerraron solas · {r['vivas']} vivas")
     activas = ma.listar("ACTIVAS")

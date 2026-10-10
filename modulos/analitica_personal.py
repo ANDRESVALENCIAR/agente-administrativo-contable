@@ -16,7 +16,7 @@ from typing import Any
 import pandas as pd
 from dateutil.relativedelta import relativedelta
 
-from database import get_conn
+from database import cache_bd, get_conn
 
 MESES = {"enero": 1, "febrero": 2, "marzo": 3, "abril": 4, "mayo": 5, "junio": 6, "julio": 7, "agosto": 8,
          "septiembre": 9, "setiembre": 9, "octubre": 10, "noviembre": 11, "diciembre": 12}
@@ -176,7 +176,14 @@ def proximo_vencimiento(inicio: pd.Timestamp | None, venc: pd.Timestamp | None, 
 
 
 def cargar(hoy: date | None = None) -> dict[str, Any]:
-    hoy = hoy or date.today()
+    """Todo el personal limpio. Se calcula una vez y queda en memoria hasta que la base cambie
+    (antes se recalculaba en cada clic y en cada pregunta al chat)."""
+    d = _cargar(hoy or date.today())
+    return {k: (v.copy() if isinstance(v, pd.DataFrame) else v) for k, v in d.items()}
+
+
+@cache_bd(maximo=8)
+def _cargar(hoy: date) -> dict[str, Any]:
     hoy_ts = pd.Timestamp(hoy)
     emp = _q("SELECT * FROM empleados_fenix")
     out: dict[str, Any] = {"hoy": hoy}

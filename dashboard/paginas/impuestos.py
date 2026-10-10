@@ -18,20 +18,24 @@ from modulos.impuestos_calendario import (
     listar_proximos_vencimientos,
     sincronizar_calendario_opendata,
 )
+from dashboard.utils.pestanas import abierta, pestanas
 
 
 def render() -> None:
     from dashboard.paginas import radar_impuestos, revision_impuestos
 
     st.markdown("## Impuestos")
-    t_radar, t_rev, t_ant = st.tabs(["Radar tributario", "Revisión de impuestos", "Módulo anterior"])
+    t_radar, t_rev, t_ant = pestanas(["Radar tributario", "Revisión de impuestos", "Módulo anterior"], key="im_tabs")
     with t_radar:
-        radar_impuestos.render()
+        if abierta(t_radar):
+            radar_impuestos.render()
     with t_rev:
-        revision_impuestos.render()
+        if abierta(t_rev):
+            revision_impuestos.render()
     with t_ant:
-        st.caption("Módulo anterior: sus fechas SHD estaban escritas a mano y no se usan para alertas.")
-        _render_anterior()
+        if abierta(t_ant):
+            st.caption("Módulo anterior: sus fechas SHD estaban escritas a mano y no se usan para alertas.")
+            _render_anterior()
 
 
 def _render_anterior() -> None:
@@ -47,18 +51,18 @@ def _render_anterior() -> None:
         )
         c1, c2, c3 = st.columns(3)
         with c1:
-            if st.button("🔄 Sincronizar open data", use_container_width=True):
+            if st.button("🔄 Sincronizar open data", width="stretch"):
                 with st.spinner("Descargando DIAN + SHD Bogotá..."):
                     n = sincronizar_calendario_opendata(date.today().year)
                 st.success(f"{n} vencimientos sincronizados.")
                 st.rerun()
         with c2:
-            if st.button("📧 Probar recordatorios", use_container_width=True):
+            if st.button("📧 Probar recordatorios", width="stretch"):
                 with st.spinner("Revisando ventanas 48h / 24h..."):
                     stats = enviar_recordatorios_vencimientos()
                 st.info(f"Emails 48h: {stats['email_48h']} | WhatsApp 24h: {stats['whatsapp_24h']}")
         with c3:
-            st.link_button("DIAN oficial", "https://www.dian.gov.co/Paginas/CalendarioTributario.aspx", use_container_width=True)
+            st.link_button("DIAN oficial", "https://www.dian.gov.co/Paginas/CalendarioTributario.aspx", width="stretch")
 
         cal = query_df(
             """SELECT entidad, impuesto, periodo, fecha_vencimiento, formulario, categoria
@@ -85,10 +89,10 @@ def _render_anterior() -> None:
                     height=380,
                 )
                 fig.update_layout(**PLOTLY_LAYOUT)
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width="stretch")
             st.dataframe(
                 cal[["entidad", "impuesto", "periodo", "fecha_vencimiento", "formulario", "dias", "color"]],
-                use_container_width=True,
+                width="stretch",
                 hide_index=True,
             )
 
@@ -106,7 +110,7 @@ def _render_anterior() -> None:
                ORDER BY r.timestamp DESC LIMIT 20"""
         )
         if not rec.empty:
-            st.dataframe(rec, use_container_width=True, hide_index=True)
+            st.dataframe(rec, width="stretch", hide_index=True)
 
     with tab_tabla:
         df = query_df("SELECT * FROM impuestos_maestro ORDER BY fecha_vencimiento")
@@ -116,7 +120,7 @@ def _render_anterior() -> None:
             df_display["dias"] = df_display["fecha_vencimiento"].apply(
                 lambda x: (date.fromisoformat(str(x)) - hoy).days if x else 999
             )
-            st.dataframe(df_display, use_container_width=True, hide_index=True)
+            st.dataframe(df_display, width="stretch", hide_index=True)
             if st.button("Exportar Excel"):
                 data, nombre = generar_reporte("impuestos", df, "excel")
                 st.download_button("Descargar", data, nombre)
@@ -169,4 +173,4 @@ def _render_anterior() -> None:
         rev = query_df("SELECT * FROM revisiones_dian ORDER BY id DESC LIMIT 10")
         if not rev.empty:
             st.caption("Últimas revisiones DIAN")
-            st.dataframe(rev, use_container_width=True, hide_index=True)
+            st.dataframe(rev, width="stretch", hide_index=True)

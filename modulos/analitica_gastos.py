@@ -56,17 +56,26 @@ def _clave(ruta: Path) -> str:
     return hashlib.md5(f"v2|{ruta}|{st.st_mtime}|{st.st_size}".encode()).hexdigest()[:16]
 
 
+_MEMORIA: dict[str, dict[str, Any]] = {}
+
+
 def cargar(ruta: Path | None = None) -> dict[str, Any] | None:
-    """Devuelve {"mov": DataFrame, "cuentas": {cuenta: nombre}, "fuente": ruta} o None si no hay libro."""
+    """Devuelve {"mov": DataFrame, "cuentas": {cuenta: nombre}, "fuente": ruta} o None si no hay libro.
+    Tres niveles: memoria (instantáneo) → caché en disco (.pkl) → leer el Excel (lento, solo si cambió)."""
     candidatos = [ruta] if ruta else libros_disponibles()
     for r in candidatos:
         if r is None or not r.exists():
             continue
+        clave = _clave(r)
+        if clave in _MEMORIA:
+            return _MEMORIA[clave]
         CACHE.mkdir(parents=True, exist_ok=True)
-        cache = CACHE / f"gastos_{_clave(r)}.pkl"
+        cache = CACHE / f"gastos_{clave}.pkl"
         if cache.exists():
             try:
-                return pd.read_pickle(cache)
+                _MEMORIA.clear()
+                _MEMORIA[clave] = pd.read_pickle(cache)
+                return _MEMORIA[clave]
             except Exception:
                 pass
         try:
@@ -76,7 +85,9 @@ def cargar(ruta: Path | None = None) -> dict[str, Any] | None:
             continue
         if datos is None:
             continue
-        pd.to_pickle(datos, cache)
+        pd.to_pickle(datos, cache, protocol=5)
+        _MEMORIA.clear()
+        _MEMORIA[clave] = datos
         return datos
     return None
 

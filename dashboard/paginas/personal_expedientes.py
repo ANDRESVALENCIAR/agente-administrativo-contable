@@ -104,7 +104,7 @@ def render_lista() -> None:
         ["nombre_display", "total_documentos", "completitud_pct", "docs_faltantes", "ultima_actualizacion"]
     ].copy()
     informe.columns = ["Empleado", "Docs", "Completitud %", "Faltantes (JSON)", "Actualizado"]
-    st.dataframe(informe, use_container_width=True, hide_index=True)
+    st.dataframe(informe, width="stretch", hide_index=True)
 
     st.subheader("Detalle por empleado")
     for _, row in df.iterrows():
@@ -175,7 +175,7 @@ def render_detalle(empleado_id: int, nombre_carpeta: str) -> None:
            FROM log_cambios_carpetas WHERE empleado=? ORDER BY id DESC LIMIT 30""",
         (nombre_carpeta,),
     )
-    st.dataframe(log, use_container_width=True, hide_index=True)
+    st.dataframe(log, width="stretch", hide_index=True)
 
     if st.button("🚪 Archivar empleado (PERSONAL RETIRADO)", type="primary"):
         try:

@@ -1,8 +1,9 @@
 """
 Cliente Claude API con prompt caching, Batch API y registro de tokens.
 """
+from __future__ import annotations
+
 import hashlib
-import anthropic
 import json
 import time
 import logging
@@ -17,6 +18,19 @@ except ImportError:
 
 from config import cfg, en_modo_demo
 from database import registrar_accion
+
+
+class _AnthropicPerezoso:
+    """El SDK de Anthropic tarda ~1 s en importarse: se carga solo la primera vez que se usa."""
+
+    def __getattr__(self, nombre: str):
+        import anthropic as _sdk
+
+        globals()["anthropic"] = _sdk
+        return getattr(_sdk, nombre)
+
+
+anthropic = _AnthropicPerezoso()
 
 logger = logging.getLogger(__name__)
 

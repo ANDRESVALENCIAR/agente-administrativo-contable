@@ -49,7 +49,7 @@ def render(token: str) -> None:
         )
         with st.form("ri_form"):
             ref = st.text_input("Número de formulario o radicado (opcional)")
-            ok = st.form_submit_button("Confirmar: ya lo presenté", use_container_width=True)
+            ok = st.form_submit_button("Confirmar: ya lo presenté", width="stretch")
         if ok:
             if rt.marcar_presentado(oid, por="enlace de alerta", referencia=ref or None).get("ok"):
                 st.session_state[f"ri_ok_{oid}"] = True

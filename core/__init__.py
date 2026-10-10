@@ -2,18 +2,31 @@
 Capa de integración de librerías del AGENTE ADMIN SHAKI.
 Cada módulo del agente usa estas utilidades en lugar de importar directo.
 """
-from core.calendario_col import es_dia_habil, es_festivo_colombia
-from core.db_sqlalchemy import get_engine, query_df as sql_query_df
-from core.documentos_engine import generar_pdf_tabla, render_plantilla
-from core.formato_col import numero_a_letras, valor_pesos
-from core.http_cliente import fetch_url
-from core.ia_engine import chat_completar, ia_disponible
-from core.registro_libs import (
-    LIBRERIAS_POR_MODULO,
-    librerias_disponibles,
-    registrar_uso_libreria,
-    verificar_librerias,
-)
+# Carga perezosa (PEP 562): cada utilidad se importa la primera vez que se pide. Antes «import core»
+# arrastraba LangChain, SQLAlchemy, Jinja, etc. y alargaba varios segundos el arranque de Shaki.
+_ORIGEN = {
+    "es_dia_habil": "core.calendario_col", "es_festivo_colombia": "core.calendario_col",
+    "get_engine": "core.db_sqlalchemy", "sql_query_df": ("core.db_sqlalchemy", "query_df"),
+    "generar_pdf_tabla": "core.documentos_engine", "render_plantilla": "core.documentos_engine",
+    "numero_a_letras": "core.formato_col", "valor_pesos": "core.formato_col",
+    "fetch_url": "core.http_cliente",
+    "chat_completar": "core.ia_engine", "ia_disponible": "core.ia_engine",
+    "LIBRERIAS_POR_MODULO": "core.registro_libs", "librerias_disponibles": "core.registro_libs",
+    "registrar_uso_libreria": "core.registro_libs", "verificar_librerias": "core.registro_libs",
+}
+
+
+def __getattr__(nombre: str):
+    if nombre not in _ORIGEN:
+        raise AttributeError(f"module 'core' has no attribute {nombre!r}")
+    import importlib
+
+    origen = _ORIGEN[nombre]
+    modulo, attr = origen if isinstance(origen, tuple) else (origen, nombre)
+    valor = getattr(importlib.import_module(modulo), attr)
+    globals()[nombre] = valor
+    return valor
+
 
 __all__ = [
     "LIBRERIAS_POR_MODULO",

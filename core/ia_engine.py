@@ -1,4 +1,5 @@
 """Motor IA: LangChain + Anthropic con fallback directo."""
+import importlib.util
 import logging
 
 from config import cfg, en_modo_demo
@@ -7,19 +8,8 @@ logger = logging.getLogger(__name__)
 
 _llm = None
 
-try:
-    from langchain_anthropic import ChatAnthropic
-    from langchain_core.messages import HumanMessage, SystemMessage
-
-    _HAS_LC = True
-except ImportError:
-    try:
-        from langchain_anthropic import ChatAnthropic
-        from langchain.schema import HumanMessage, SystemMessage
-
-        _HAS_LC = True
-    except ImportError:
-        _HAS_LC = False
+# LangChain pesa ~1 s al importar: solo se comprueba que esté instalado y se importa al usarlo.
+_HAS_LC = importlib.util.find_spec("langchain_anthropic") is not None
 
 
 def ia_disponible() -> dict[str, bool]:
@@ -36,6 +26,8 @@ def _get_llm():
         from core.registro_libs import registrar_uso_libreria
 
         registrar_uso_libreria("chat", "langchain_anthropic")
+        from langchain_anthropic import ChatAnthropic
+
         _llm = ChatAnthropic(
             model=cfg.MODELO_COMPLEJO,
             anthropic_api_key=cfg.ANTHROPIC_API_KEY,
@@ -61,6 +53,8 @@ def chat_completar(system: str, mensaje: str, historial: list[dict] | None = Non
     if _HAS_LC and not en_modo_demo():
         llm = _get_llm()
         if llm is not None:
+            from langchain_core.messages import HumanMessage, SystemMessage
+
             msgs = [SystemMessage(content=system)]
             for h in historial[-6:]:
                 if h.get("role") == "user":

@@ -49,7 +49,7 @@ def render() -> None:
                     (tipo, tit, date.today().isoformat(), resp),
                 )
                 st.rerun()
-        st.dataframe(query_df("SELECT * FROM normatividad ORDER BY id DESC"), use_container_width=True)
+        st.dataframe(query_df("SELECT * FROM normatividad ORDER BY id DESC"), width="stretch")
 
     with t4:
         with st.form("pol"):
@@ -62,7 +62,7 @@ def render() -> None:
                     (nom, ver, date.today().isoformat(), est),
                 )
                 st.rerun()
-        st.dataframe(query_df("SELECT * FROM politicas_internas"), use_container_width=True)
+        st.dataframe(query_df("SELECT * FROM politicas_internas"), width="stretch")
         st.subheader("Jornadas laborales")
         with st.form("jor"):
             emp = st.text_input("Empleado jornada")
@@ -70,4 +70,4 @@ def render() -> None:
             if st.form_submit_button("Asignar"):
                 execute("INSERT INTO jornadas_laborales (empleado,modalidad) VALUES (?,?)", (emp, mod))
                 st.rerun()
-        st.dataframe(query_df("SELECT * FROM jornadas_laborales"), use_container_width=True)
+        st.dataframe(query_df("SELECT * FROM jornadas_laborales"), width="stretch")

@@ -117,14 +117,14 @@ def render() -> None:
                           dias_pendientes_2025, fecha_regreso, observaciones
                    FROM vacaciones_fenix ORDER BY nombre_completo"""
             ),
-            use_container_width=True,
+            width="stretch",
             hide_index=True,
         )
 
     with tabs[5]:
         st.dataframe(
             query_df("SELECT nombre, dia, mes FROM cumpleanos_fenix ORDER BY mes, dia"),
-            use_container_width=True,
+            width="stretch",
             hide_index=True,
         )
 
@@ -135,7 +135,7 @@ def render() -> None:
                           vencimiento_contrato, fecha_preaviso FROM contratos_fijos_fenix
                    ORDER BY vencimiento_contrato"""
             ),
-            use_container_width=True,
+            width="stretch",
             hide_index=True,
         )
 
@@ -156,7 +156,7 @@ def _tabla_empleados(tipo: str, activo: int) -> None:
         st.info(f"Sin registros de {ETIQUETAS_TIPO.get(tipo, tipo)}. Use Importar.")
         return
 
-    st.dataframe(df, use_container_width=True, hide_index=True)
+    st.dataframe(df, width="stretch", hide_index=True)
 
     ids = df["id"].tolist()
     nombres = df["nombre_completo"].tolist()

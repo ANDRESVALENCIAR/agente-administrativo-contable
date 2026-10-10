@@ -14,6 +14,7 @@ git pull
 $py = "C:\venvs\shaki\Scripts\python.exe"
 if (-not (Test-Path $py)) { $py = "python" }
 Write-Host "Revisando librerías nuevas..." -ForegroundColor Cyan
-& $py -m pip install -q rapidfuzz 2>$null
+& $py -m pip install -q "streamlit>=1.50" rapidfuzz 2>$null
+& $py -c "import streamlit; print('Streamlit', streamlit.__version__)"
 Write-Host "Abriendo Shaki en http://localhost:8501 (no cierre esta ventana)" -ForegroundColor Green
 & $py -m streamlit run dashboard/app.py --server.port 8501

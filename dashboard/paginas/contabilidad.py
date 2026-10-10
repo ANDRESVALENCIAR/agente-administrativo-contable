@@ -22,7 +22,7 @@ def render() -> None:
         anio = st.number_input("Año", value=date.today().year, step=1)
         if archivo:
             df = pd.read_csv(archivo) if archivo.name.endswith(".csv") else pd.read_excel(archivo)
-            st.dataframe(df.head(20), use_container_width=True)
+            st.dataframe(df.head(20), width="stretch")
             if st.button("Generar informe con IA"):
                 with st.spinner("Analizando..."):
                     informe = llamar_claude(
@@ -50,7 +50,7 @@ def render() -> None:
                     )
                     st.rerun()
         else:
-            st.dataframe(df, use_container_width=True)
+            st.dataframe(df, width="stretch")
             if len(df) >= 2:
                 diff = abs(df.iloc[0]["saldo"] - df.iloc[1]["saldo"])
                 if diff > 0:

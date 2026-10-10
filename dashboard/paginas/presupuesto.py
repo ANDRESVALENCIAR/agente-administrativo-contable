@@ -26,7 +26,7 @@ def render() -> None:
         df["semaforo"] = df["variacion_pct"].apply(
             lambda x: "🔴" if abs(x) > 10 else "🟡" if abs(x) > 5 else "🟢"
         )
-        st.dataframe(df, use_container_width=True)
+        st.dataframe(df, width="stretch")
         st.bar_chart(df.set_index("rubro")[["presupuesto", "ejecutado"]])
 
     uploaded = st.file_uploader("Cargar ejecución real (Excel)", type=["xlsx"])
@@ -47,7 +47,7 @@ def render() -> None:
         st.success("Rubros importados.")
         st.rerun()
     elif uploaded:
-        st.dataframe(pd.read_excel(uploaded).head(), use_container_width=True)
+        st.dataframe(pd.read_excel(uploaded).head(), width="stretch")
 
     with st.form("rubro"):
         rubro = st.text_input("Rubro")

@@ -11,6 +11,7 @@ import streamlit as st
 
 from dashboard.estilos import OTROS, PLOTLY_LAYOUT, SECUENCIAL, SERIES
 from modulos import analitica_gastos as ag
+from dashboard.utils.pestanas import abierta, pestanas
 
 MESES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
 
@@ -126,162 +127,168 @@ def render() -> None:
         f'<div><b>{k["terceros"]:,}</b><span>Terceros · {k["movimientos"]:,} mov.</span></div>'
         f'</div></div>', unsafe_allow_html=True)
 
-    t1, t2, t3, t4, t5 = st.tabs(["Evolución", "¿En qué se gasta?", "Proveedores", "Detalle", "Compromisos recurrentes"])
+    colores = {n: (SERIES[i] if i < len(SERIES) else OTROS) for i, n in enumerate(sorted(grupos_all))}
+    t1, t2, t3, t4, t5 = pestanas(["Evolución", "¿En qué se gasta?", "Proveedores", "Detalle", "Compromisos recurrentes"],
+                                  key="gd_tabs")
 
     with t1:
-        mens = ag.mensual(m, costos)
-        c1, c2 = st.columns([1.35, 1])
-        with c1:
-            st.markdown('<div class="gd-h">Gasto mensual por tipo</div><div class="gd-c">Pase el cursor para ver '
-                        'el valor; haga clic en la leyenda para ocultar un tipo.</div>', unsafe_allow_html=True)
-            pm = g.groupby(["mes", "nombre_grupo"])["monto"].sum().reset_index()
-            orden = pm.groupby("nombre_grupo")["monto"].sum().sort_values(ascending=False).index.tolist()
-            colores = {n: (SERIES[i] if i < len(SERIES) else OTROS) for i, n in enumerate(sorted(grupos_all))}
-            fig = px.bar(pm, x="mes", y="monto", color="nombre_grupo", category_orders={"nombre_grupo": orden},
-                         color_discrete_map=colores, labels={"monto": "", "mes": "", "nombre_grupo": ""})
-            fig.update_traces(marker_line_color="#0A0B0D", marker_line_width=2,
-                              hovertemplate="%{x|%b %Y}<br>%{fullData.name}: $%{y:,.0f}<extra></extra>")
-            fig.update_layout(bargap=0.35)
-            fig.update_xaxes(tickformat="%b %y", dtick="M1")
-            fig.update_yaxes(tickformat="~s", tickprefix="$")
-            st.plotly_chart(_layout(fig, 360), use_container_width=True)
-        with c2:
-            st.markdown('<div class="gd-h">Ingresos vs. gastos</div><div class="gd-c">Resultado del mes = ingresos − '
-                        'gastos</div>', unsafe_allow_html=True)
-            fig = go.Figure()
-            fig.add_bar(x=mens.index, y=mens["ingresos"], name="Ingresos", marker_color=SERIES[2],
-                        hovertemplate="%{x|%b %Y}<br>Ingresos $%{y:,.0f}<extra></extra>")
-            fig.add_bar(x=mens.index, y=mens["gastos"], name="Gastos", marker_color=SERIES[1],
-                        hovertemplate="%{x|%b %Y}<br>Gastos $%{y:,.0f}<extra></extra>")
-            fig.add_scatter(x=mens.index, y=mens["resultado"], name="Resultado", mode="lines+markers",
-                            line=dict(color="#E8E8EA", width=2), marker=dict(size=8),
-                            hovertemplate="%{x|%b %Y}<br>Resultado $%{y:,.0f}<extra></extra>")
-            fig.update_layout(barmode="group", bargap=0.3)
-            fig.update_xaxes(tickformat="%b %y", dtick="M1")
-            fig.update_yaxes(tickformat="~s", tickprefix="$")
-            st.plotly_chart(_layout(fig, 360), use_container_width=True)
-        an = ag.anomalias(m, costos)
-        if not an.empty:
-            st.markdown('<div class="gd-h">Lo que se salió de lo normal en el último mes</div>', unsafe_allow_html=True)
-            for _, a in an.head(6).iterrows():
-                st.markdown(f'<div class="gd-an"><b>{escape(str(a["cuenta"]))}</b>: {_p(a["ultimo"])} '
-                            f'<small>vs. promedio {_p(a["promedio"])} ({a["variacion"] * 100:+.0f}%)</small></div>',
-                            unsafe_allow_html=True)
+        if abierta(t1):
+            mens = ag.mensual(m, costos)
+            c1, c2 = st.columns([1.35, 1])
+            with c1:
+                st.markdown('<div class="gd-h">Gasto mensual por tipo</div><div class="gd-c">Pase el cursor para ver '
+                            'el valor; haga clic en la leyenda para ocultar un tipo.</div>', unsafe_allow_html=True)
+                pm = g.groupby(["mes", "nombre_grupo"])["monto"].sum().reset_index()
+                orden = pm.groupby("nombre_grupo")["monto"].sum().sort_values(ascending=False).index.tolist()
+                fig = px.bar(pm, x="mes", y="monto", color="nombre_grupo", category_orders={"nombre_grupo": orden},
+                             color_discrete_map=colores, labels={"monto": "", "mes": "", "nombre_grupo": ""})
+                fig.update_traces(marker_line_color="#0A0B0D", marker_line_width=2,
+                                  hovertemplate="%{x|%b %Y}<br>%{fullData.name}: $%{y:,.0f}<extra></extra>")
+                fig.update_layout(bargap=0.35)
+                fig.update_xaxes(tickformat="%b %y", dtick="M1")
+                fig.update_yaxes(tickformat="~s", tickprefix="$")
+                st.plotly_chart(_layout(fig, 360), width="stretch")
+            with c2:
+                st.markdown('<div class="gd-h">Ingresos vs. gastos</div><div class="gd-c">Resultado del mes = ingresos − '
+                            'gastos</div>', unsafe_allow_html=True)
+                fig = go.Figure()
+                fig.add_bar(x=mens.index, y=mens["ingresos"], name="Ingresos", marker_color=SERIES[2],
+                            hovertemplate="%{x|%b %Y}<br>Ingresos $%{y:,.0f}<extra></extra>")
+                fig.add_bar(x=mens.index, y=mens["gastos"], name="Gastos", marker_color=SERIES[1],
+                            hovertemplate="%{x|%b %Y}<br>Gastos $%{y:,.0f}<extra></extra>")
+                fig.add_scatter(x=mens.index, y=mens["resultado"], name="Resultado", mode="lines+markers",
+                                line=dict(color="#E8E8EA", width=2), marker=dict(size=8),
+                                hovertemplate="%{x|%b %Y}<br>Resultado $%{y:,.0f}<extra></extra>")
+                fig.update_layout(barmode="group", bargap=0.3)
+                fig.update_xaxes(tickformat="%b %y", dtick="M1")
+                fig.update_yaxes(tickformat="~s", tickprefix="$")
+                st.plotly_chart(_layout(fig, 360), width="stretch")
+            an = ag.anomalias(m, costos)
+            if not an.empty:
+                st.markdown('<div class="gd-h">Lo que se salió de lo normal en el último mes</div>', unsafe_allow_html=True)
+                for _, a in an.head(6).iterrows():
+                    st.markdown(f'<div class="gd-an"><b>{escape(str(a["cuenta"]))}</b>: {_p(a["ultimo"])} '
+                                f'<small>vs. promedio {_p(a["promedio"])} ({a["variacion"] * 100:+.0f}%)</small></div>',
+                                unsafe_allow_html=True)
 
     with t2:
-        c1, c2 = st.columns([1.4, 1])
-        with c1:
-            st.markdown('<div class="gd-h">Mapa de gastos</div><div class="gd-c">Clic en un bloque para entrar; '
-                        'clic arriba para volver.</div>', unsafe_allow_html=True)
-            tm = g.groupby(["nombre_grupo", "nombre_cuenta4", "nombre_cuenta6"])["monto"].sum().reset_index()
-            tm = tm[tm["monto"] > 0]
-            fig = px.treemap(tm, path=[px.Constant("Total"), "nombre_grupo", "nombre_cuenta4", "nombre_cuenta6"],
-                             values="monto", color="nombre_grupo", color_discrete_map={**colores, "(?)": OTROS})
-            fig.update_traces(hovertemplate="<b>%{label}</b><br>$%{value:,.0f}<br>%{percentRoot:.1%} del total<extra></extra>",
-                              texttemplate="%{label}<br>%{percentRoot:.0%}", marker_line_color="#0A0B0D",
-                              marker_line_width=2, root_color="#0F1012")
-            st.plotly_chart(_layout(fig, 460, False), use_container_width=True)
-        with c2:
-            st.markdown('<div class="gd-h">Top cuentas</div>', unsafe_allow_html=True)
-            top = g.groupby("nombre_cuenta4")["monto"].sum().sort_values(ascending=True).tail(12).reset_index()
-            top["nombre_cuenta4"] = top["nombre_cuenta4"].str.slice(0, 28)
-            fig = px.bar(top, x="monto", y="nombre_cuenta4", orientation="h", labels={"monto": "", "nombre_cuenta4": ""})
-            fig.update_traces(marker_color=SERIES[0], hovertemplate="%{y}<br>$%{x:,.0f}<extra></extra>")
-            fig.update_xaxes(tickformat="~s", tickprefix="$")
-            st.plotly_chart(_layout(fig, 460, False), use_container_width=True)
-        st.markdown('<div class="gd-h">Mapa de calor: cuenta × mes</div><div class="gd-c">Cada fila se compara con su '
-                    'propio mes más alto (más claro = más gasto en esa cuenta). Sirve para ver estacionalidad.</div>', unsafe_allow_html=True)
-        hm = g.pivot_table(index="nombre_cuenta4", columns="mes", values="monto", aggfunc="sum").fillna(0)
-        hm = hm.loc[hm.sum(axis=1).sort_values(ascending=False).index[:15]]
-        rel = hm.div(hm.max(axis=1).where(hm.max(axis=1) > 0), axis=0).fillna(0)  # cada cuenta contra su mes más alto
-        fig = go.Figure(go.Heatmap(z=rel.values, x=[_mes(c) for c in hm.columns], y=[str(i)[:30] for i in hm.index],
-                                   customdata=hm.values, zmin=0, zmax=1,
-                                   colorscale=[[i / (len(SECUENCIAL) - 1), c] for i, c in enumerate(SECUENCIAL)],
-                                   xgap=2, ygap=2, hovertemplate="%{y}<br>%{x}: $%{customdata:,.0f}<extra></extra>",
-                                   colorbar=dict(tickvals=[0, 1], ticktext=["bajo", "su mes más alto"], outlinewidth=0)))
-        st.plotly_chart(_layout(fig, 40 + 26 * len(hm), False), use_container_width=True)
+        if abierta(t2):
+            c1, c2 = st.columns([1.4, 1])
+            with c1:
+                st.markdown('<div class="gd-h">Mapa de gastos</div><div class="gd-c">Clic en un bloque para entrar; '
+                            'clic arriba para volver.</div>', unsafe_allow_html=True)
+                tm = g.groupby(["nombre_grupo", "nombre_cuenta4", "nombre_cuenta6"])["monto"].sum().reset_index()
+                tm = tm[tm["monto"] > 0]
+                fig = px.treemap(tm, path=[px.Constant("Total"), "nombre_grupo", "nombre_cuenta4", "nombre_cuenta6"],
+                                 values="monto", color="nombre_grupo", color_discrete_map={**colores, "(?)": OTROS})
+                fig.update_traces(hovertemplate="<b>%{label}</b><br>$%{value:,.0f}<br>%{percentRoot:.1%} del total<extra></extra>",
+                                  texttemplate="%{label}<br>%{percentRoot:.0%}", marker_line_color="#0A0B0D",
+                                  marker_line_width=2, root_color="#0F1012")
+                st.plotly_chart(_layout(fig, 460, False), width="stretch")
+            with c2:
+                st.markdown('<div class="gd-h">Top cuentas</div>', unsafe_allow_html=True)
+                top = g.groupby("nombre_cuenta4")["monto"].sum().sort_values(ascending=True).tail(12).reset_index()
+                top["nombre_cuenta4"] = top["nombre_cuenta4"].str.slice(0, 28)
+                fig = px.bar(top, x="monto", y="nombre_cuenta4", orientation="h", labels={"monto": "", "nombre_cuenta4": ""})
+                fig.update_traces(marker_color=SERIES[0], hovertemplate="%{y}<br>$%{x:,.0f}<extra></extra>")
+                fig.update_xaxes(tickformat="~s", tickprefix="$")
+                st.plotly_chart(_layout(fig, 460, False), width="stretch")
+            st.markdown('<div class="gd-h">Mapa de calor: cuenta × mes</div><div class="gd-c">Cada fila se compara con su '
+                        'propio mes más alto (más claro = más gasto en esa cuenta). Sirve para ver estacionalidad.</div>', unsafe_allow_html=True)
+            hm = g.pivot_table(index="nombre_cuenta4", columns="mes", values="monto", aggfunc="sum").fillna(0)
+            hm = hm.loc[hm.sum(axis=1).sort_values(ascending=False).index[:15]]
+            rel = hm.div(hm.max(axis=1).where(hm.max(axis=1) > 0), axis=0).fillna(0)  # cada cuenta contra su mes más alto
+            fig = go.Figure(go.Heatmap(z=rel.values, x=[_mes(c) for c in hm.columns], y=[str(i)[:30] for i in hm.index],
+                                       customdata=hm.values, zmin=0, zmax=1,
+                                       colorscale=[[i / (len(SECUENCIAL) - 1), c] for i, c in enumerate(SECUENCIAL)],
+                                       xgap=2, ygap=2, hovertemplate="%{y}<br>%{x}: $%{customdata:,.0f}<extra></extra>",
+                                       colorbar=dict(tickvals=[0, 1], ticktext=["bajo", "su mes más alto"], outlinewidth=0)))
+            st.plotly_chart(_layout(fig, 40 + 26 * len(hm), False), width="stretch")
 
     with t3:
-        propio = g["nit"].astype(str).str.replace(r"\D", "", regex=True).str.startswith("901146454")
-        g_ext = g[~propio]
-        st.caption(f"Sin contar movimientos internos de la empresa ({_p(g[propio]['monto'].sum())}: costo de ventas, "
-                   "cierres y autorretenciones).")
-        terc = g_ext.groupby("tercero").agg(total=("monto", "sum"), movimientos=("monto", "size"),
-                                         ultimo=("fecha", "max"), meses=("mes", "nunique")).reset_index()
-        terc = terc[terc["total"] > 0].sort_values("total", ascending=False)
-        c1, c2 = st.columns([1.3, 1])
-        with c1:
-            st.markdown('<div class="gd-h">Top 15 terceros</div><div class="gd-c">Seleccione una barra para ver sus '
-                        'movimientos abajo.</div>', unsafe_allow_html=True)
-            t15 = terc.head(15).iloc[::-1]
-            fig = px.bar(t15, x="total", y="tercero", orientation="h", labels={"total": "", "tercero": ""},
-                         custom_data=["movimientos", "meses"])
-            fig.update_traces(marker_color=SERIES[0],
-                              hovertemplate="%{y}<br>$%{x:,.0f}<br>%{customdata[0]} movimientos · %{customdata[1]} meses<extra></extra>")
-            fig.update_xaxes(tickformat="~s", tickprefix="$")
-            ev = st.plotly_chart(_layout(fig, 500, False), use_container_width=True, on_select="rerun",
-                                 selection_mode="points", key="gd_terc")
-        with c2:
-            st.markdown('<div class="gd-h">Concentración</div><div class="gd-c">Cuánto del gasto se va en los '
-                        'principales terceros</div>', unsafe_allow_html=True)
-            tot = terc["total"].sum()
-            filas = [(f"Top {n}", terc.head(n)["total"].sum() / tot if tot else 0) for n in (1, 5, 10, 20)]
-            for et, v in filas:
-                st.markdown(f'<div style="display:flex;justify-content:space-between;color:#A1A1AA;font-size:13px">'
-                            f'<span>{et}</span><b style="color:#fff">{v * 100:.0f}%</b></div>', unsafe_allow_html=True)
-                st.progress(min(1.0, v))
-            st.markdown(f'<div class="gd-c" style="margin-top:10px">{len(terc):,} terceros con gasto en el periodo.</div>',
-                        unsafe_allow_html=True)
-        sel = None
-        try:
-            pts = ev.selection.points if ev else []
-            sel = pts[0]["y"] if pts else None
-        except Exception:
+        if abierta(t3):
+            propio = g["nit"].astype(str).str.replace(r"\D", "", regex=True).str.startswith("901146454")
+            g_ext = g[~propio]
+            st.caption(f"Sin contar movimientos internos de la empresa ({_p(g[propio]['monto'].sum())}: costo de ventas, "
+                       "cierres y autorretenciones).")
+            terc = g_ext.groupby("tercero").agg(total=("monto", "sum"), movimientos=("monto", "size"),
+                                             ultimo=("fecha", "max"), meses=("mes", "nunique")).reset_index()
+            terc = terc[terc["total"] > 0].sort_values("total", ascending=False)
+            c1, c2 = st.columns([1.3, 1])
+            with c1:
+                st.markdown('<div class="gd-h">Top 15 terceros</div><div class="gd-c">Seleccione una barra para ver sus '
+                            'movimientos abajo.</div>', unsafe_allow_html=True)
+                t15 = terc.head(15).iloc[::-1]
+                fig = px.bar(t15, x="total", y="tercero", orientation="h", labels={"total": "", "tercero": ""},
+                             custom_data=["movimientos", "meses"])
+                fig.update_traces(marker_color=SERIES[0],
+                                  hovertemplate="%{y}<br>$%{x:,.0f}<br>%{customdata[0]} movimientos · %{customdata[1]} meses<extra></extra>")
+                fig.update_xaxes(tickformat="~s", tickprefix="$")
+                ev = st.plotly_chart(_layout(fig, 500, False), width="stretch", on_select="rerun",
+                                     selection_mode="points", key="gd_terc")
+            with c2:
+                st.markdown('<div class="gd-h">Concentración</div><div class="gd-c">Cuánto del gasto se va en los '
+                            'principales terceros</div>', unsafe_allow_html=True)
+                tot = terc["total"].sum()
+                filas = [(f"Top {n}", terc.head(n)["total"].sum() / tot if tot else 0) for n in (1, 5, 10, 20)]
+                for et, v in filas:
+                    st.markdown(f'<div style="display:flex;justify-content:space-between;color:#A1A1AA;font-size:13px">'
+                                f'<span>{et}</span><b style="color:#fff">{v * 100:.0f}%</b></div>', unsafe_allow_html=True)
+                    st.progress(min(1.0, v))
+                st.markdown(f'<div class="gd-c" style="margin-top:10px">{len(terc):,} terceros con gasto en el periodo.</div>',
+                            unsafe_allow_html=True)
             sel = None
-        busca = st.text_input("Buscar tercero", value=sel or "", key="gd_tq", placeholder="Nombre del proveedor…")
-        if busca:
-            d = g_ext[g_ext["tercero"].str.contains(busca, case=False, na=False)]
-            st.markdown(f'<div class="gd-h">{escape(busca)}: {_p(d["monto"].sum())} en {len(d)} movimientos</div>',
-                        unsafe_allow_html=True)
-            serie = d.groupby("mes")["monto"].sum()
-            if len(serie) > 1:
-                fig = px.area(serie.reset_index(), x="mes", y="monto", labels={"monto": "", "mes": ""})
-                fig.update_traces(line_color=SERIES[0], fillcolor="rgba(57,135,229,.18)",
-                                  hovertemplate="%{x|%b %Y}: $%{y:,.0f}<extra></extra>")
-                fig.update_yaxes(tickformat="~s", tickprefix="$")
-                st.plotly_chart(_layout(fig, 220, False), use_container_width=True)
-            st.dataframe(d.sort_values("fecha", ascending=False)[["fecha", "nombre_cuenta6", "detalle", "comprobante", "monto"]],
-                         use_container_width=True, hide_index=True,
-                         column_config={"fecha": st.column_config.DateColumn("Fecha", format="DD/MM/YYYY"),
-                                        "nombre_cuenta6": "Cuenta", "detalle": "Detalle", "comprobante": "Comprobante",
-                                        "monto": st.column_config.NumberColumn("Valor", format="$ %,.0f")})
-        else:
-            st.dataframe(terc.head(100), use_container_width=True, hide_index=True,
-                         column_config={"tercero": "Tercero", "total": st.column_config.NumberColumn("Total", format="$ %,.0f"),
-                                        "movimientos": "Movimientos", "meses": "Meses con gasto",
-                                        "ultimo": st.column_config.DateColumn("Último", format="DD/MM/YYYY")})
+            try:
+                pts = ev.selection.points if ev else []
+                sel = pts[0]["y"] if pts else None
+            except Exception:
+                sel = None
+            busca = st.text_input("Buscar tercero", value=sel or "", key="gd_tq", placeholder="Nombre del proveedor…")
+            if busca:
+                d = g_ext[g_ext["tercero"].str.contains(busca, case=False, na=False)]
+                st.markdown(f'<div class="gd-h">{escape(busca)}: {_p(d["monto"].sum())} en {len(d)} movimientos</div>',
+                            unsafe_allow_html=True)
+                serie = d.groupby("mes")["monto"].sum()
+                if len(serie) > 1:
+                    fig = px.area(serie.reset_index(), x="mes", y="monto", labels={"monto": "", "mes": ""})
+                    fig.update_traces(line_color=SERIES[0], fillcolor="rgba(57,135,229,.18)",
+                                      hovertemplate="%{x|%b %Y}: $%{y:,.0f}<extra></extra>")
+                    fig.update_yaxes(tickformat="~s", tickprefix="$")
+                    st.plotly_chart(_layout(fig, 220, False), width="stretch")
+                st.dataframe(d.sort_values("fecha", ascending=False)[["fecha", "nombre_cuenta6", "detalle", "comprobante", "monto"]],
+                             width="stretch", hide_index=True,
+                             column_config={"fecha": st.column_config.DateColumn("Fecha", format="DD/MM/YYYY"),
+                                            "nombre_cuenta6": "Cuenta", "detalle": "Detalle", "comprobante": "Comprobante",
+                                            "monto": st.column_config.NumberColumn("Valor", format="$ %,.0f")})
+            else:
+                st.dataframe(terc.head(100), width="stretch", hide_index=True,
+                             column_config={"tercero": "Tercero", "total": st.column_config.NumberColumn("Total", format="$ %,.0f"),
+                                            "movimientos": "Movimientos", "meses": "Meses con gasto",
+                                            "ultimo": st.column_config.DateColumn("Último", format="DD/MM/YYYY")})
 
     with t4:
-        c1, c2 = st.columns([1, 1])
-        cuentas = ["Todas"] + sorted(g["nombre_cuenta4"].unique())
-        cta = c1.selectbox("Cuenta", cuentas, key="gd_cta")
-        txt = c2.text_input("Buscar en el detalle", key="gd_txt", placeholder="arriendo, flete, DHL…")
-        d = g if cta == "Todas" else g[g["nombre_cuenta4"] == cta]
-        if txt:
-            d = d[d["detalle"].str.contains(txt, case=False, na=False) | d["tercero"].str.contains(txt, case=False, na=False)]
-        st.markdown(f'<div class="gd-h">{len(d):,} movimientos · {_p(d["monto"].sum())}</div>', unsafe_allow_html=True)
-        vista = d.sort_values("fecha", ascending=False)[["fecha", "nombre_cuenta4", "nombre_cuenta6", "tercero", "detalle",
-                                                         "comprobante", "monto"]]
-        st.dataframe(vista.head(2000), use_container_width=True, hide_index=True, height=480,
-                     column_config={"fecha": st.column_config.DateColumn("Fecha", format="DD/MM/YYYY"),
-                                    "nombre_cuenta4": "Cuenta", "nombre_cuenta6": "Subcuenta", "tercero": "Tercero",
-                                    "detalle": "Detalle", "comprobante": "Comprobante",
-                                    "monto": st.column_config.NumberColumn("Valor", format="$ %,.0f")})
-        st.download_button("Descargar (CSV)", vista.to_csv(index=False).encode("utf-8-sig"),
-                           file_name=f"gastos_{date.today()}.csv", mime="text/csv")
+        if abierta(t4):
+            c1, c2 = st.columns([1, 1])
+            cuentas = ["Todas"] + sorted(g["nombre_cuenta4"].unique())
+            cta = c1.selectbox("Cuenta", cuentas, key="gd_cta")
+            txt = c2.text_input("Buscar en el detalle", key="gd_txt", placeholder="arriendo, flete, DHL…")
+            d = g if cta == "Todas" else g[g["nombre_cuenta4"] == cta]
+            if txt:
+                d = d[d["detalle"].str.contains(txt, case=False, na=False) | d["tercero"].str.contains(txt, case=False, na=False)]
+            st.markdown(f'<div class="gd-h">{len(d):,} movimientos · {_p(d["monto"].sum())}</div>', unsafe_allow_html=True)
+            vista = d.sort_values("fecha", ascending=False)[["fecha", "nombre_cuenta4", "nombre_cuenta6", "tercero", "detalle",
+                                                             "comprobante", "monto"]]
+            st.dataframe(vista.head(2000), width="stretch", hide_index=True, height=480,
+                         column_config={"fecha": st.column_config.DateColumn("Fecha", format="DD/MM/YYYY"),
+                                        "nombre_cuenta4": "Cuenta", "nombre_cuenta6": "Subcuenta", "tercero": "Tercero",
+                                        "detalle": "Detalle", "comprobante": "Comprobante",
+                                        "monto": st.column_config.NumberColumn("Valor", format="$ %,.0f")})
+            st.download_button("Descargar (CSV)", vista.to_csv(index=False).encode("utf-8-sig"),
+                               file_name=f"gastos_{date.today()}.csv", mime="text/csv")
 
     with t5:
-        _compromisos()
+        if abierta(t5):
+            _compromisos()
 
 
 def _compromisos() -> None:
@@ -316,7 +323,7 @@ def _compromisos() -> None:
                               color_discrete_map=colores)
             fig.update_traces(hovertemplate="%{label}: %{value} registros<extra></extra>", marker_line_color="#0A0B0D",
                               marker_line_width=2, insidetextorientation="radial")
-            st.plotly_chart(_layout(fig, 430, False), use_container_width=True)
+            st.plotly_chart(_layout(fig, 430, False), width="stretch")
     with c2:
         st.markdown(f'<div class="gd-h">Próximos 30 días</div><div class="gd-c">{len(prox)} pagos programados '
                     '(Control de pagos)</div>', unsafe_allow_html=True)
@@ -325,8 +332,8 @@ def _compromisos() -> None:
             por_sem = prox.groupby(prox["fecha_sugerida"].dt.to_period("W").dt.start_time).size().reset_index(name="pagos")
             fig = px.bar(por_sem, x="fecha_sugerida", y="pagos", labels={"fecha_sugerida": "Semana", "pagos": ""})
             fig.update_traces(marker_color=SERIES[0], hovertemplate="Semana del %{x|%d %b}: %{y} pagos<extra></extra>")
-            st.plotly_chart(_layout(fig, 200, False), use_container_width=True)
-            st.dataframe(prox, use_container_width=True, hide_index=True, height=230,
+            st.plotly_chart(_layout(fig, 200, False), width="stretch")
+            st.dataframe(prox, width="stretch", hide_index=True, height=230,
                          column_config={"fecha_sugerida": st.column_config.DateColumn("Fecha", format="DD/MM"),
                                         "detalle": "Pago", "proveedor": "Proveedor", "centro_costos": "Centro",
                                         "valor": st.column_config.NumberColumn("Valor", format="$ %,.0f"),

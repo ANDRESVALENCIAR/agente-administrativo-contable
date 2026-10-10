@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pandas as pd
 import streamlit as st
-import streamlit.components.v1 as components
+from dashboard.utils import incrustar
 
 import modulos.comparador_comisiones as comparador
 
@@ -100,7 +100,7 @@ def render_comparador() -> None:
         m2.markdown(f'<div class="ca-metric" style="color:#fff"><div class="ca-metric-l" style="color:#fff">Con SFE</div><div class="ca-metric-v ca-ok">{v["kept"]}</div></div>', unsafe_allow_html=True)
         m3.markdown(f'<div class="ca-metric" style="color:#fff"><div class="ca-metric-l" style="color:#fff">SFE únicas</div><div class="ca-metric-v">{v["unique_sfes"]}</div></div>', unsafe_allow_html=True)
         m4.markdown(f'<div class="ca-metric" style="color:#fff"><div class="ca-metric-l" style="color:#fff">Σ Abono</div><div class="ca-metric-v">${v["sum_abono"]:,.0f}</div></div>', unsafe_allow_html=True)
-        st.dataframe(_df_via_preview(v), use_container_width=True, hide_index=True, height=220)
+        st.dataframe(_df_via_preview(v), width="stretch", hide_index=True, height=220)
         via_bytes, via_name = generar_via_limpio_bytes(v, titulo or "VIA_Limpio")
         st.download_button(
             "⬇️ Descargar VIA limpio (Excel)",
@@ -131,7 +131,7 @@ def render_comparador() -> None:
         m2.markdown(f'<div class="ca-metric" style="color:#fff"><div class="ca-metric-l" style="color:#fff">Total eliminadas</div><div class="ca-metric-v ca-warn">{c["totals_removed"]}</div></div>', unsafe_allow_html=True)
         m3.markdown(f'<div class="ca-metric" style="color:#fff"><div class="ca-metric-l" style="color:#fff">Con SFE</div><div class="ca-metric-v ca-ok">{c["with_sfe"]}</div></div>', unsafe_allow_html=True)
         m4.markdown(f'<div class="ca-metric" style="color:#fff"><div class="ca-metric-l" style="color:#fff">Sin SFE</div><div class="ca-metric-v ca-err">{c["without_sfe"]}</div></div>', unsafe_allow_html=True)
-        st.dataframe(_df_cont_preview(c), use_container_width=True, hide_index=True, height=220)
+        st.dataframe(_df_cont_preview(c), width="stretch", hide_index=True, height=220)
 
     st.markdown(
         '<div class="ca-step" style="background:#171B1E;color:#fff">'
@@ -190,13 +190,13 @@ def render_comparador() -> None:
             key="cmp_tab_res",
         )
         if tab == "Coincidencias":
-            st.dataframe(pd.DataFrame(x["both"]), use_container_width=True, hide_index=True, height=360)
+            st.dataframe(pd.DataFrame(x["both"]), width="stretch", hide_index=True, height=360)
         elif tab == "Solo VIA":
-            st.dataframe(pd.DataFrame(x["onlyVia"]), use_container_width=True, hide_index=True, height=360)
+            st.dataframe(pd.DataFrame(x["onlyVia"]), width="stretch", hide_index=True, height=360)
         elif tab == "Solo Contabilidad":
-            st.dataframe(pd.DataFrame(x["onlyCont"]), use_container_width=True, hide_index=True, height=360)
+            st.dataframe(pd.DataFrame(x["onlyCont"]), width="stretch", hide_index=True, height=360)
         else:
-            st.dataframe(pd.DataFrame(x["noSfe"]), use_container_width=True, hide_index=True, height=360)
+            st.dataframe(pd.DataFrame(x["noSfe"]), width="stretch", hide_index=True, height=360)
 
         if len(x["both"]) == 0:
             st.warning(
@@ -217,7 +217,7 @@ def render_comparador() -> None:
                 if os.name == "nt":
                     os.startfile(str(html_path))  # noqa: S606
             with open(html_path, encoding="utf-8") as f:
-                components.html(f.read(), height=900, scrolling=True)
+                incrustar.html(f.read(), height=900, scrolling=True)
         else:
             st.info("Use el flujo de arriba; el HTML standalone se genera en dashboard/static/.")
 
@@ -242,7 +242,7 @@ def render_historial() -> None:
             ["id", "titulo", "fecha_cruce", "coincidencias", "solo_via", "solo_cont", "sin_sfe", "ruta_excel", "ruta_consolidado"]
         ].copy()
         show.columns = ["ID", "Título", "Fecha", "Coincidencias", "Solo VIA", "Solo Cont.", "Sin SFE", "Excel", "Consolidado"]
-        st.dataframe(show.drop(columns=["ID"]), use_container_width=True, hide_index=True)
+        st.dataframe(show.drop(columns=["ID"]), width="stretch", hide_index=True)
 
         st.subheader("Descargar informes guardados")
         for _, row in df.iterrows():
@@ -282,7 +282,7 @@ def render_historial() -> None:
         resumen = query_resumen_periodo(sel_periodo)
         if resumen:
             st.subheader(f"Resumen de cruzes — {sel_periodo}")
-            st.dataframe(pd.DataFrame(resumen), use_container_width=True, hide_index=True)
+            st.dataframe(pd.DataFrame(resumen), width="stretch", hide_index=True)
     else:
         st.caption("El consolidado mensual se crea al guardar el primer cruce del periodo.")
 
@@ -291,7 +291,7 @@ def render_historial() -> None:
     if not df_all.empty:
         st.dataframe(
             df_all[["periodo", "titulo", "fecha_cruce", "coincidencias", "ruta_consolidado"]],
-            use_container_width=True,
+            width="stretch",
             hide_index=True,
         )
 

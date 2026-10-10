@@ -101,7 +101,7 @@ def render(token: str) -> None:
             ref = c2.text_input("Referencia / comprobante (opcional)")
             enviar = st.form_submit_button(
                 "Confirmar: ya lo pagué" if p["tipo"] == "PAGO" else "Confirmar: ya lo hice",
-                use_container_width=True,
+                width="stretch",
             )
         if enviar:
             res = cp.marcar_pagado(pid, por="enlace de alerta", valor=monto or None, referencia=ref or None)

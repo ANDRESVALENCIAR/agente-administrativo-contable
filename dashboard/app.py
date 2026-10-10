@@ -136,6 +136,16 @@ if "pagos_sync" not in st.session_state:
         logging.getLogger(__name__).warning("Sync CONTROL DE PAGOS al arrancar: %s", exc)
         st.session_state.pagos_sync = {"error": str(exc)}
 
+@st.cache_resource(show_spinner=False)
+def _optimizar_bd() -> int:
+    """Una vez por arranque del servidor: índices en las columnas más consultadas + PRAGMA optimize."""
+    from database import asegurar_indices
+
+    return asegurar_indices()
+
+
+_optimizar_bd()
+
 if "radar_tributario_sync" not in st.session_state:
     try:
         from modulos.radar_tributario import inicializar_y_cargar as _radar_init
@@ -256,7 +266,7 @@ def _chat_cuerpo(en_dialogo: bool = False) -> None:
     with st.form(f"chat_form_{int(en_dialogo)}", clear_on_submit=True, border=False):
         c1, c2 = st.columns([5, 1])
         user_input = c1.text_input("Mensaje", placeholder="Escriba su pregunta…", label_visibility="collapsed")
-        if c2.form_submit_button("Enviar", use_container_width=True, type="primary") and user_input.strip():
+        if c2.form_submit_button("Enviar", width="stretch", type="primary") and user_input.strip():
             _preguntar(user_input.strip())
             _rerun()
 
@@ -288,11 +298,11 @@ with col_dashboard:
         st.session_state["nav_movil"] = pagina
         m1.selectbox("Ir a", list(PAGINAS.keys()), key="nav_movil", on_change=_nav_movil,
                      label_visibility="collapsed")
-        if m2.button("Shaki", key="abrir_chat_movil", use_container_width=True, icon=":material/chat:"):
+        if m2.button("Shaki", key="abrir_chat_movil", width="stretch", icon=":material/chat:"):
             _chat_dialogo()
     if not chat_lado:
         c_btn = st.container(key="chat_btn_box")
-        if c_btn.button("Pregúntale a Shaki", key="abrir_chat", use_container_width=True, icon=":material/chat:"):
+        if c_btn.button("Pregúntale a Shaki", key="abrir_chat", width="stretch", icon=":material/chat:"):
             _chat_dialogo()
     PAGINAS[pagina]()
 

@@ -9,7 +9,7 @@ from pathlib import Path
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
-import streamlit.components.v1 as components
+from dashboard.utils import incrustar
 
 from config import cfg
 from dashboard.estilos import ACCENT, PLOTLY_LAYOUT
@@ -153,13 +153,13 @@ def _panel_alertas() -> None:
         unsafe_allow_html=True,
     )
     c1, c2, c3 = st.columns(3)
-    if c1.button("Enviar ahora", key="cp_send_now", use_container_width=True, disabled=not pendientes):
+    if c1.button("Enviar ahora", key="cp_send_now", width="stretch", disabled=not pendientes):
         res = cp.enviar_alerta(pendientes)
         if res["sin_canal"]:
             st.error("No salió: configure correo (SMTP) o WhatsApp (Twilio).")
         else:
             st.success(f"Enviado: {res['pagos']} pago(s) · {res['correos']} correo(s) · {res['whatsapp']} WhatsApp.")
-    if c2.button("Probar envío", key="cp_test", use_container_width=True,
+    if c2.button("Probar envío", key="cp_test", width="stretch",
                  help="Manda un mensaje de prueba a los destinatarios, sin marcar nada como avisado"):
         muestra = cp.listar(date.today(), date.today() + timedelta(days=31), estados=cp.ABIERTOS)[:1]
         if not muestra:
@@ -170,10 +170,10 @@ def _panel_alertas() -> None:
                 st.error("No hay canal configurado todavía.")
             else:
                 st.success(f"Prueba: {res['correos']} correo(s) · {res['whatsapp']} WhatsApp. Revise el historial.")
-    with c3.popover("Ver ejemplo", use_container_width=True):
+    with c3.popover("Ver ejemplo", width="stretch"):
         muestra = pendientes or cp.listar(date.today(), date.today() + timedelta(days=31), estados=cp.ABIERTOS)[:1]
         if muestra:
-            components.html(cp.html_correo(muestra[:2]), height=520, scrolling=True)
+            incrustar.html(cp.html_correo(muestra[:2]), height=520, scrolling=True)
             st.code(cp.texto_whatsapp(muestra[0]), language=None)
         else:
             st.caption("No hay cuotas pendientes para mostrar.")
@@ -200,7 +200,7 @@ def _grafica_anual(anio: int) -> None:
     fig.update_layout(**PLOTLY_LAYOUT, barmode="stack", height=230, title=f"Cuotas por mes · {anio}",
                       legend=dict(orientation="h", y=1.15, x=1, xanchor="right"))
     fig.update_yaxes(gridcolor="#1F2024")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 
 def _filtros(anio: int) -> tuple[date, date, tuple[str, ...] | None, str | None, str | None]:
@@ -263,25 +263,25 @@ def _fila(p: dict) -> None:
         if p["estado"] in cp.ABIERTOS:
             b1, b2 = st.columns([1.25, 1])
             if b1.button("Pagado" if p["tipo"] == "PAGO" else "Hecho", key=f"cp_ok_{p['id']}",
-                         type="primary", use_container_width=True):
+                         type="primary", width="stretch"):
                 cp.marcar_pagado(p["id"], por="dashboard")
                 st.rerun()
-            with b2.popover("Más", use_container_width=True):
+            with b2.popover("Más", width="stretch"):
                 st.caption(f"{p['id_pago']} · cuota {p['ocurrencia']}")
-                if st.button("Enviar alerta ahora", key=f"cp_al_{p['id']}", use_container_width=True):
+                if st.button("Enviar alerta ahora", key=f"cp_al_{p['id']}", width="stretch"):
                     r = cp.enviar_alerta([p], marcar=False)
                     if r["sin_canal"]:
                         st.error("Sin canal configurado")
                     else:
                         st.success(f"{r['correos']} correo(s) · {r['whatsapp']} WhatsApp")
                 if p["estado"] != "EN PROCESO" and st.button("En proceso", key=f"cp_ep_{p['id']}",
-                                                             use_container_width=True):
+                                                             width="stretch"):
                     cp.cambiar_estado(p["id"], "EN PROCESO")
                     st.rerun()
-                if st.button("Anular", key=f"cp_an_{p['id']}", use_container_width=True):
+                if st.button("Anular", key=f"cp_an_{p['id']}", width="stretch"):
                     cp.cambiar_estado(p["id"], "ANULADO")
                     st.rerun()
-        elif st.button("Reabrir", key=f"cp_re_{p['id']}", use_container_width=True):
+        elif st.button("Reabrir", key=f"cp_re_{p['id']}", width="stretch"):
             cp.cambiar_estado(p["id"], "PENDIENTE")
             st.rerun()
 
@@ -324,7 +324,7 @@ def _historial_alertas() -> None:
     if df.empty:
         st.caption("Aún no se han enviado alertas.")
     else:
-        st.dataframe(df, use_container_width=True, hide_index=True)
+        st.dataframe(df, width="stretch", hide_index=True)
 
 
 # ───────────────────────── Página ─────────────────────────
@@ -358,9 +358,9 @@ def render() -> None:
         f'</div>',
         unsafe_allow_html=True,
     )
-    if c2.button("Releer Excel", key="cp_reload", use_container_width=True):
+    if c2.button("Releer Excel", key="cp_reload", width="stretch"):
         try:
-            res = cp.importar_si_existe()
+            res = cp.importar_si_existe(forzar=True)
             st.toast(f"Excel leído: {res['total']} cuotas" if res else "No se encontró el archivo")
         except Exception as exc:
             st.error(f"No se pudo leer: {exc}")

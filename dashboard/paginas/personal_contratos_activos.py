@@ -123,7 +123,7 @@ def _render_tabla_resumen(df: pd.DataFrame) -> None:
         return ["background-color:#fff9c4;color:#000"] * len(vista)
 
     styled = vista.style.apply(_color, axis=0)
-    st.dataframe(styled, use_container_width=True, hide_index=True, height=400)
+    st.dataframe(styled, width="stretch", hide_index=True, height=400)
 
 
 def render() -> None:

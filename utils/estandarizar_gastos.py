@@ -15,7 +15,7 @@ from openpyxl import Workbook, load_workbook
 from openpyxl.styles import Font, PatternFill
 
 from config import cfg
-from database import get_conn, registrar_accion
+from database import cache_bd, get_conn, registrar_accion
 from modulos.catalogos_gastos import (
     CATEGORIAS_GASTO,
     inicializar_catalogos_gastos,
@@ -460,51 +460,57 @@ def marcar_restantes_como_otro() -> int:
     return n
 
 
-_LOOKUP_CACHE: dict[str, dict[str, Any] | None] = {}
-
-
-def lookup_gasto_por_detalle(detalle: str) -> dict[str, Any] | None:
-    """Enriquece un pago con categoría/periodicidad estándar (con caché en memoria)."""
-    limpio = limpiar_texto(detalle)
-    if not limpio:
-        return None
-    if limpio in _LOOKUP_CACHE:
-        return _LOOKUP_CACHE[limpio]
+@cache_bd
+def _maestro() -> tuple[dict[str, tuple], list[tuple]]:
+    """Toda la tabla gastos_maestro en memoria (≈4.000 filas): una sola lectura hasta que la base cambie,
+    en vez de una consulta por cada pago que se pinta."""
     conn = get_conn()
-    row = conn.execute(
-        """SELECT categoria, periodicidad_std, requiere_revision
-           FROM gastos_maestro WHERE detalle_limpio=? LIMIT 1""",
-        (limpio,),
-    ).fetchone()
-    if not row:
-        # match parcial
-        row = conn.execute(
-            """SELECT categoria, periodicidad_std, requiere_revision
-               FROM gastos_maestro
-               WHERE detalle_limpio LIKE ? OR ? LIKE '%' || detalle_limpio || '%'
-               LIMIT 1""",
-            (f"%{limpio[:40]}%", limpio),
-        ).fetchone()
-    conn.close()
-    if not row:
-        _LOOKUP_CACHE[limpio] = None
+    try:
+        filas = conn.execute(
+            "SELECT detalle_limpio, categoria, periodicidad_std, requiere_revision FROM gastos_maestro ORDER BY rowid"
+        ).fetchall()
+    finally:
+        conn.close()
+    exacto: dict[str, tuple] = {}
+    for f in filas:
+        if f[0] is not None:
+            exacto.setdefault(f[0], f)
+    return exacto, filas
+
+
+@cache_bd
+def _lookup(limpio: str) -> dict[str, Any] | None:
+    exacto, filas = _maestro()
+    row = exacto.get(limpio)
+    if row is None:
+        # match parcial (mismo criterio que antes: uno contiene al otro)
+        corto = limpio[:40]
+        row = next((f for f in filas if f[0] is not None and (corto in f[0] or f[0] in limpio)), None)
+    if row is None:
         return None
     cats = mapa_categorias()
     pers = mapa_periodicidades()
-    cat = cats.get(row[0], {})
-    per = pers.get(row[1], {})
-    result = {
-        "categoria": row[0],
-        "categoria_label": cat.get("label", row[0]),
+    cat = cats.get(row[1], {})
+    per = pers.get(row[2], {})
+    return {
+        "categoria": row[1],
+        "categoria_label": cat.get("label", row[1]),
         "categoria_icono": cat.get("icono", ""),
         "categoria_color": cat.get("color", "#AEAEB2"),
-        "periodicidad_std": row[1],
-        "periodicidad_label": per.get("label", row[1]),
+        "periodicidad_std": row[2],
+        "periodicidad_label": per.get("label", row[2]),
         "periodicidad_icono": per.get("icono", ""),
-        "requiere_revision": bool(row[2]),
+        "requiere_revision": bool(row[3]),
     }
-    _LOOKUP_CACHE[limpio] = result
-    return result
+
+
+def lookup_gasto_por_detalle(detalle: str) -> dict[str, Any] | None:
+    """Enriquece un pago con categoría/periodicidad estándar (en memoria; se refresca si la base cambia)."""
+    limpio = limpiar_texto(detalle)
+    if not limpio:
+        return None
+    r = _lookup(limpio)
+    return dict(r) if r else None
 
 
 def exportar_excel_estandarizado() -> tuple[bytes, str]:

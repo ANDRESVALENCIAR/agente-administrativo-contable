@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 import logging
 
-from database import get_conn
+from database import cache_bd, get_conn
 
 logger = logging.getLogger(__name__)
 
@@ -296,6 +296,15 @@ def inicializar_catalogos_gastos() -> None:
 
 
 def mapa_categorias() -> dict[str, dict]:
+    return dict(_mapa_categorias())
+
+
+def mapa_periodicidades() -> dict[str, dict]:
+    return dict(_mapa_periodicidades())
+
+
+@cache_bd
+def _mapa_categorias() -> dict[str, dict]:
     conn = get_conn()
     rows = conn.execute(
         "SELECT codigo, label, icono, color_hex FROM cat_categorias_gasto WHERE activo=1"
@@ -304,7 +313,8 @@ def mapa_categorias() -> dict[str, dict]:
     return {r[0]: {"label": r[1], "icono": r[2], "color": r[3]} for r in rows}
 
 
-def mapa_periodicidades() -> dict[str, dict]:
+@cache_bd
+def _mapa_periodicidades() -> dict[str, dict]:
     conn = get_conn()
     rows = conn.execute(
         "SELECT codigo, label, icono FROM cat_periodicidades WHERE activo=1"

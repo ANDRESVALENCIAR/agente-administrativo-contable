@@ -6,7 +6,7 @@ from html import escape
 from pathlib import Path
 
 import streamlit as st
-import streamlit.components.v1 as components
+from dashboard.utils import incrustar
 
 from modulos import revision_impuestos as ri
 
@@ -107,10 +107,10 @@ def _mostrar(rev: dict, clave: str) -> None:
     if ruta and Path(ruta).exists():
         html = Path(ruta).read_text(encoding="utf-8")
         st.download_button("Descargar informe escrito", html.encode("utf-8"), file_name=Path(ruta).name,
-                           mime="text/html", use_container_width=True, key=f"dl_{clave}_{rev['id']}")
+                           mime="text/html", width="stretch", key=f"dl_{clave}_{rev['id']}")
         ver = st.toggle("Ver informe completo aquí", key=f"ver_{clave}_{rev['id']}")
         if ver:
-            components.html(html, height=1200, scrolling=True)
+            incrustar.html(html, height=1200, scrolling=True)
         st.caption("El informe se abre en el navegador; para PDF use Imprimir → Guardar como PDF.")
 
 
@@ -133,7 +133,7 @@ def _tab_impuesto(imp: str, anio: int) -> None:
         con_ia = False
         if ri.ia_disponible():
             con_ia = st.toggle("Agregar concepto de Claude (IA)", value=False, key=f"ia_{imp}")
-        if st.button("Revisar ahora", type="primary", use_container_width=True, key=f"btn_{imp}",
+        if st.button("Revisar ahora", type="primary", width="stretch", key=f"btn_{imp}",
                      disabled=not archivos):
             with st.spinner("Leyendo el borrador, cruzando con la contabilidad y la norma…"):
                 try:

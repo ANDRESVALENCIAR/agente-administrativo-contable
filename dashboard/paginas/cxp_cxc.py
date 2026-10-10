@@ -48,7 +48,7 @@ def render() -> None:
 
     with t2:
         df = query_df("SELECT * FROM cxp_programados ORDER BY fecha_pago")
-        st.dataframe(df, use_container_width=True, hide_index=True)
+        st.dataframe(df, width="stretch", hide_index=True)
         with st.form("cxp_new"):
             prov = st.text_input("Proveedor")
             conc = st.text_input("Concepto")
@@ -73,7 +73,7 @@ def render() -> None:
                     (emp, fi.isoformat(), int(dias)),
                 )
                 st.rerun()
-        st.dataframe(query_df("SELECT * FROM incapacidades ORDER BY id DESC"), use_container_width=True)
+        st.dataframe(query_df("SELECT * FROM incapacidades ORDER BY id DESC"), width="stretch")
 
     with t4:
         if st.button("Generar agenda semanal"):
