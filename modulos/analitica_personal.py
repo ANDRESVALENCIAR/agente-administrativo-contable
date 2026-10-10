@@ -90,6 +90,20 @@ def _texto(v: Any, invalidos: tuple[str, ...] = ()) -> str:
     return s.title()
 
 
+CARGO_AREA = [("COMERCIAL", "Comercial"), ("VENTA", "Comercial"), ("ASESOR", "Comercial"), ("COMPRA", "Compras"),
+              ("IMPORTA", "Compras"), ("LOGIST", "Logística"), ("BODEG", "Logística"), ("DESPACH", "Logística"),
+              ("CONTAB", "Contabilidad"), ("CONTADOR", "Contabilidad"), ("TESORER", "Contabilidad"),
+              ("CARTERA", "Contabilidad"), ("GERENT", "Dirección"), ("DIRECT", "Dirección"), ("RECURSOS HUMANOS", "RR. HH."),
+              ("TALENTO", "RR. HH."), ("MENSAJER", "Operativo"), ("SERVICIOS GENERALES", "Operativo"),
+              ("AUXILIAR", "Administrativo"), ("ASISTENTE", "Administrativo"), ("RECEPCION", "Administrativo"),
+              ("TECNIC", "Técnico"), ("INGENIER", "Técnico"), ("SISTEMAS", "Tecnología"), ("DESARROLL", "Tecnología")]
+
+
+def _area_por_cargo(cargo: Any) -> str:
+    c = _n(cargo)
+    return next((a for k, a in CARGO_AREA if k in c), "Sin dato")
+
+
 def _termino_meses(t: Any) -> int | None:
     s = _n(t)
     if "INDEFINID" in s:
@@ -139,6 +153,11 @@ def cargar(hoy: date | None = None) -> dict[str, Any]:
         emp["nacimiento"] = emp["fecha_nacimiento"].map(_fecha)
         emp["retiro"] = emp["observaciones"].map(_retiro)
         emp["area"] = emp["departamento"].map(_texto)
+        # área faltante: primero la de Contratos Activos; si no, se deduce del cargo
+        ca_area = _q("SELECT nombre_completo, area FROM contratos_activos")
+        mapa = {_n(n).title(): _texto(a) for n, a in zip(ca_area.get("nombre_completo", []), ca_area.get("area", []))}
+        emp["area"] = [a if a != "Sin dato" else (mapa.get(n) if mapa.get(n, "Sin dato") != "Sin dato" else _area_por_cargo(c))
+                       for a, n, c in zip(emp["area"], emp["nombre"], emp["cargo"])]
         emp["cargo_n"] = emp["cargo"].map(_texto)
         emp["ciudad_n"] = emp["ciudad"].map(lambda v: _texto(v, NO_CIUDAD))
         emp["eps"] = emp["salud"].map(_texto)

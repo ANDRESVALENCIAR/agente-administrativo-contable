@@ -98,7 +98,7 @@ def render() -> None:
         c1, c2 = st.columns([1.4, 1])
         with c1:
             st.markdown('<div class="pd-h">Personas por área</div><div class="pd-c">Haga clic en una barra para filtrar '
-                        'el directorio de abajo.</div>', unsafe_allow_html=True)
+                        'el directorio. Si falta el área, se toma de Contratos Activos o se deduce del cargo.</div>', unsafe_allow_html=True)
             pa = act.groupby(["area", "vinculo"]).size().reset_index(name="personas")
             orden = pa.groupby("area")["personas"].sum().sort_values().index.tolist()
             colv = {"Nómina": SERIES[0], "Prestación de servicios": SERIES[1], "Sin dato": OTROS}
