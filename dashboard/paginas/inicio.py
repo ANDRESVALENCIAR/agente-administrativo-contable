@@ -143,43 +143,31 @@ def _atencion(alertas: list) -> None:
 
 
 def _calendario_tributario() -> None:
+    """Próximas presentaciones del radar tributario (DIAN + SHD, NIT de la empresa)."""
     st.markdown('<div class="sk-card-h"><h4>Calendario tributario</h4></div>', unsafe_allow_html=True)
     try:
-        from dashboard.utils.db_helper import query_df
+        from modulos import radar_tributario as rt
 
-        hoy = date.today().isoformat()
-        df = query_df(
-            """SELECT impuesto, periodo, fecha_vencimiento, estado FROM impuestos_maestro
-               WHERE estado NOT IN ('PRESENTADO','PAGADO')
-               ORDER BY (fecha_vencimiento < ?) DESC, fecha_vencimiento ASC LIMIT 5""",
-            (hoy,),
-        )
+        hoy = date.today()
+        filas = [o for o in rt.listar(estados=("PENDIENTE",))][:5]
     except Exception:
-        df = pd.DataFrame()
-    if df.empty:
-        st.markdown('<div class="sk-row"><span class="sk-row-s">Sin vencimientos pendientes.</span></div>',
+        filas = []
+    if not filas:
+        st.markdown('<div class="sk-row"><span class="sk-row-s">Sin declaraciones pendientes.</span></div>',
                     unsafe_allow_html=True)
         return
-    filas = []
-    hoy_d = date.today()
-    for r in df.itertuples():
-        try:
-            f = date.fromisoformat(str(r.fecha_vencimiento)[:10])
-        except ValueError:
-            continue
-        dias = (f - hoy_d).days
-        if dias < 0:
-            estado = f'<span class="sk-venc">Vencido hace {-dias} días</span>'
-        elif dias == 0:
-            estado = '<span class="sk-venc">Vence hoy</span>'
-        else:
-            estado = f"{escape(str(r.estado).capitalize())} · {dias} días"
-        filas.append(
+    html = []
+    for o in filas:
+        f = date.fromisoformat(str(o["fecha_limite"]))
+        dias = (f - hoy).days
+        estado = (f'<span class="sk-venc">Vencida hace {-dias} días</span>' if dias < 0 else
+                  '<span class="sk-venc">Vence hoy</span>' if dias == 0 else f"{escape(o['entidad'])} · {dias} días")
+        html.append(
             f'<div class="sk-row"><div class="sk-date"><b>{f.day:02d}</b><span>{_MESES[f.month - 1]}</span></div>'
-            f'<div><div class="sk-row-t">{escape(str(r.impuesto))} {escape(str(r.periodo))}</div>'
-            f'<div class="sk-row-s">{estado}</div></div></div>'
+            f'<div><div class="sk-row-t">{escape(o["impuesto"])}</div>'
+            f'<div class="sk-row-s">{escape(o["periodo"] or "")} · {estado}</div></div></div>'
         )
-    st.markdown("".join(filas), unsafe_allow_html=True)
+    st.markdown("".join(html), unsafe_allow_html=True)
 
 
 def render() -> None:

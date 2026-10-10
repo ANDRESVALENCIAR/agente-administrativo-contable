@@ -106,6 +106,10 @@ class Config:
     PAGOS_ALERTA_WHATSAPP = os.getenv("PAGOS_ALERTA_WHATSAPP") or os.getenv("WHATSAPP_DESTINATARIOS")
     # URL pública del dashboard (para el botón "Ya lo pagué"). Ej: https://shaki.up.railway.app
     APP_PUBLIC_URL = (os.getenv("APP_PUBLIC_URL") or "http://localhost:8501").rstrip("/")
+    # Alerta 24h de PRESENTACIÓN de impuestos (solo correo)
+    IMPUESTOS_ALERTA_EMAILS = os.getenv(
+        "IMPUESTOS_ALERTA_EMAILS", "directorfenix@viaindustrial.com,gerenciafenix@viaindustrial.com"
+    )
     # Secreto para firmar los enlaces de confirmación. Si vacío se genera y guarda en la BD.
     PAGOS_LINK_SECRET = os.getenv("PAGOS_LINK_SECRET")
 

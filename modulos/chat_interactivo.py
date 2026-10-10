@@ -212,6 +212,17 @@ def ejecutar_accion(intencion: str, mensaje: str) -> dict[str, Any]:
             }
 
         if intencion == "impuestos_vencimientos":
+            try:
+                from modulos import radar_tributario as rt
+
+                pend = rt.listar(estados=("PENDIENTE",))[:8]
+            except Exception:
+                pend = []
+            if pend:
+                lineas = [f"{rt.semaforo(o)} · {o['fecha_limite']} · {o['impuesto']} {o['periodo']} ({o['entidad']})"
+                          for o in pend]
+                return {"ejecutada": True, "modulo": "impuestos",
+                        "resultado": "Próximas presentaciones (radar tributario):\n" + "\n".join(lineas)}
             from datetime import date
 
             hoy = date.today().isoformat()

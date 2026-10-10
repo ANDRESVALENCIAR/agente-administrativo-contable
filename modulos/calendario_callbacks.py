@@ -106,6 +106,7 @@ CALLBACKS: dict[str, Callable[..., Any]] = {
         "revisar_pagos_pendientes", "modulos.pagos", "revisar_pagos_pendientes"
     ),
     "alerta_pagos_manana": _lazy("alerta_pagos_manana", "modulos.pagos", "alerta_pagos_manana"),
+    "alertas_impuestos_24h": _lazy("alertas_impuestos_24h", "modulos.radar_tributario", "enviar_alertas_24h"),
     "alertas_pagos_24h": _lazy("alertas_pagos_24h", "modulos.control_pagos", "enviar_alertas_24h"),
     "importar_control_pagos": _lazy("importar_control_pagos", "modulos.control_pagos", "importar_si_existe"),
     "alerta_nomina_semanal": _lazy("alerta_nomina_semanal", "modulos.pagos", "alerta_nomina_semanal"),

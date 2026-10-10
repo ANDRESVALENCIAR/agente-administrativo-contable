@@ -21,8 +21,19 @@ from modulos.impuestos_calendario import (
 
 
 def render() -> None:
-    """Renderiza módulo impuestos con calendario open data."""
+    from dashboard.paginas import radar_impuestos
+
     st.markdown("## Impuestos")
+    t_radar, t_ant = st.tabs(["Radar tributario", "Módulo anterior"])
+    with t_radar:
+        radar_impuestos.render()
+    with t_ant:
+        st.caption("Módulo anterior: sus fechas SHD estaban escritas a mano y no se usan para alertas.")
+        _render_anterior()
+
+
+def _render_anterior() -> None:
+    """Módulo anterior (impuestos_maestro)."""
     inicializar_tablas_calendario()
 
     tab_cal, tab_tabla, tab_admin = st.tabs(["📅 Calendario", "📋 Tabla maestra", "⚙️ Administrar"])

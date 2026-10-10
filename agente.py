@@ -49,6 +49,9 @@ if __name__ == "__main__":
         from modulos.control_pagos import inicializar_y_cargar
 
         inicializar_y_cargar()
+        from modulos.radar_tributario import inicializar_y_cargar as _radar
+
+        _radar()
     except Exception as exc:
         logger.warning("Control de pagos al arrancar: %s", exc)
     if en_modo_demo():

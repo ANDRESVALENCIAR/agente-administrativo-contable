@@ -76,6 +76,12 @@ if _token_pago:
 
     confirmar_pago.render(_token_pago)
     st.stop()
+_token_imp = st.query_params.get("presentar")
+if _token_imp:
+    from dashboard.paginas import confirmar_impuesto
+
+    confirmar_impuesto.render(_token_imp)
+    st.stop()
 
 if "rrhh_watcher_on" not in st.session_state:
     try:
@@ -124,6 +130,17 @@ if "pagos_sync" not in st.session_state:
 
         logging.getLogger(__name__).warning("Sync CONTROL DE PAGOS al arrancar: %s", exc)
         st.session_state.pagos_sync = {"error": str(exc)}
+
+if "radar_tributario_sync" not in st.session_state:
+    try:
+        from modulos.radar_tributario import inicializar_y_cargar as _radar_init
+
+        _radar_init()
+    except Exception as exc:
+        import logging
+
+        logging.getLogger(__name__).warning("Radar tributario al arrancar: %s", exc)
+    st.session_state.radar_tributario_sync = True
 
 if "control_pagos_sync" not in st.session_state:
     try:
