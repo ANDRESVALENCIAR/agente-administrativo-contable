@@ -22,7 +22,17 @@ MIME_XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
 def render() -> None:
-    st.markdown("## Gastos — Estandarización")
+    from dashboard.paginas import gastos_dashboard
+
+    st.markdown("## Gastos")
+    t_tab, t_est = st.tabs(["Tablero", "Catálogo y estandarización"])
+    with t_tab:
+        gastos_dashboard.render()
+    with t_est:
+        _render_estandarizacion()
+
+
+def _render_estandarizacion() -> None:
     path = ruta_excel_estandarizar()
     st.caption(f"Fuente: `{path.name}` · hoja Hoja1")
 

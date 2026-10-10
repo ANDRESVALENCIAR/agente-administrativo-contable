@@ -38,6 +38,11 @@ def _q(sql: str) -> pd.DataFrame:
         conn.close()
 
 
+def _ok(v: Any) -> bool:
+    return v is not None and not (isinstance(v, float) and pd.isna(v)) and not (v is pd.NaT) and not \
+        (hasattr(v, "year") and pd.isna(v))
+
+
 def _fecha(v: Any) -> pd.Timestamp | None:
     if v in (None, "", "NaT") or (isinstance(v, float) and pd.isna(v)):
         return None
@@ -103,6 +108,8 @@ def proximo_vencimiento(inicio: pd.Timestamp | None, venc: pd.Timestamp | None, 
     """Los contratos a término fijo se renuevan solos: lleva el vencimiento al próximo futuro."""
     hoy_ts = pd.Timestamp(hoy or date.today())
     meses = None if meses is None or pd.isna(meses) else int(meses)
+    venc = venc if _ok(venc) else None
+    inicio = inicio if _ok(inicio) else None
     if venc is None:
         if inicio is None or not meses:
             return None
@@ -112,7 +119,8 @@ def proximo_vencimiento(inicio: pd.Timestamp | None, venc: pd.Timestamp | None, 
     paso = max(meses, 12) if meses < 12 else meses  # tras 3 renovaciones cortas la ley lleva el plazo a 1 año
     n = 0
     while venc < hoy_ts and n < 60:
-        venc = venc + relativedelta(months=meses if n < 3 else paso)
+        un_dia = pd.Timedelta(days=1)
+        venc = (venc + un_dia) + relativedelta(months=meses if n < 3 else paso) - un_dia
         n += 1
     return venc
 
@@ -138,9 +146,8 @@ def cargar(hoy: date | None = None) -> dict[str, Any]:
         emp["contrato"] = emp["tipo_contrato"].map(_texto)
         emp["salario"] = emp["salario_ibc"].map(_dinero)
         fin = emp["retiro"].where(~emp["activo"], hoy_ts)
-        emp["antiguedad"] = [((f - i).days / 365.25) if i is not None and f is not None and not pd.isna(f) else None
-                             for i, f in zip(emp["ingreso"], fin)]
-        emp["edad"] = [((hoy_ts - n).days / 365.25) if n is not None else None for n in emp["nacimiento"]]
+        emp["antiguedad"] = [((f - i).days / 365.25) if _ok(i) and _ok(f) else None for i, f in zip(emp["ingreso"], fin)]
+        emp["edad"] = [((hoy_ts - n).days / 365.25) if _ok(n) else None for n in emp["nacimiento"]]
         out["empleados"] = emp
     # vacaciones (puede haber dos hojas por persona: se toma el mayor saldo)
     vac = _q("SELECT nombre_completo, hoja_origen, dias_pendientes, dias_tomar, fecha_regreso FROM vacaciones_fenix")
@@ -156,7 +163,7 @@ def cargar(hoy: date | None = None) -> dict[str, Any]:
         cf["meses"] = cf["termino"].map(_termino_meses)
         cf["prox"] = [proximo_vencimiento(_fecha(i), _fecha(v), m, hoy)
                       for i, v, m in zip(cf["fecha_inicio"], cf["vencimiento_contrato"], cf["meses"])]
-        cf["preaviso"] = cf["prox"].map(lambda d: d - pd.Timedelta(days=30) if d is not None else None)
+        cf["preaviso"] = [d - pd.Timedelta(days=30) if _ok(d) else None for d in cf["prox"]]
         if "empleados" in out:
             activos = set(out["empleados"].loc[out["empleados"]["activo"], "nombre"])
             cf = cf[cf["nombre"].isin(activos) | ~cf["nombre"].isin(set(out["empleados"]["nombre"]))]
@@ -175,14 +182,14 @@ def cargar(hoy: date | None = None) -> dict[str, Any]:
     if not filas and "empleados" in out:
         e = out["empleados"]
         filas = [{"nombre": n, "dia": f.day, "mes": f.month} for n, f, a in zip(e["nombre"], e["nacimiento"], e["activo"])
-                 if f is not None and a]
+                 if _ok(f) and a]
     out["cumpleanos"] = pd.DataFrame(filas)
     # exámenes periódicos y dotación pendiente
     nov = _q("SELECT nombre_completo, pendiente_dotacion, examenes_periodicos FROM novedades_fenix")
     if not nov.empty:
         nov["nombre"] = nov["nombre_completo"].map(lambda x: _n(x).title())
         nov["examen"] = nov["examenes_periodicos"].map(_fecha)
-        nov["prox_examen"] = nov["examen"].map(lambda d: d + relativedelta(years=1) if d is not None else None)
+        nov["prox_examen"] = [d + relativedelta(years=1) if _ok(d) else None for d in nov["examen"]]
         nov["dotacion_pend"] = nov["pendiente_dotacion"].map(lambda v: _n(v) == "SI")
         out["novedades"] = nov[["nombre", "examen", "prox_examen", "dotacion_pend"]]
     # expedientes
@@ -214,13 +221,12 @@ def kpis(d: dict[str, Any]) -> dict[str, Any]:
         k["retirados"] = int((~e["activo"]).sum())
         k["antiguedad"] = float(act["antiguedad"].dropna().mean()) if act["antiguedad"].notna().any() else None
         k["edad"] = float(act["edad"].dropna().mean()) if act["edad"].notna().any() else None
-        ret12 = e["retiro"].map(lambda r: r is not None and not pd.isna(r) and r >= hoy_ts - pd.DateOffset(years=1)).sum()
+        ret12 = sum(1 for r in e["retiro"] if _ok(r) and r >= hoy_ts - pd.DateOffset(years=1))
         k["retiros_12m"] = int(ret12)
         k["rotacion"] = float(ret12 / max(len(act), 1))
         k["areas"] = int(act["area"].nunique())
         k["completitud_datos"] = float(act[["ingreso", "nacimiento", "area", "cargo_n", "eps"]]
-                                       .apply(lambda c: c.map(lambda v: v is not None and v != "Sin dato" and not
-                                                              (isinstance(v, float) and pd.isna(v)))).mean().mean())
+                                       .apply(lambda c: c.map(lambda v: _ok(v) and v != "Sin dato")).mean().mean())
     v = d.get("vacaciones")
     if v is not None and not v.empty:
         k["vac_dias"] = float(v["dias"].sum())

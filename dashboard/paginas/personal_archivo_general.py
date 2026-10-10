@@ -103,7 +103,7 @@ def render() -> None:
         else:
             for _, row in df.iterrows():
                 try:
-                    meses = json.loads(row["meses_json"] or "{}")
+                    meses = json.loads(row["meses_json"] if isinstance(row["meses_json"], str) and row["meses_json"] else "{}")
                 except json.JSONDecodeError:
                     meses = {}
                 meses_txt = ", ".join(f"{k}: {v}" for k, v in meses.items() if v) or "—"

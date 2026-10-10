@@ -13,6 +13,11 @@ MUTED_2 = "#A1A1AA"
 ACCENT = "#FF6A3D"
 OK = "#4ADE80"
 
+# Paleta categórica validada para fondo oscuro (orden fijo; nunca ciclar)
+SERIES = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181", "#008300", "#9085e9", "#e66767"]
+OTROS = "#52525B"
+SECUENCIAL = ["#0f1b2d", "#15325a", "#1d4d8a", "#2a6bc0", "#3987e5", "#7fb0f0", "#c4dcfa"]  # azul, oscuro→claro
+
 # Plotly: fondo transparente y tipografía del tema
 PLOTLY_LAYOUT = dict(
     plot_bgcolor="rgba(0,0,0,0)",
