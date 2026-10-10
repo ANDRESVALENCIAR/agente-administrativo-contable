@@ -523,8 +523,9 @@ def cambiar_estado(pago_id: int, estado: str, por: str = "dashboard") -> None:
 # ───────────────────────── Enlaces firmados ─────────────────────────
 
 def _secreto() -> bytes:
-    if cfg.PAGOS_LINK_SECRET:
-        return cfg.PAGOS_LINK_SECRET.encode()
+    secreto = getattr(cfg, "PAGOS_LINK_SECRET", None)
+    if secreto:
+        return secreto.encode()
     inicializar_tablas()
     s = _meta("link_secret")
     if not s:
@@ -548,7 +549,7 @@ def verificar_token(token: str) -> int | None:
 
 
 def enlace_confirmacion(pago_id: int) -> str:
-    return f"{cfg.APP_PUBLIC_URL}/?pagar={generar_token(pago_id)}"
+    return f"{getattr(cfg, 'APP_PUBLIC_URL', 'http://localhost:8501')}/?pagar={generar_token(pago_id)}"
 
 
 # ───────────────────────── Alertas 24 h ─────────────────────────
