@@ -68,6 +68,37 @@ def _hero(w: dict, por_aprobar: int) -> None:
     )
 
 
+def _hero_control(r: dict) -> None:
+    """Hero cuando hay libro de Control de pagos cargado (cuotas, no saldos)."""
+    hoy = fecha_larga_es(datetime.now(), con_hora=False)
+    pct = r["al_dia_pct"]
+    principal = r["vencidos"] + r["hoy"]
+    if principal:
+        titulo, numero = "Pagos vencidos o para hoy", _miles(principal)
+    else:
+        titulo, numero = "Pagos pendientes este mes", _miles(r["mes_pendientes"])
+    valor = f' · ${_miles(r["valor_pendiente_mes"])} por pagar' if r["valor_pendiente_mes"] else ""
+    st.markdown(
+        f"""
+        <div class="sk-hero">
+          <div class="sk-eyebrow">{escape(hoy)} · {titulo}</div>
+          <div class="sk-hero-num">{numero}</div>
+          <div class="sk-hero-sub">
+            <span><strong class="{'sk-acc' if r['vencidos'] else ''}">{_miles(r['vencidos'])}</strong> vencidos</span>
+            <span><strong>{_miles(r['hoy'])}</strong> hoy</span>
+            <span><strong>{_miles(r['manana'])}</strong> mañana (alerta 24h)</span>
+            <span><strong>{_miles(r['semana'])}</strong> en 7 días{valor}</span>
+          </div>
+          <div class="sk-bar"><div style="flex:{max(pct, 1)} 1 0;background:#4ADE80"></div>
+            <div style="flex:{max(100 - pct, 0)} 1 0;background:#26272C"></div></div>
+          <div class="sk-legend"><span style="color:#4ADE80">■ MES AL DÍA {pct}%</span>
+            <span>■ {r['mes_pagados']} DE {r['mes_total']} CUOTAS PAGADAS</span></div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def _kpis(stats: dict, alertas: list, n_tareas: int) -> None:
     criticas = sum(1 for a in alertas if a[2] == "CRITICO")
     items = [
@@ -157,7 +188,16 @@ def render() -> None:
     alertas = obtener_alertas_activas()
     df_hoy = tareas_hoy()
 
-    _hero(_resumen_pagos(), stats["pagos_pendientes"])
+    try:
+        from modulos import control_pagos as cp
+
+        usar_control = cp.hay_datos()
+    except Exception:
+        usar_control = False
+    if usar_control:
+        _hero_control(cp.resumen())
+    else:
+        _hero(_resumen_pagos(), stats["pagos_pendientes"])
     _kpis(stats, alertas, len(df_hoy))
 
     df_venc = tareas_vencidas()

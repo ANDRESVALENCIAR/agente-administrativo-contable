@@ -149,7 +149,22 @@ def ejecutar_accion(intencion: str, mensaje: str) -> dict[str, Any]:
             return {"ejecutada": True, "modulo": "pagos", "resultado": f"Pago #{pid} rechazado."}
 
         if intencion == "listar_pagos":
+            from modulos import control_pagos as cp
             from modulos.pagos import listar_pagos_abiertos
+
+            if cp.hay_datos():
+                from datetime import date, timedelta
+
+                hoy = date.today()
+                filas = cp.listar(date(hoy.year, 1, 1), hoy + timedelta(days=7), cp.ABIERTOS)
+                if not filas:
+                    return {"ejecutada": True, "modulo": "pagos", "resultado": "Todo al día: nada pendiente en 7 días."}
+                lineas = [
+                    f"{cp.semaforo(p)} · {p['fecha_sugerida']} · {p['detalle']} ({p['proveedor'] or ''})"
+                    for p in filas[:12]
+                ]
+                return {"ejecutada": True, "modulo": "pagos",
+                        "resultado": "Pagos pendientes (vencidos y próximos 7 días):\n" + "\n".join(lineas)}
 
             pagos = listar_pagos_abiertos(10)
             if not pagos:

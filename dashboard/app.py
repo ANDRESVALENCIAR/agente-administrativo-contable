@@ -69,6 +69,14 @@ if "db_ready" not in st.session_state:
     get_engine()
     st.session_state.db_ready = True
 
+# Enlace "Ya lo pagué" de las alertas 24h (correo / WhatsApp): pantalla propia y nada más
+_token_pago = st.query_params.get("pagar")
+if _token_pago:
+    from dashboard.paginas import confirmar_pago
+
+    confirmar_pago.render(_token_pago)
+    st.stop()
+
 if "rrhh_watcher_on" not in st.session_state:
     try:
         from modulos.watcher_carpetas import iniciar_watcher
@@ -117,6 +125,17 @@ if "pagos_sync" not in st.session_state:
         logging.getLogger(__name__).warning("Sync CONTROL DE PAGOS al arrancar: %s", exc)
         st.session_state.pagos_sync = {"error": str(exc)}
 
+if "control_pagos_sync" not in st.session_state:
+    try:
+        from modulos.control_pagos import inicializar_y_cargar
+
+        inicializar_y_cargar()
+    except Exception as exc:
+        import logging
+
+        logging.getLogger(__name__).warning("Control de pagos al arrancar: %s", exc)
+    st.session_state.control_pagos_sync = True
+
 if "gastos_std" not in st.session_state:
     try:
         from utils.estandarizar_gastos import estandarizar_todos, gastos_maestro_vacio
@@ -150,10 +169,16 @@ stats = obtener_estadisticas_hoy()
 if "pagos_urgentes_n" not in st.session_state:
     _pagos_urgentes = 0
     try:
-        from utils.alertas_pagos import resumen_pagos_widget
+        from modulos import control_pagos as _cp
 
-        _rw = resumen_pagos_widget()
-        _pagos_urgentes = int(_rw.get("vencidos", 0)) + int(_rw.get("hoy", 0))
+        if _cp.hay_datos():
+            _rc = _cp.resumen()
+            _pagos_urgentes = int(_rc["vencidos"]) + int(_rc["hoy"])
+        else:
+            from utils.alertas_pagos import resumen_pagos_widget
+
+            _rw = resumen_pagos_widget()
+            _pagos_urgentes = int(_rw.get("vencidos", 0)) + int(_rw.get("hoy", 0))
     except Exception:
         pass
     st.session_state.pagos_urgentes_n = _pagos_urgentes

@@ -118,8 +118,18 @@ def _tarjeta_html(num: int, row: dict) -> str:
 
 
 def render() -> None:
-    st.markdown(CSS, unsafe_allow_html=True)
+    from dashboard.paginas import pagos_control
+
     st.markdown("## Pagos")
+    t_control, t_anterior = st.tabs(["Control de pagos", "Archivo anterior (CONTROL DE PAGOS)"])
+    with t_control:
+        pagos_control.render()
+    with t_anterior:
+        _render_anterior()
+
+
+def _render_anterior() -> None:
+    st.markdown(CSS, unsafe_allow_html=True)
     excel_path = ruta_excel_pagos()
     st.caption(f"Fuente: `{excel_path.name}` · hoja CONTROL DE PAGOS")
 

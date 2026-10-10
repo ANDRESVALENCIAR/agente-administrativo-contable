@@ -84,6 +84,21 @@ class Config:
             "CONTROL DE PAGOS (1).xlsx",
         ),
     )
+    # Control de pagos (libro "Maestro de Pagos" + "Calendario Anual")
+    PAGOS_CONTROL_EXCEL = os.getenv(
+        "PAGOS_CONTROL_EXCEL",
+        os.path.join(_BASE_DIR, "data", "Control_de_pagos_Shaki.xlsx"),
+    )
+    PAGOS_ESCRIBIR_EXCEL = os.getenv("PAGOS_ESCRIBIR_EXCEL", "1") not in ("0", "false", "False", "no")
+    # Correos que reciben la alerta 24h (separados por coma). Si vacío usa EMAIL_PAGOS.
+    PAGOS_ALERTA_EMAILS = os.getenv("PAGOS_ALERTA_EMAILS") or EMAIL_PAGOS
+    # WhatsApp de la alerta 24h. Si vacío usa WHATSAPP_DESTINATARIOS.
+    PAGOS_ALERTA_WHATSAPP = os.getenv("PAGOS_ALERTA_WHATSAPP") or os.getenv("WHATSAPP_DESTINATARIOS")
+    # URL pública del dashboard (para el botón "Ya lo pagué"). Ej: https://shaki.up.railway.app
+    APP_PUBLIC_URL = (os.getenv("APP_PUBLIC_URL") or "http://localhost:8501").rstrip("/")
+    # Secreto para firmar los enlaces de confirmación. Si vacío se genera y guarda en la BD.
+    PAGOS_LINK_SECRET = os.getenv("PAGOS_LINK_SECRET")
+
     ESTANDARIZAR_GASTOS = os.getenv(
         "ESTANDARIZAR_GASTOS",
         os.path.join(

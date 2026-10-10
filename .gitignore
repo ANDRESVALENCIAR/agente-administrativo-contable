@@ -11,3 +11,8 @@ __pycache__/
 documentos/generados/
 !documentos/generados/.gitkeep
 reportes/
+
+# Control de pagos (datos reales: no subir)
+data/*.xlsx
+data/*.bak
+*.xlsx.bak
