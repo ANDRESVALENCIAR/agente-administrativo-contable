@@ -88,6 +88,23 @@ def _desde_json(orig: dict, claves: tuple[str, ...], actual: Any) -> Any:
     return actual
 
 
+def parecido(a: str, b: str) -> float:
+    """0-100: qué tan parecidos son dos nombres (orden de palabras y errores de digitación tolerados)."""
+    try:
+        from rapidfuzz import fuzz
+        return float(fuzz.token_set_ratio(_n(a), _n(b)))
+    except ImportError:
+        import difflib
+        return 100 * difflib.SequenceMatcher(None, " ".join(sorted(_n(a).split())), " ".join(sorted(_n(b).split()))).ratio()
+
+
+def _buscar_fecha(nombre: str, nombres: list[str], otras: list[tuple]) -> Any:
+    mejor = max(range(len(nombres)), key=lambda i: parecido(nombre, nombres[i]), default=None)
+    if mejor is not None and parecido(nombre, nombres[mejor]) >= 88:
+        return otras[mejor][1]
+    return None
+
+
 def _mes(v: Any) -> int | None:
     s = _n(v).lower().replace(".0", "")
     if s.isdigit() and 1 <= int(s) <= 12:
@@ -180,6 +197,16 @@ def cargar(hoy: date | None = None) -> dict[str, Any]:
         emp["ingreso"] = emp["fecha_ingreso"].map(_fecha)
         emp["nacimiento"] = emp["fecha_nacimiento"].map(_fecha)
         emp["retiro"] = emp["observaciones"].map(_retiro)
+        # fecha de ingreso faltante: se busca la misma persona en las otras tablas de personal
+        otras = []
+        for sql in ("SELECT nombre_completo n, COALESCE(NULLIF(fecha_ingreso,'NaT'), fecha_inicio) f FROM contratos_activos",
+                    "SELECT nombre n, fecha_ingreso f FROM empleados",
+                    "SELECT nombre_completo n, fecha_inicio f FROM contratos_fijos_fenix"):
+            t = _q(sql)
+            otras += [(_n(n).title(), _fecha(f)) for n, f in zip(t.get("n", []), t.get("f", [])) if _ok(_fecha(f))]
+        if otras:
+            nombres_o = [o[0] for o in otras]
+            emp["ingreso"] = [i if _ok(i) else _buscar_fecha(n, nombres_o, otras) for i, n in zip(emp["ingreso"], emp["nombre"])]
         emp["area"] = emp["departamento"].map(_texto)
         # área faltante: primero la de Contratos Activos; si no, se deduce del cargo
         ca_area = _q("SELECT nombre_completo, area FROM contratos_activos")

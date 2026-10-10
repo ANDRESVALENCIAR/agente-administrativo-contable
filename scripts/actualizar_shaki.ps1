@@ -13,5 +13,7 @@ Write-Host "Trayendo la última versión..." -ForegroundColor Cyan
 git pull
 $py = "C:\venvs\shaki\Scripts\python.exe"
 if (-not (Test-Path $py)) { $py = "python" }
+Write-Host "Revisando librerías nuevas..." -ForegroundColor Cyan
+& $py -m pip install -q rapidfuzz 2>$null
 Write-Host "Abriendo Shaki en http://localhost:8501 (no cierre esta ventana)" -ForegroundColor Green
 & $py -m streamlit run dashboard/app.py --server.port 8501

@@ -246,7 +246,7 @@ def _chat_cuerpo(en_dialogo: bool = False) -> None:
                 with st.chat_message("assistant", avatar=":material/auto_awesome:"):
                     st.markdown(texto)
     preguntas = ["¿Qué tengo hoy?", "Pagos de esta semana", "¿Qué impuestos vienen?", "Alertas críticas",
-                 "Correos importantes", "¿Cómo quedó la revisión de retención?"]
+                 "Correos importantes", "¿Cuánto le debemos a Codifer?", "¿Cuánto vendimos en septiembre?"]
     n = st.session_state.get("chat_sug_n", 0)
     elegida = st.pills("Sugerencias", preguntas, key=f"sug_{int(en_dialogo)}_{n}", label_visibility="collapsed")
     if elegida:

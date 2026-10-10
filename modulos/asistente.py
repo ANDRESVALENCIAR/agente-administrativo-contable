@@ -242,6 +242,35 @@ def h_hoy() -> dict[str, Any]:
                          for a in crit[:8]]}
 
 
+def h_persona(nombre: str, pregunta: str = "") -> dict[str, Any]:
+    """Datos de un empleado o exempleado por nombre (aunque esté mal escrito): ingreso, antigüedad, edad,
+    cumpleaños, cargo, área, contrato y vencimiento, vacaciones, salario."""
+    from modulos import conocimiento as co
+    info = co.buscar_persona(nombre)
+    if not info:
+        return {"encontrado": False, "nota": "No hay nadie con ese nombre en Personal."}
+    return {"encontrado": True, "datos": info, "respuesta_sugerida": co.responder_persona(pregunta or nombre, info)}
+
+
+def h_tercero(nombre: str, pregunta: str = "") -> dict[str, Any]:
+    """Proveedor o cliente por nombre: cuánto nos facturó y le pagamos, facturas sin pago (lo que le debemos),
+    cuánto le vendimos y nos debe, gasto por cuenta, pagos programados y mora. Base: auxiliar del contador."""
+    from modulos import conocimiento as co
+    info = co.buscar_tercero(nombre)
+    if not info:
+        return {"encontrado": False, "nota": "No encontré ese tercero en la contabilidad, pagos ni cartera."}
+    return {"encontrado": True, "datos": info,
+            "respuesta_sugerida": co.responder_tercero(pregunta or f"cuanto le debemos a {nombre}", info)}
+
+
+def h_contabilidad(pregunta: str) -> dict[str, Any]:
+    """Cifras del auxiliar contable: cuánto se gastó en una cuenta (arriendo, energía, publicidad…) o cuánto se
+    vendió, en total o en un mes. Pase la pregunta tal cual."""
+    from modulos import conocimiento as co
+    r = co.responder_contable(pregunta)
+    return {"respuesta": r or "No hay contabilidad cargada o no entendí la cuenta."}
+
+
 def _ev(e: dict) -> dict:
     from modulos import agenda_unificada as ag
     return {"fecha": e["fecha"].isoformat(), "fuente": ag.FUENTES[e["fuente"]]["nombre"], "titulo": e["titulo"],
@@ -260,6 +289,9 @@ HERRAMIENTAS: dict[str, tuple[Callable[..., dict], dict]] = {
     "agenda": (h_agenda, {"desde": "string", "hasta": "string"}),
     "cartera": (h_cartera, {}),
     "buscar": (h_buscar, {"texto": "string"}),
+    "persona": (h_persona, {"nombre": "string (nombre del empleado)", "pregunta": "string (la pregunta original)"}),
+    "tercero": (h_tercero, {"nombre": "string (proveedor o cliente)", "pregunta": "string (la pregunta original)"}),
+    "contabilidad": (h_contabilidad, {"pregunta": "string (la pregunta original)"}),
 }
 
 
@@ -269,7 +301,10 @@ SISTEMA = (
     "Eres Shaki, el asistente administrativo y contable de EQUIPOS INDUSTRIALES FÉNIX S.A.S. (NIT 901.146.454-6) "
     "en Bogotá. Hoy es {hoy}. Responde en español colombiano, claro y directo, con viñetas cortas y montos en pesos "
     "($1.234.567). Usa SIEMPRE las herramientas para obtener datos; nunca inventes cifras ni fechas. Si una "
-    "herramienta no trae datos, dilo y sugiere dónde cargarlos en Shaki. Termina con la acción más urgente si la hay."
+    "herramienta no trae datos, dilo y sugiere dónde cargarlos en Shaki. Para preguntas sobre una persona usa «persona»; "
+    "sobre un proveedor o cliente (cuánto le debemos, cuánto nos debe, cuánto le pagamos) usa «tercero»; sobre cuentas "
+    "contables usa «contabilidad». Aclara que las deudas se calculan con el auxiliar del periodo cargado. "
+    "Termina con la acción más urgente si la hay."
 )
 
 
@@ -322,6 +357,9 @@ AYUDA = """Puedo responderle con los datos reales de Shaki. Pruebe, por ejemplo:
 - **Alertas**: alertas críticas · ¿qué alertas hay?
 - **Correos**: correos importantes · facturas que llegaron · ¿llegó algo de la DIAN?
 - **Cartera**: clientes en mora
+- **Personas**: ¿cuántos años lleva Andrés Valencia? · ¿cuándo cumple años Laura? · ¿cuándo vence el contrato de Juan?
+- **Proveedores y clientes**: ¿cuánto le debemos a Codifer? · ¿cuánto nos debe Ecopetrol? · ¿cuánto le hemos pagado a Claro?
+- **Contabilidad**: ¿cuánto gastamos en publicidad? · ¿cuánto vendimos en septiembre?
 - **Buscar**: busca Codifer · ¿qué hay de Claro?"""
 
 
@@ -364,6 +402,9 @@ def _local(pregunta: str) -> str:
             return "Con gusto. Aquí estoy si necesita algo más."
         return "¡Hola! Soy Shaki. Pregúnteme por pagos, impuestos, alertas, correos o «¿qué tengo hoy?». " \
                "Escriba **ayuda** para ver ejemplos."
+    r = _conocimiento(pregunta, t)
+    if r:
+        return r
     m = re.search(r"\b(busca|buscar|encuentra|que hay de|algo de|informacion de)\s+(.+)", t)
     tema_pagos = re.search(r"\bpag(o|os|ar|ue)\b|cuota|cuanto (hay|debo|tengo)|nomina|factura[s]? (por|a) pagar", t)
     tema_imp = re.search(r"impuest|declarac|retencion|reteica|\biva\b|\bica\b|renta|exogena|predial|vehicul|dian|shd|hacienda", t)
@@ -468,6 +509,41 @@ def _local(pregunta: str) -> str:
         if not r.startswith("No encontré"):
             return r
     return "No entendí bien la pregunta. " + AYUDA
+
+
+RE_PERSONA = (r"\blleva\b|antiguedad|cuantos anos|edad|cumple|nacio|vacacion|contrato|\bcargo\b|que hace|salario|sueldo|"
+              r"\bgana\b|quien es|cuando (entro|ingreso)|desde cuando|trabaja")
+RE_TERCERO = (r"debemos|\bdebe\b|deuda|le (hemos )?pagado|le pagamos|le compramos|nos (ha )?facturado|nos facturo|"
+              r"le vendimos|le facturamos|saldo (de|con)|cuanto (le|nos)|proveedor|cliente")
+RE_CONTABLE = r"cuanto (gastamos|gasto|se gasto|hemos gastado|vendimos|vendio|facturamos|ingreso)|cuanto (nos )?cuesta"
+
+
+def _conocimiento(pregunta: str, t: str) -> str | None:
+    """Preguntas sobre una persona, un proveedor/cliente o una cuenta contable."""
+    from modulos import conocimiento as co
+    try:
+        if re.search(RE_PERSONA, t):
+            info = co.buscar_persona(pregunta)
+            if info:
+                return co.responder_persona(pregunta, info)
+        if re.search(RE_TERCERO, t) or re.search(RE_CONTABLE, t):
+            info = co.buscar_tercero(pregunta)
+            if info:
+                return co.responder_tercero(pregunta, info)
+        if re.search(RE_CONTABLE, t):
+            r = co.responder_contable(pregunta)
+            if r:
+                return r
+        if re.search(RE_PERSONA, t) and co.candidatos_texto(pregunta):
+            return (f"No encontré a «{co.candidatos_texto(pregunta)}» en Personal. Revise que esté en el "
+                    "Archivo General o en Contratos Activos.")
+        if re.search(RE_TERCERO, t) and re.search(r"debe|deuda|pagado|pagamos|compramos|vendimos|facturo", t) \
+                and co.candidatos_texto(pregunta):
+            return (f"No encontré a «{co.candidatos_texto(pregunta)}» como proveedor ni cliente en la contabilidad, "
+                    "pagos o cartera. Pruebe con otra parte del nombre (ej. «Codifer» en vez de «Codifer SAS»).")
+    except Exception as e:
+        logger.warning("Conocimiento: %s", e)
+    return None
 
 
 def _resumen_hoy(manana: bool = False) -> str:

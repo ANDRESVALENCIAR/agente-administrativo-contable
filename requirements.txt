@@ -94,3 +94,5 @@ pydantic>=2.7.0
 python-multipart>=0.0.9
 pytz>=2024.1
 twilio>=9.0.0
+# Reconocer nombres de personas y proveedores aunque estén mal escritos (chat de Shaki)
+rapidfuzz>=3.9

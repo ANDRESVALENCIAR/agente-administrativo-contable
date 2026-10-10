@@ -53,7 +53,7 @@ def guardar_subida(nombre: str, contenido: bytes) -> Path:
 
 def _clave(ruta: Path) -> str:
     st = ruta.stat()
-    return hashlib.md5(f"{ruta}|{st.st_mtime}|{st.st_size}".encode()).hexdigest()[:16]
+    return hashlib.md5(f"v2|{ruta}|{st.st_mtime}|{st.st_size}".encode()).hexdigest()[:16]
 
 
 def cargar(ruta: Path | None = None) -> dict[str, Any] | None:
@@ -89,6 +89,7 @@ def _leer(ruta: Path) -> dict[str, Any] | None:
         if not libro.hoja("Auxiliar"):
             return None
         mov = pd.DataFrame(libro.auxiliar(("4", "5", "6", "7")))
+        terc = pd.DataFrame(libro.auxiliar(("1305", "1330", "2205", "2335", "2380")))
         pr = libro.prueba()
     finally:
         libro.cerrar()
@@ -111,7 +112,12 @@ def _leer(ruta: Path) -> dict[str, Any] | None:
     mov["nombre_grupo"] = mov["grupo"].map(lambda g: GRUPOS.get(g, nombres.get(g, g)))
     mov["nombre_cuenta4"] = mov["cuenta4"].map(lambda c: nombres.get(c, c))
     mov["nombre_cuenta6"] = mov["cuenta6"].map(lambda c: nombres.get(c, c))
-    return {"mov": mov[["fecha", "mes", "cuenta", "cuenta4", "cuenta6", "clase", "grupo", "nombre_grupo",
+    if not terc.empty:
+        terc["fecha"] = pd.to_datetime(terc["fecha"], errors="coerce")
+        terc["tercero"] = terc["nombre"].fillna("").astype(str).str.split(" Nit:").str[0].str.strip()
+        terc["cuenta4"] = terc["cuenta"].astype(str).str[:4]
+        terc["nombre_cuenta4"] = terc["cuenta4"].map(lambda c: nombres.get(c, c))
+    return {"terceros": terc, "mov": mov[["fecha", "mes", "cuenta", "cuenta4", "cuenta6", "clase", "grupo", "nombre_grupo",
                         "nombre_cuenta4", "nombre_cuenta6", "nit", "tercero", "detalle", "comprobante", "monto"]],
             "cuentas": nombres, "fuente": str(ruta), "leido": date.today().isoformat()}
 
