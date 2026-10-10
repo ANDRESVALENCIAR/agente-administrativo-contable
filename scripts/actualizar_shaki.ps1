@@ -1,4 +1,4 @@
-# Actualiza Shaki a la última versión de GitHub y lo vuelve a abrir.
+﻿# Actualiza Shaki a la última versión de GitHub y lo vuelve a abrir.
 # Uso (desde cualquier carpeta):
 #   powershell -ExecutionPolicy Bypass -File "<carpeta de Shaki>\scripts\actualizar_shaki.ps1"
 $ErrorActionPreference = "Continue"

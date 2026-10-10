@@ -1,4 +1,4 @@
-# ============================================================
+﻿# ============================================================
 # Conecta un buzón de correo a Shaki (solo lectura).
 # Guarda la contraseña en el .env de ESTE computador (nunca en GitHub).
 # Uso:
@@ -31,5 +31,5 @@ Write-Host "Contraseña guardada en .env para $Correo" -ForegroundColor Green
 $py = "C:\venvs\shaki\Scripts\python.exe"
 if (-not (Test-Path $py)) { $py = "python" }
 Write-Host "Probando la conexión (solo lectura)..." -ForegroundColor Cyan
-& $py -c "from dotenv import load_dotenv; load_dotenv(override=True); from modulos import buzones as b; b.inicializar(); bid=b.agregar_buzon('$Correo'); x=[z for z in b.listar_buzones() if z['email']=='$Correo'][0]; r=b.probar(x['id']); print('CONECTADO: ' + str(r.get('mensajes')) + ' correos en la bandeja' if r['ok'] else 'ERROR: ' + r['error'])"
+& $py (Join-Path $raiz "scripts\probar_buzon.py") $Correo
 Write-Host "Reinicie Shaki para que empiece a leer este buzón cada 10 minutos."
