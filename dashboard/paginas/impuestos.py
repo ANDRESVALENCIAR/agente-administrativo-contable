@@ -21,12 +21,14 @@ from modulos.impuestos_calendario import (
 
 
 def render() -> None:
-    from dashboard.paginas import radar_impuestos
+    from dashboard.paginas import radar_impuestos, revision_impuestos
 
     st.markdown("## Impuestos")
-    t_radar, t_ant = st.tabs(["Radar tributario", "Módulo anterior"])
+    t_radar, t_rev, t_ant = st.tabs(["Radar tributario", "Revisión de impuestos", "Módulo anterior"])
     with t_radar:
         radar_impuestos.render()
+    with t_rev:
+        revision_impuestos.render()
     with t_ant:
         st.caption("Módulo anterior: sus fechas SHD estaban escritas a mano y no se usan para alertas.")
         _render_anterior()

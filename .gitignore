@@ -17,3 +17,6 @@ data/*.xlsx
 data/*.bak
 *.xlsx.bak
 logs/
+
+# Revisión de impuestos: insumos del contador e informes (datos reales: no subir)
+data/revisiones/
