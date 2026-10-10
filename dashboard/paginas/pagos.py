@@ -118,10 +118,16 @@ def _tarjeta_html(num: int, row: dict) -> str:
 
 
 def render() -> None:
-    from dashboard.paginas import pagos_control
+    from dashboard.paginas import pagos_control, pagos_hoy_semana
 
     st.markdown("## Pagos")
-    t_control, t_anterior = st.tabs(["Control de pagos", "Archivo anterior (CONTROL DE PAGOS)"])
+    t_hoy, t_semana, t_control, t_anterior = st.tabs(
+        ["Hoy", "Semana", "Control de pagos", "Archivo anterior (CONTROL DE PAGOS)"]
+    )
+    with t_hoy:
+        pagos_hoy_semana.render_hoy()
+    with t_semana:
+        pagos_hoy_semana.render_semana()
     with t_control:
         pagos_control.render()
     with t_anterior:
