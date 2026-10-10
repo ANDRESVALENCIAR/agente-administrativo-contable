@@ -110,6 +110,8 @@ class Config:
     IMPUESTOS_ALERTA_EMAILS = os.getenv(
         "IMPUESTOS_ALERTA_EMAILS", "directorfenix@viaindustrial.com,gerenciafenix@viaindustrial.com"
     )
+    # Centro de alertas: resumen diario 06:55 y aviso inmediato de alertas CRÍTICAS nuevas
+    ALERTAS_EMAILS = os.getenv("ALERTAS_EMAILS") or IMPUESTOS_ALERTA_EMAILS
     # Secreto para firmar los enlaces de confirmación. Si vacío se genera y guarda en la BD.
     PAGOS_LINK_SECRET = os.getenv("PAGOS_LINK_SECRET")
 

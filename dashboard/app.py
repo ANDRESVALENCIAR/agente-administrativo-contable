@@ -108,7 +108,12 @@ if en_modo_demo() and "demo_loaded" not in st.session_state:
     st.session_state.demo_loaded = True
 
 if "alertas_verificadas" not in st.session_state:
-    verificar_alertas_globales()
+    try:
+        from modulos import motor_alertas
+
+        motor_alertas.escanear_si_toca(5)
+    except Exception:
+        verificar_alertas_globales()
     st.session_state.alertas_verificadas = True
 
 if "pagos_sync" not in st.session_state:
@@ -215,7 +220,7 @@ with st.sidebar:
             unsafe_allow_html=True,
         )
     st.write("")
-    pagina = st.radio("Navegación", list(PAGINAS.keys()), label_visibility="collapsed")
+    pagina = st.radio("Navegación", list(PAGINAS.keys()), label_visibility="collapsed", key="nav")
     st.divider()
     st.caption(f"Costo API hoy: **${stats['costo_hoy']}**")
     st.caption(f"Costo API mes: **${stats['costo_mes']}**")

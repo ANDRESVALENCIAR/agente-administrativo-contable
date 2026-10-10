@@ -229,6 +229,19 @@ def obtener_alertas_activas() -> list[tuple[Any, ...]]:
     """Retorna todas las alertas no resueltas."""
     conn = get_conn()
     c = conn.cursor()
+    try:  # el motor de alertas agrega pospuesta_hasta; sin la columna se lista todo
+        c.execute(
+            """SELECT * FROM alertas WHERE resuelto=0
+                 AND (pospuesta_hasta IS NULL OR pospuesta_hasta <= datetime('now','localtime'))
+                 ORDER BY CASE nivel
+                   WHEN 'CRITICO' THEN 1 WHEN 'URGENTE' THEN 2
+                   WHEN 'AVISO' THEN 3 ELSE 4 END, timestamp DESC"""
+        )
+        rows = c.fetchall()
+        conn.close()
+        return rows
+    except sqlite3.OperationalError:
+        pass
     c.execute(
         """SELECT * FROM alertas WHERE resuelto=0
                  ORDER BY CASE nivel
