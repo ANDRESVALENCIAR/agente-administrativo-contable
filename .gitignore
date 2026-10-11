@@ -27,3 +27,6 @@ data/escritorio/
 # Analítica (contabilidad real: no subir)
 data/contabilidad/
 data/analitica/
+
+# Interruptor de la IA (local de cada computador)
+data/ia_apagada.flag

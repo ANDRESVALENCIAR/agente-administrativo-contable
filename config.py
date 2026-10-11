@@ -150,17 +150,45 @@ class Config:
 cfg = Config()
 
 
+# Interruptor de la IA (se guarda en un archivo para que valga en todo Shaki y sobreviva reinicios)
+IA_APAGADA_FLAG = os.path.join(_BASE_DIR, "data", "ia_apagada.flag")
+
+
+def ia_tiene_clave() -> bool:
+    clave = (cfg.ANTHROPIC_API_KEY or "").strip()
+    return bool(clave) and not clave.startswith("sk-ant-xxx")
+
+
+def ia_encendida() -> bool:
+    """El usuario dejó el interruptor de la IA en ON (por defecto ON)."""
+    return not os.path.exists(IA_APAGADA_FLAG)
+
+
+def poner_ia(encendida: bool) -> None:
+    os.makedirs(os.path.dirname(IA_APAGADA_FLAG), exist_ok=True)
+    if encendida:
+        if os.path.exists(IA_APAGADA_FLAG):
+            os.remove(IA_APAGADA_FLAG)
+    else:
+        with open(IA_APAGADA_FLAG, "w", encoding="utf-8") as f:
+            f.write("La IA de Shaki está apagada desde la barra lateral.\n")
+
+
+def estado_ia() -> str:
+    """«activa» (clave + interruptor ON) · «apagada» (hay clave pero el usuario la apagó) · «sin_clave»."""
+    if not ia_tiene_clave():
+        return "sin_clave"
+    return "activa" if ia_encendida() else "apagada"
+
+
 def en_modo_demo() -> bool:
     """
-    Indica si el sistema opera en modo demo (sin credenciales reales).
+    Indica si el sistema opera sin IA (sin clave real o con el interruptor de la IA apagado).
 
     Returns:
-        True si faltan credenciales críticas o son placeholders.
+        True si no se debe llamar a Claude.
     """
-    clave = cfg.ANTHROPIC_API_KEY or ""
-    if not clave or clave.startswith("sk-ant-xxx"):
-        return True
-    return False
+    return estado_ia() != "activa"
 
 
 def gmail_configurado() -> bool:

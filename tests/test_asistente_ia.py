@@ -93,3 +93,17 @@ def test_sql_solo_lectura():
         assert "error" in ad.h_sql(malo)
     assert all(t["filas"] > 0 and t["columnas"] for t in ad.h_esquema()["tablas"])  # solo tablas con datos
     assert "columnas" in ad.h_esquema("log_acciones") and "error" in ad.h_esquema("no_existe")
+
+
+def test_interruptor_de_la_ia(monkeypatch, tmp_path):
+    import config
+    monkeypatch.setattr(config, "IA_APAGADA_FLAG", str(tmp_path / "ia_apagada.flag"))
+    assert config.estado_ia() == "sin_clave" and not a.ia_activa()
+    monkeypatch.setattr(cfg, "ANTHROPIC_API_KEY", "sk-ant-prueba")
+    assert config.estado_ia() == "activa" and a.ia_activa() and not config.en_modo_demo()
+    config.poner_ia(False)
+    assert config.estado_ia() == "apagada" and not a.ia_activa() and config.en_modo_demo()
+    monkeypatch.setattr(a, "_con_claude", lambda p, h: (_ for _ in ()).throw(AssertionError("IA apagada")))
+    assert isinstance(a.responder("por qué perdimos plata en junio"), str)  # con OFF nunca llama a Claude
+    config.poner_ia(True)
+    assert config.estado_ia() == "activa"

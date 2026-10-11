@@ -208,6 +208,39 @@ if "pagos_urgentes_n" not in st.session_state:
     st.session_state.pagos_urgentes_n = _pagos_urgentes
 _pagos_urgentes = st.session_state.pagos_urgentes_n
 
+def _cambiar_ia() -> None:
+    from config import poner_ia
+    poner_ia(bool(st.session_state.get("ia_switch")))
+
+
+def _interruptor_ia() -> None:
+    """Interruptor de la IA: verde = encendida, rojo = apagada. Sin clave queda en rojo y bloqueado."""
+    from config import estado_ia, ia_encendida, ia_tiene_clave
+    estado = estado_ia()
+    verde = estado == "activa"
+    color, fondo = ("#22C55E", "#0F2A1A") if verde else ("#EF4444", "#2A1212")
+    texto = {"activa": "IA ENCENDIDA", "apagada": "IA APAGADA", "sin_clave": "IA APAGADA · SIN CLAVE"}[estado]
+    sub = {"activa": f"{cfg.MODELO_COMPLEJO} · lo simple sigue siendo gratis",
+           "apagada": "Solo modo local (gratis). Nada se envía a la IA.",
+           "sin_clave": "Ponga la clave con scripts\\configurar_ia.ps1"}[estado]
+    st.markdown(
+        f'<div class="sk-ia" style="border:1px solid {color}55;background:{fondo};border-radius:14px;padding:10px 12px;'
+        f'margin-bottom:6px"><div style="display:flex;align-items:center;gap:8px;font-weight:600;color:{color};'
+        f'letter-spacing:.06em;font-size:12.5px"><span style="width:12px;height:12px;border-radius:50%;background:{color};'
+        f'box-shadow:0 0 10px {color}"></span>{texto}</div>'
+        f'<div style="color:#A1A1AA;font-size:11.5px;margin-top:4px">{sub}</div></div>'
+        '<style>.st-key-ia_switch label[data-selected="true"]>div:first-of-type{background:#22C55E!important}'
+        '.st-key-ia_switch label:not([data-selected="true"])>div:first-of-type{background:#EF4444!important}'
+        '.st-key-ia_switch label:has(input:disabled)>div:first-of-type{background:#7F1D1D!important}</style>',
+        unsafe_allow_html=True)
+    st.session_state["ia_switch"] = ia_encendida() if ia_tiene_clave() else False
+    st.toggle("Interruptor de la IA · ON / OFF", key="ia_switch", on_change=_cambiar_ia,
+              disabled=not ia_tiene_clave(),
+              help="ON: el chat usa Claude para análisis y preguntas abiertas. OFF: todo funciona en modo local, "
+                   "gratis, y no se envía nada a la IA." if ia_tiene_clave() else
+                   "Primero guarde la clave de Anthropic con scripts\\configurar_ia.ps1 y reinicie Shaki.")
+
+
 with st.sidebar:
     modo = "Demo" if en_modo_demo() else "Producción"
     st.markdown(
@@ -224,6 +257,7 @@ with st.sidebar:
     st.write("")
     pagina = st.radio("Navegación", list(PAGINAS.keys()), label_visibility="collapsed", key="nav")
     st.divider()
+    _interruptor_ia()
     st.caption(f"Costo API hoy: **${stats['costo_hoy']}**")
     st.caption(f"Costo API mes: **${stats['costo_mes']}**")
     libs_ok = sum(1 for v in librerias_disponibles().values() if v)
@@ -259,13 +293,20 @@ def _chat_cuerpo(en_dialogo: bool = False) -> None:
             else:
                 with st.chat_message("assistant", avatar=":material/auto_awesome:"):
                     st.markdown(texto)
-    from modulos import asistente as _as
-    if _as.ia_activa():
-        st.caption(f":material/psychology: IA activa · {cfg.MODELO_COMPLEJO} — lo simple se responde gratis al instante; "
-                   "las preguntas abiertas las analiza la IA.")
+    from config import estado_ia
+    _est = estado_ia()
+    if _est == "activa":
+        st.markdown(f'<div style="font-size:12.5px;color:#A1A1AA"><span style="display:inline-block;width:9px;height:9px;'
+                    f'border-radius:50%;background:#22C55E;box-shadow:0 0 8px #22C55E;margin-right:6px"></span>'
+                    f'<b style="color:#22C55E">IA encendida</b> · {cfg.MODELO_COMPLEJO} — lo simple se responde gratis al '
+                    f'instante; las preguntas abiertas las analiza la IA.</div>', unsafe_allow_html=True)
     else:
-        st.caption(":material/bolt: Modo local (gratis, sin IA). Para preguntas abiertas y análisis, active la IA con "
-                   "scripts\\configurar_ia.ps1")
+        motivo = ("apáguela o enciéndala en la barra lateral" if _est == "apagada"
+                  else "para activarla ponga la clave con scripts\\configurar_ia.ps1")
+        st.markdown(f'<div style="font-size:12.5px;color:#A1A1AA"><span style="display:inline-block;width:9px;height:9px;'
+                    f'border-radius:50%;background:#EF4444;box-shadow:0 0 8px #EF4444;margin-right:6px"></span>'
+                    f'<b style="color:#EF4444">IA apagada</b> · modo local, gratis ({motivo}).</div>',
+                    unsafe_allow_html=True)
     preguntas = ["¿Qué tengo hoy?", "¿Cómo vamos?", "¿Cuánta plata hay en bancos?", "¿Me alcanza la plata?",
                  "¿Cuánto nos deben los clientes?", "Pagos de esta semana", "¿Qué impuestos vienen?",
                  "¿Quién cumple años este mes?"]

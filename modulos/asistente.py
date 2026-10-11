@@ -772,8 +772,12 @@ def _busqueda(texto: str) -> str:
 # ───────────────────────── Entrada pública ─────────────────────────
 
 def ia_activa() -> bool:
+    """Hay clave de Anthropic y el interruptor de la IA está en ON."""
     k = (getattr(cfg, "ANTHROPIC_API_KEY", "") or "").strip()
-    return bool(k) and not k.startswith("sk-ant-xxx")
+    if not k or k.startswith("sk-ant-xxx"):
+        return False
+    from config import ia_encendida
+    return ia_encendida()
 
 
 def _local_seguro(pregunta: str) -> str:
