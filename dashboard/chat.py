@@ -194,7 +194,7 @@ def chat_responder_anterior(mensaje_usuario: str, historial: list[dict[str, str]
                     system=system,
                     messages=mensajes,
                 )
-                respuesta = resp.content[0].text
+                respuesta = "".join(getattr(b, "text", "") for b in resp.content if getattr(b, "type", "") == "text")
             tokens = 0
         except Exception as e:
             logger.error("Error en chat: %s", e)

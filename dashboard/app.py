@@ -236,7 +236,10 @@ def _chat_cuerpo(en_dialogo: bool = False) -> None:
 
     def _preguntar(texto: str) -> None:
         st.session_state.chat_mensajes_ui.append({"rol": "user", "texto": texto})
-        with st.spinner("Shaki está consultando…"):
+        from modulos import asistente as _as
+        aviso = ("Shaki está analizando con IA…" if _as.motor_para(texto, st.session_state.chat_historial) == "ia"
+                 else "Shaki está consultando…")
+        with st.spinner(aviso):
             r, st.session_state.chat_historial = chat_responder(texto, st.session_state.chat_historial)
         st.session_state.chat_mensajes_ui.append({"rol": "agent", "texto": r})
 
@@ -244,8 +247,9 @@ def _chat_cuerpo(en_dialogo: bool = False) -> None:
     with caja:
         if not st.session_state.chat_mensajes_ui:
             with st.chat_message("assistant", avatar=":material/auto_awesome:"):
-                st.markdown("Hola, soy **Shaki**. Pregúnteme con sus palabras: *¿qué tengo hoy?*, *pagos de esta "
-                            "semana*, *¿cuándo vence la retención?*, *correos importantes*…")
+                st.markdown("Hola, soy **Shaki**. Pregúnteme con sus palabras: *¿cómo vamos?*, *¿cuánta plata hay "
+                            "en bancos?*, *¿cuánto le debemos a Codifer?*, *¿quién cumple años este mes?*, *¿qué tengo "
+                            "hoy?*… Escriba **ayuda** para ver todo lo que sé.")
         for msg in st.session_state.chat_mensajes_ui[-20:]:
             # $ escapado (si no, Streamlit lo toma como fórmula) y saltos de línea respetados
             texto = str(msg["texto"]).replace("$", "\\$").replace("\n", "  \n")
@@ -255,8 +259,16 @@ def _chat_cuerpo(en_dialogo: bool = False) -> None:
             else:
                 with st.chat_message("assistant", avatar=":material/auto_awesome:"):
                     st.markdown(texto)
-    preguntas = ["¿Qué tengo hoy?", "Pagos de esta semana", "¿Qué impuestos vienen?", "Alertas críticas",
-                 "Correos importantes", "¿Cuánto le debemos a Codifer?", "¿Cuánto vendimos en septiembre?"]
+    from modulos import asistente as _as
+    if _as.ia_activa():
+        st.caption(f":material/psychology: IA activa · {cfg.MODELO_COMPLEJO} — lo simple se responde gratis al instante; "
+                   "las preguntas abiertas las analiza la IA.")
+    else:
+        st.caption(":material/bolt: Modo local (gratis, sin IA). Para preguntas abiertas y análisis, active la IA con "
+                   "scripts\\configurar_ia.ps1")
+    preguntas = ["¿Qué tengo hoy?", "¿Cómo vamos?", "¿Cuánta plata hay en bancos?", "¿Me alcanza la plata?",
+                 "¿Cuánto nos deben los clientes?", "Pagos de esta semana", "¿Qué impuestos vienen?",
+                 "¿Quién cumple años este mes?"]
     n = st.session_state.get("chat_sug_n", 0)
     elegida = st.pills("Sugerencias", preguntas, key=f"sug_{int(en_dialogo)}_{n}", label_visibility="collapsed")
     if elegida:

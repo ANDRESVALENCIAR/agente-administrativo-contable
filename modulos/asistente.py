@@ -1,13 +1,17 @@
 """
 Asistente de Shaki — responde preguntas con los DATOS REALES del agente.
 
-Herramientas (consultas de solo lectura sobre los módulos nuevos):
-  hoy · pagos · impuestos · alertas · correos · revision · agenda · cartera · buscar
+Herramientas (todas de solo lectura): hoy · pagos · impuestos · alertas · correos · revision · agenda ·
+cartera · buscar · persona · tercero · contabilidad · finanzas · caja · cuentas_por_cobrar_pagar · gastos ·
+personal · esquema · sql
 
-Dos motores:
-  1. Con ANTHROPIC_API_KEY: Claude decide qué herramientas usar (tool use) y redacta la respuesta.
-  2. Sin clave (modo local): un intérprete en español reconoce la pregunta (tema + fecha) y arma la
-     respuesta directamente con las mismas herramientas. Nunca inventa cifras.
+Dos motores y un enrutador:
+  1. Motor local (siempre disponible, gratis e instantáneo): un intérprete en español reconoce la pregunta
+     (tema, fecha, persona o tercero) y arma la respuesta con las herramientas. Nunca inventa cifras.
+  2. Con ANTHROPIC_API_KEY: Claude (Sonnet 5.5, razonamiento adaptativo) decide qué herramientas usar, cruza
+     varias fuentes, puede consultar la base con SQL de solo lectura y redacta un análisis.
+  El enrutador manda lo simple al motor local y solo lo abierto o analítico a Claude (costo bajo). Si Claude
+  falla o no hay clave, responde el motor local.
 """
 from __future__ import annotations
 
@@ -17,10 +21,11 @@ import json
 import logging
 import re
 import unicodedata
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 from typing import Any, Callable
 
 from config import cfg
+from modulos import asistente_datos as ad
 
 logger = logging.getLogger(__name__)
 
@@ -292,20 +297,70 @@ HERRAMIENTAS: dict[str, tuple[Callable[..., dict], dict]] = {
     "persona": (h_persona, {"nombre": "string (nombre del empleado)", "pregunta": "string (la pregunta original)"}),
     "tercero": (h_tercero, {"nombre": "string (proveedor o cliente)", "pregunta": "string (la pregunta original)"}),
     "contabilidad": (h_contabilidad, {"pregunta": "string (la pregunta original)"}),
+    "finanzas": (ad.h_finanzas, {"desde_mes": "string (mes inicial, ej. enero o 1)", "hasta_mes": "string (mes final)"}),
+    "caja": (ad.h_caja, {}),
+    "cuentas_por_cobrar_pagar": (ad.h_cuentas_por_cobrar_pagar, {"tipo": "string (clientes|proveedores)",
+                                                                 "min_dias": "integer (antigüedad mínima)"}),
+    "gastos": (ad.h_gastos, {"agrupar": "string (cuenta|subcuenta|tercero|mes)", "mes": "string (nombre o número)",
+                             "buscar": "string (texto en cuenta o tercero)", "top": "integer",
+                             "tipo": "string (gastos|ventas)"}),
+    "personal": (ad.h_personal, {"consulta": "string (resumen|cumpleanos|vacaciones|contratos|lista|examenes)"}),
+    "alcanza": (ad.h_alcanza, {"dias": "integer (horizonte en días, por defecto 30)"}),
+    "esquema": (ad.h_esquema, {"tabla": "string (opcional: nombre de una tabla)"}),
+    "sql": (ad.h_sql, {"consulta": "string (un SELECT de SQLite)"}),
 }
 
 
 # ───────────────────────── Motor 1: Claude con herramientas ─────────────────────────
 
-SISTEMA = (
-    "Eres Shaki, el asistente administrativo y contable de EQUIPOS INDUSTRIALES FÉNIX S.A.S. (NIT 901.146.454-6) "
-    "en Bogotá. Hoy es {hoy}. Responde en español colombiano, claro y directo, con viñetas cortas y montos en pesos "
-    "($1.234.567). Usa SIEMPRE las herramientas para obtener datos; nunca inventes cifras ni fechas. Si una "
-    "herramienta no trae datos, dilo y sugiere dónde cargarlos en Shaki. Para preguntas sobre una persona usa «persona»; "
-    "sobre un proveedor o cliente (cuánto le debemos, cuánto nos debe, cuánto le pagamos) usa «tercero»; sobre cuentas "
-    "contables usa «contabilidad». Aclara que las deudas se calculan con el auxiliar del periodo cargado. "
-    "Termina con la acción más urgente si la hay."
-)
+SISTEMA = """Eres Shaki, el asistente administrativo, contable y financiero de EQUIPOS INDUSTRIALES FÉNIX S.A.S. \
+(EIF SAS, NIT 901.146.454-6), importadora y distribuidora de equipos e instrumentación industrial en Bogotá, Colombia. \
+Trabajas para la gerencia (Andrés Valencia, representante legal). Hoy es {hoy}.
+
+Cómo trabajas:
+- Respondes SIEMPRE con datos reales de Shaki obtenidos con las herramientas. Nunca inventes cifras, fechas ni \
+nombres. Si un dato no está, dilo y explica dónde cargarlo en Shaki.
+- Piensa qué necesitas antes de responder y usa varias herramientas cuando la pregunta lo pida (puedes llamar \
+varias a la vez). Cruza fuentes: por ejemplo caja + proveedores vencidos + pagos de la semana para decir si alcanza \
+la plata; finanzas + gastos para explicar una pérdida; personal + persona para temas de un empleado.
+- Si ninguna herramienta cubre la pregunta, mira las tablas con «esquema» y consulta con «sql» (solo SELECT).
+- Contabilidad: el libro del contador (auxiliar y balance de prueba) llega hasta la fecha de corte que indican \
+las herramientas; las deudas por tercero se calculan con los movimientos del año (los saldos de años anteriores \
+no están en el auxiliar). Menciona el corte cuando des cifras contables.
+- Normas colombianas: PUC, DIAN, Secretaría de Hacienda de Bogotá, CST (laboral). Cuando apliquen, explica el \
+porqué en lenguaje sencillo, sin tecnicismos innecesarios.
+
+Cómo respondes:
+- Español colombiano, trato de «usted», directo y claro: primero la respuesta, luego el detalle.
+- Montos en pesos con punto de miles ($1.234.567) o en millones ($12,3 M) cuando son grandes.
+- Viñetas cortas y **negritas** para lo clave. Nada de relleno.
+- Si hay riesgo o algo urgente (vencidos, pérdidas, indicadores en rojo, multas), dilo y termina con la acción \
+recomendada concreta.
+- Eres de solo lectura: no puedes pagar, enviar ni modificar nada; indica en qué pantalla de Shaki se hace.
+- Datos sensibles (salarios, cédulas, salud): solo si la gerencia los pide expresamente."""
+
+# Preguntas que piden razonar (no solo consultar): van a Claude cuando hay clave.
+RE_ANALISIS = re.compile(
+    r"por ?que|porque|analiza|analisis|explica|compara|comparar|recomienda|recomendacion|deberia|conviene|"
+    r"estrategia|opinas|que hago|como mejor|como reduc|como aument|proyecc|proyecta|pronostic|tendencia|riesgo|"
+    r"alcanza|me sirve|resum|diagnostic|evalua|que pasaria|simula|escenario|prioriza|plan de|consejo|cuidado|"
+    r"preocup|\bvs\b|versus|diferencia entre|mejor opcion|redacta|escribe|carta|correo para|mensaje para")
+RE_SEGUIMIENTO = re.compile(r"^(y |y,|¿y|entonces|eso|ese |esa |esos |esas |el mismo|la misma|tambien|ademas|"
+                            r"y si |y el|y la|y los|y las|ahora )")
+
+
+def _necesita_ia(pregunta: str, historial: list[dict]) -> bool:
+    t = _n(pregunta)
+    if RE_ANALISIS.search(t):
+        return True
+    if historial and RE_SEGUIMIENTO.match(t):
+        return True
+    return len(t.split()) > 16
+
+
+def _respuesta_segura(texto: str) -> bool:
+    """¿El motor local entendió de verdad? (no fue la búsqueda de último recurso ni un «no entendí»)."""
+    return not texto.startswith(("No entendí", "No encontré", "Esto encontré sobre", "Tuve un problema"))
 
 
 def _tools_spec() -> list[dict]:
@@ -318,32 +373,67 @@ def _tools_spec() -> list[dict]:
                         "description": t}
         out.append({"name": nombre, "description": (fn.__doc__ or nombre).strip(),
                     "input_schema": {"type": "object", "properties": props}})
+    out[-1]["cache_control"] = {"type": "ephemeral"}  # caché de prompt: herramientas + sistema se reutilizan
     return out
+
+
+def _ejecutar_herramienta(nombre: str, entrada: dict) -> str:
+    fn = HERRAMIENTAS.get(nombre, (None,))[0]
+    try:
+        datos = fn(**(entrada or {})) if fn else {"error": f"herramienta desconocida: {nombre}"}
+    except TypeError as e:
+        datos = {"error": f"parámetros inválidos: {e}"}
+    except Exception as e:  # noqa: BLE001 — se le cuenta a Claude para que intente otra vía
+        logger.warning("Herramienta %s falló: %s", nombre, e)
+        datos = {"error": str(e)}
+    return json.dumps(datos, ensure_ascii=False, default=str)[:24000]
 
 
 def _con_claude(pregunta: str, historial: list[dict]) -> str:
     import anthropic
-    client = anthropic.Anthropic(api_key=cfg.ANTHROPIC_API_KEY)
-    msgs = [{"role": m["role"], "content": m["content"]} for m in historial[-8:]] + [{"role": "user", "content": pregunta}]
-    sistema = SISTEMA.format(hoy=_f(date.today()))
-    for _ in range(5):
-        r = client.messages.create(model=cfg.MODELO_COMPLEJO, max_tokens=1500, system=sistema, tools=_tools_spec(),
-                                   messages=msgs)
+
+    client = anthropic.Anthropic(api_key=cfg.ANTHROPIC_API_KEY, max_retries=3)
+    msgs = [{"role": m["role"], "content": m["content"]} for m in historial[-10:]
+            if m.get("role") in ("user", "assistant") and isinstance(m.get("content"), str) and m["content"].strip()]
+    while msgs and msgs[0]["role"] != "user":
+        msgs.pop(0)
+    msgs.append({"role": "user", "content": pregunta})
+    sistema = [{"type": "text", "text": SISTEMA.format(hoy=_f(date.today())), "cache_control": {"type": "ephemeral"}}]
+    herramientas = _tools_spec()
+    extra = {"output_config": {"effort": cfg.IA_ESFUERZO}} if getattr(cfg, "IA_ESFUERZO", "") else {}
+    t_in = t_out = 0
+    texto_parcial = ""
+    for _ in range(12):
+        try:
+            r = client.messages.create(model=cfg.MODELO_COMPLEJO, max_tokens=8000, system=sistema, tools=herramientas,
+                                       messages=msgs, extra_body=extra or None)
+        except anthropic.BadRequestError as e:
+            if extra and "output_config" in str(e):  # modelo o SDK sin «effort»: se sigue sin él
+                extra = {}
+                continue
+            raise
+        u = getattr(r, "usage", None)
+        if u:
+            t_in += (u.input_tokens or 0) + (getattr(u, "cache_creation_input_tokens", 0) or 0)
+            t_out += u.output_tokens or 0
+        texto_parcial = "".join(b.text for b in r.content if b.type == "text").strip() or texto_parcial
         if r.stop_reason != "tool_use":
-            return "".join(b.text for b in r.content if b.type == "text").strip()
-        msgs.append({"role": "assistant", "content": r.content})
-        resultados = []
-        for b in r.content:
-            if b.type == "tool_use":
-                fn = HERRAMIENTAS.get(b.name, (None,))[0]
-                try:
-                    datos = fn(**(b.input or {})) if fn else {"error": "herramienta desconocida"}
-                except Exception as e:
-                    datos = {"error": str(e)}
-                resultados.append({"type": "tool_result", "tool_use_id": b.id,
-                                   "content": json.dumps(datos, ensure_ascii=False, default=str)[:15000]})
-        msgs.append({"role": "user", "content": resultados})
-    return "No alcancé a terminar la consulta. Intente con una pregunta más concreta."
+            _registrar_uso(pregunta, t_in, t_out)
+            return texto_parcial or "No obtuve una respuesta. Intente reformular la pregunta."
+        msgs.append({"role": "assistant", "content": r.content})  # incluye el razonamiento (thinking) tal cual
+        msgs.append({"role": "user", "content": [
+            {"type": "tool_result", "tool_use_id": b.id, "content": _ejecutar_herramienta(b.name, b.input)}
+            for b in r.content if b.type == "tool_use"]})
+    _registrar_uso(pregunta, t_in, t_out)
+    return texto_parcial or "La consulta fue muy larga. Intente con una pregunta más concreta."
+
+
+def _registrar_uso(pregunta: str, t_in: int, t_out: int) -> None:
+    try:
+        from database import registrar_accion
+        registrar_accion("chat", "asistente_ia", pregunta[:200], "EXITOSO", tokens_input=t_in, tokens_output=t_out)
+    except Exception:  # noqa: BLE001 — el registro nunca debe tumbar la respuesta
+        pass
 
 
 # ───────────────────────── Motor 2: intérprete local ─────────────────────────
@@ -356,7 +446,10 @@ AYUDA = """Puedo responderle con los datos reales de Shaki. Pruebe, por ejemplo:
 - **Revisión**: ¿cómo quedó la revisión de retención?
 - **Alertas**: alertas críticas · ¿qué alertas hay?
 - **Correos**: correos importantes · facturas que llegaron · ¿llegó algo de la DIAN?
-- **Cartera**: clientes en mora
+- **La empresa**: ¿cómo vamos? · ¿cuánta plata hay en bancos? · indicadores · ¿cuánto debemos a los bancos?
+- **Cartera y proveedores**: ¿cuánto nos deben los clientes? · ¿cuánto les debemos a los proveedores?
+- **Gastos y ventas**: ¿en qué gastamos más? · mejores clientes · ventas por mes · ¿cuánto gastamos en publicidad?
+- **Equipo**: ¿cuántos empleados hay? · ¿quién cumple años este mes? · vacaciones pendientes · exámenes vencidos
 - **Personas**: ¿cuántos años lleva Andrés Valencia? · ¿cuándo cumple años Laura? · ¿cuándo vence el contrato de Juan?
 - **Proveedores y clientes**: ¿cuánto le debemos a Codifer? · ¿cuánto nos debe Ecopetrol? · ¿cuánto le hemos pagado a Claro?
 - **Contabilidad**: ¿cuánto gastamos en publicidad? · ¿cuánto vendimos en septiembre?
@@ -402,6 +495,9 @@ def _local(pregunta: str) -> str:
             return "Con gusto. Aquí estoy si necesita algo más."
         return "¡Hola! Soy Shaki. Pregúnteme por pagos, impuestos, alertas, correos o «¿qué tengo hoy?». " \
                "Escriba **ayuda** para ver ejemplos."
+    r = _negocio(t)
+    if r:
+        return r
     r = _conocimiento(pregunta, t)
     if r:
         return r
@@ -530,6 +626,70 @@ RE_TERCERO = (r"debemos|\bdebe\b|deuda|le (hemos )?pagado|le pagamos|le compramo
 RE_CONTABLE = r"cuanto (gastamos|gasto|se gasto|hemos gastado|vendimos|vendio|facturamos|ingreso)|cuanto (nos )?cuesta"
 
 
+# Preguntas generales de negocio (sin nombre propio): finanzas, caja, deudas, cartera, gastos, ventas, equipo.
+NEGOCIO = [
+    (r"alcanza|nos da (la plata|la caja)|podemos pagar|tenemos con que pagar|hay (plata|caja) para",
+     lambda t: ad.texto_alcanza(ad.h_alcanza())),
+    (r"(debemos|deuda|obligaciones|creditos?).{0,25}(bancos?|financier)|deuda (bancaria|financiera)|creditos bancarios",
+     lambda t: ad.texto_finanzas(ad.h_finanzas(), "deuda")),
+    (r"cuanto debemos( en total)?\W*$|deudas? (de la empresa|totales?)|total (de )?(deudas|pasivos?)|\bpasivos?\b",
+     lambda t: ad.texto_finanzas(ad.h_finanzas(), "deuda")),
+    (r"indicador|liquidez|endeudamiento|prueba acida|rentabilidad|capital de trabajo|\bmargen(es)?\b",
+     lambda t: ad.texto_finanzas(ad.h_finanzas(), "indicadores")),
+    (r"(cuanta|cuanto|que) plata|plata (hay|tenemos)|saldo (en|de) (los )?(bancos?|caja|cuentas?)|"
+     r"cuanto (hay|tenemos) en (el |los |la )?(bancos?|caja|cuentas?)|caja y bancos|flujo de caja|efectivo|disponible",
+     lambda t: ad.texto_caja(ad.h_caja())),
+    (r"como (vamos|va la empresa|estamos|nos fue|va el negocio)|utilidad|perdida|ganancia|estado de resultados|"
+     r"\bp ?y ?g\b|\bbalance\b|estados? financieros?|resultados? (del ano|de la empresa)|situacion financiera",
+     lambda t: ad.texto_finanzas(ad.h_finanzas(_mes_en(t), _mes_en(t)))),
+    (r"(cuanto|que) (nos deben|debe la gente)( los clientes)?\W*$|cartera (total|vencida|de clientes|por edades)|"
+     r"clientes (nos deben|morosos|en mora|que deben)|cuentas por cobrar|cartera\W*$",
+     lambda t: ad.texto_cxc_cxp(ad.h_cuentas_por_cobrar_pagar("clientes"))),
+    (r"(cuanto )?(les |le )?debemos a (los )?proveedores|cuentas por pagar|proveedores (por pagar|pendientes|vencidos)|"
+     r"facturas (de proveedores )?(por pagar|sin pagar)",
+     lambda t: ad.texto_cxc_cxp(ad.h_cuentas_por_cobrar_pagar("proveedores"))),
+    (r"(en )?(que|donde) (gastamos|se gasta|se va la plata)( mas)?|mayores gastos|principales gastos|top (de )?gastos|"
+     r"gastos mas (altos|grandes)",
+     lambda t: ad.texto_gastos(ad.h_gastos("cuenta"))),
+    (r"a quien (le )?(pagamos|compramos) mas|principales proveedores|mayores proveedores|proveedores (mas grandes|principales)",
+     lambda t: ad.texto_gastos(ad.h_gastos("tercero"))),
+    (r"(mejores|principales|mayores) clientes|quien(es)? (nos )?compra(n)? mas|a quien(es)? (le )?vendemos mas",
+     lambda t: ad.texto_gastos(ad.h_gastos("tercero", tipo="ventas"))),
+    (r"ventas (por|de cada|mes a) mes|como (van|han ido|vamos en) (las )?ventas|evolucion de (las )?ventas",
+     lambda t: ad.texto_gastos(ad.h_gastos("mes", tipo="ventas"))),
+    (r"gastos (por|de cada|mes a) mes|evolucion de (los )?gastos",
+     lambda t: ad.texto_gastos(ad.h_gastos("mes"))),
+    (r"quien(es)? cumple|cumpleanos (del|de este|este|de) mes|proximos cumpleanos|cumpleanos\W*$",
+     lambda t: ad.texto_personal(ad.h_personal("cumpleanos"))),
+    (r"quien(es)? tiene(n)? (mas )?vacaciones|vacaciones pendientes( de todos| del equipo)?\W*$|saldo de vacaciones\W*$",
+     lambda t: ad.texto_personal(ad.h_personal("vacaciones"))),
+    (r"contratos? (que )?(vence|vencen|por vencer|a termino fijo)|vencimientos? de contratos|preavisos?\W*$",
+     lambda t: ad.texto_personal(ad.h_personal("contratos"))),
+    (r"examen(es)? (medicos?|periodicos?|vencidos?)|dotacion",
+     lambda t: ad.texto_personal(ad.h_personal("examenes"))),
+    (r"lista (de )?(empleados|personal|trabajadores)|quienes trabajan|quien trabaja (aqui|con nosotros)",
+     lambda t: ad.texto_personal(ad.h_personal("lista"))),
+    (r"cuant(os|as) (empleados|trabajadores|personas) (hay|tenemos|trabajan)|cuanta gente|tamano del equipo|"
+     r"\bplantilla\b|resumen (del )?personal|como esta el (equipo|personal)",
+     lambda t: ad.texto_personal(ad.h_personal("resumen"))),
+]
+
+
+def _mes_en(t: str) -> str | None:
+    return next((m for m in MESES if re.search(rf"\b{m}\b", t)), None)
+
+
+def _negocio(t: str) -> str | None:
+    for patron, fn in NEGOCIO:
+        if re.search(patron, t):
+            try:
+                return fn(t)
+            except Exception as e:  # noqa: BLE001
+                logger.warning("Negocio (%s): %s", patron[:30], e)
+                return None
+    return None
+
+
 def _conocimiento(pregunta: str, t: str) -> str | None:
     """Preguntas sobre una persona, un proveedor/cliente o una cuenta contable."""
     from modulos import conocimiento as co
@@ -538,6 +698,10 @@ def _conocimiento(pregunta: str, t: str) -> str | None:
             info = co.buscar_persona(pregunta)
             if info:
                 return co.responder_persona(pregunta, info)
+        if re.search(RE_CONTABLE, t) and not re.search(RE_TERCERO, t):
+            r = co.responder_contable(pregunta)  # «¿cuánto gastamos en publicidad?»: primero la cuenta contable
+            if r and not r.startswith("No encontré"):
+                return r
         if re.search(RE_TERCERO, t) or re.search(RE_CONTABLE, t):
             info = co.buscar_tercero(pregunta)
             if info:
@@ -612,15 +776,34 @@ def ia_activa() -> bool:
     return bool(k) and not k.startswith("sk-ant-xxx")
 
 
-def responder(pregunta: str, historial: list[dict] | None = None) -> str:
-    historial = historial or []
-    if ia_activa():
-        try:
-            return _con_claude(pregunta, historial)
-        except Exception as e:
-            logger.warning("Asistente con Claude falló, uso el modo local: %s", e)
+def _local_seguro(pregunta: str) -> str:
     try:
         return _local(pregunta)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.exception("Asistente local: %s", e)
         return f"Tuve un problema leyendo los datos ({e}). Intente de nuevo en un momento."
+
+
+def motor_para(pregunta: str, historial: list[dict] | None = None) -> str:
+    """«local» o «ia»: qué motor contestaría esta pregunta (para mostrarlo en el chat)."""
+    if not ia_activa():
+        return "local"
+    return "ia" if _necesita_ia(pregunta, historial or []) else "local"
+
+
+def responder(pregunta: str, historial: list[dict] | None = None) -> str:
+    """Enrutador: lo simple lo resuelve el motor local (gratis, al instante); lo analítico, lo que el motor
+    local no entiende y las preguntas de seguimiento van a Claude cuando hay clave."""
+    historial = historial or []
+    if not ia_activa():
+        return _local_seguro(pregunta)
+    local = None
+    if not _necesita_ia(pregunta, historial):
+        local = _local_seguro(pregunta)
+        if _respuesta_segura(local):
+            return local
+    try:
+        return _con_claude(pregunta, historial)
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Asistente con Claude falló, uso el modo local: %s", e)
+        return (local or _local_seguro(pregunta)) + "\n\n_(La IA no respondió en este momento; respuesta del modo local.)_"

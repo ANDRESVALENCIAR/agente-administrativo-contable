@@ -97,3 +97,14 @@ def test_corrige_servidor_por_certificado(monkeypatch):
     assert hosts["gerenciafenix@viaindustrial.com"] == "srv7.hosting.com"      # mismo dominio, mismo servidor
     assert hosts["equiposindustrialesfenix@gmail.com"] == "imap.gmail.com"
     _ = imaplib
+
+
+def test_no_se_alerta_a_si_mismo_ni_por_pie_de_pagina():
+    from modulos import buzones as b
+    assert b.clasificar("gerenciafenix@viaindustrial.com", "⚠ 2 alertas críticas nuevas en Shaki", "", [])[0] == "OTRO"
+    assert b.clasificar("x@y.com", "⚠ Alerta crítica: Juzgados y procesos", "juzgado", [])[0] == "OTRO"
+    pie = "Bancolombia S.A. Vigilado Superintendencia Financiera de Colombia"
+    assert b.clasificar("informacion@solicitudesgrupobancolombia.com.co", "Actualizamos el reglamento", pie, [])[0] != "JUDICIAL"
+    assert b.clasificar("nuntius@fiscalia.gov.co", "NUC 110016000049202527335", "Fiscalía General", [])[0] == "JUDICIAL"
+    cat, mot = b.clasificar("rappi@hello.rappi.com.co", "Notificación Juzgado 41 Civil", "", [])
+    assert cat == "JUDICIAL" and "suplantación" in mot

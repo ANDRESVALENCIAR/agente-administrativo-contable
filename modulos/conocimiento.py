@@ -12,7 +12,6 @@ Conocimiento de Shaki sobre PERSONAS y TERCEROS — para responder preguntas con
 from __future__ import annotations
 
 import re
-from datetime import date
 from typing import Any
 
 import pandas as pd
@@ -31,7 +30,7 @@ PALABRAS_VACIAS = {"cuanto", "cuantos", "cuantas", "cual", "cuales", "que", "qui
                    "debo", "plata", "dinero", "total", "mucho", "ingreso", "ingresar", "entro", "desde", "fecha", "hace",
                    "nuestra", "nuestro", "su", "sus", "ese", "esa", "este", "nomina", "salario", "gana", "sueldo",
                    "clientes", "proveedores", "mora", "cartera", "quien", "trabaja", "hemos", "cuesta", "hace", "pagos",
-                   "semana", "mes", "hoy", "manana", "nos", "nostros", "nosotras", "facturo", "facturado", "facturamos", "vendio"}
+                   "semana", "mes", "hoy", "manana", "nos", "nostros", "alcanza", "alcanzar", "podemos", "nosotras", "facturo", "facturado", "facturamos", "vendio"}
 
 
 def _p(v: float | None) -> str:
@@ -55,10 +54,21 @@ def _anios(x: float | None) -> str:
     return f"{a} año{'s' if a != 1 else ''}" + (f" y {m} mes{'es' if m != 1 else ''}" if m else "")
 
 
+# Siglas y nombres cortos con que se conoce a empresas grandes en Colombia
+ALIAS = {"emcali": "empresas municipales de cali", "epm": "empresas publicas de medellin",
+         "eaab": "empresa de acueducto y alcantarillado de bogota", "acueducto": "acueducto y alcantarillado",
+         "etb": "empresa de telecomunicaciones de bogota", "codensa": "enel colombia", "enel": "enel colombia",
+         "une": "une epm telecomunicaciones", "dian": "direccion de impuestos y aduanas nacionales",
+         "shd": "secretaria distrital de hacienda", "colpensiones": "administradora colombiana de pensiones",
+         "ecopetrol": "ecopetrol", "bavaria": "bavaria", "claro": "comunicacion celular comcel",
+         "comcel": "comunicacion celular comcel", "movistar": "colombia telecomunicaciones",
+         "tigo": "colombia movil", "davivienda": "banco davivienda", "bancolombia": "bancolombia"}
+
+
 def candidatos_texto(pregunta: str) -> str:
-    """Quita palabras de la pregunta para quedarse con el posible nombre."""
+    """Quita palabras de la pregunta para quedarse con el posible nombre (y expande siglas conocidas)."""
     pal = [w for w in re.findall(r"[a-z0-9&.]+", _n(pregunta).lower()) if w not in PALABRAS_VACIAS and len(w) > 1]
-    return " ".join(pal)
+    return " ".join(ALIAS.get(w, w) for w in pal)
 
 
 COMUNES = {"sas", "s.a.s", "ltda", "s.a", "sa", "cia", "y", "e.u", "eu", "esp", "de", "del", "la", "los"}

@@ -14,8 +14,11 @@ class Config:
 
     # Claude
     ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
-    MODELO_SIMPLE = "claude-haiku-4-5-20251001"
-    MODELO_COMPLEJO = "claude-sonnet-4-6"
+    # Modelos vigentes (se pueden cambiar en .env sin tocar el código)
+    MODELO_SIMPLE = os.getenv("MODELO_SIMPLE", "claude-haiku-5-5")
+    MODELO_COMPLEJO = os.getenv("MODELO_COMPLEJO", "claude-sonnet-5-5")
+    # Esfuerzo de razonamiento del chat con IA: low · medium · high · xhigh · max
+    IA_ESFUERZO = os.getenv("IA_ESFUERZO", "high")
 
     # Gmail
     GMAIL_USER = os.getenv("GMAIL_USER")

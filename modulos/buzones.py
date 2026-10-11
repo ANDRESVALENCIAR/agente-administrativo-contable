@@ -78,6 +78,13 @@ _R = lambda *pal: re.compile("|".join(pal), re.I)  # noqa: E731
 R_JUDICIAL = _R(r"juzgado", r"rama judicial", r"notificaci[oó]n judicial", r"\bdemanda", r"embargo", r"tutela",
                 r"despacho judicial", r"proceso ejecutivo", r"mandamiento de pago", r"superintendencia",
                 r"\bugpp\b", r"fiscal[ií]a", r"conciliaci[oó]n extrajudicial", r"citaci[oó]n para notificaci")
+# En el CUERPO solo cuentan las palabras inequívocas (los bancos ponen «Vigilado Superintendencia» al pie de todo
+# y la publicidad habla de «demanda»); las demás solo cuentan en el asunto o si escribe una entidad oficial.
+R_JUDICIAL_FUERTE = _R(r"juzgado", r"rama judicial", r"notificaci[oó]n judicial", r"despacho judicial",
+                       r"proceso ejecutivo", r"mandamiento de pago", r"auto admisorio", r"acci[oó]n de tutela",
+                       r"\b\d{23}\b", r"citaci[oó]n para notificaci")
+R_DOM_OFICIAL = re.compile(r"(\.gov\.co|ramajudicial|fiscalia|supersociedades|superfinanciera|supersalud|ugpp|"
+                           r"procuraduria|contraloria|personeria)\b", re.I)
 R_ACTUACION = _R(r"requerimiento", r"emplazamiento", r"pliego de cargos", r"liquidaci[oó]n oficial",
                  r"sanci[oó]n", r"cobro coactivo", r"mandamiento", r"notificaci[oó]n electr[oó]nica",
                  r"acto administrativo", r"auto de", r"resoluci[oó]n", r"inexactitud", r"omis[oó]")
@@ -100,15 +107,38 @@ R_PUBLI = _R(r"unsubscribe", r"darse de baja", r"cancelar suscripci", r"newslett
              r"promoci[oó]n", r"descuento", r"oferta especial", r"black friday", r"no-?reply@.*(news|promo|marketing)")
 
 
+# Avisos que manda el propio Shaki: si se vuelven a leer en los buzones no deben generar alertas
+# (si no, una alerta crítica genera un correo, el correo otra alerta, y así sin fin).
+R_PROPIO = re.compile(r"^\W*(⚠\s*)?(alerta cr[ií]tica:|\d+ alertas cr[ií]ticas nuevas en shaki|resumen de alertas\s*·)"
+                      r"|de shaki\s*·\s*eif|enviado por shaki", re.I)
+
+
+def es_de_shaki(remitente: str, asunto: str, cuerpo: str = "") -> bool:
+    return bool(R_PROPIO.search(asunto or "") or R_PROPIO.search((cuerpo or "")[:600])
+                or re.search(r"aviso autom[aá]tico de shaki", cuerpo or "", re.I)
+                or re.search(r"\bshaki\b", (remitente or ""), re.I))
+
+
 def clasificar(remitente: str, asunto: str, cuerpo: str, adjuntos: list[str]) -> tuple[str, str]:
     """Devuelve (categoria, motivo). Reglas en orden de gravedad."""
     rem = (remitente or "").lower()
     asu = asunto or ""
     txt = f"{asu}\n{(cuerpo or '')[:4000]}"
+    if es_de_shaki(remitente, asu, cuerpo):
+        return "OTRO", "aviso enviado por el propio Shaki"
     adj = " ".join(adjuntos).lower()
-    if R_JUDICIAL.search(txt) or rem.endswith(("ramajudicial.gov.co", "cendoj.ramajudicial.gov.co")):
+    oficial = bool(R_DOM_OFICIAL.search(rem.split("@")[-1]))
+    m_asu = R_JUDICIAL.search(asu)
+    if rem.endswith("ramajudicial.gov.co") or (oficial and R_JUDICIAL.search(txt)):
         m = R_JUDICIAL.search(txt)
         return "JUDICIAL", f"menciona «{m.group(0)}»" if m else "remitente de la Rama Judicial"
+    if m_asu:
+        aviso = "" if oficial or not R_PUBLI.search(txt) and not re.search(r"(news|promo|marketing|hello|noticias|novedades)",
+                                                                            rem) else " · ⚠ remitente comercial: posible suplantación"
+        return "JUDICIAL", f"menciona «{m_asu.group(0)}»{aviso}"
+    m = R_JUDICIAL_FUERTE.search(txt)
+    if m and not R_PUBLI.search(txt):
+        return "JUDICIAL", f"menciona «{m.group(0)}»"
     es_dian = "dian.gov.co" in rem or re.search(r"\bdian\b", asu, re.I)
     es_shd = any(d in rem for d in ("haciendabogota.gov.co", "shd.gov.co")) or re.search(
         r"hacienda (distrital|bogot)|secretar[ií]a distrital de hacienda", asu, re.I)
@@ -195,6 +225,23 @@ def inicializar() -> None:
             conn.execute("INSERT OR IGNORE INTO correo_buzones (email, imap_host, imap_port, usuario) VALUES (?,?,?,?)",
                          (e, h, p, e))
         conn.execute("INSERT INTO correo_meta(clave, valor) VALUES ('sembrado', '1')")
+        conn.commit()
+    if not conn.execute("SELECT valor FROM correo_meta WHERE clave='judicial_v2'").fetchone():
+        # reclasifica con las reglas nuevas los «judiciales» que solo mencionaban la palabra en el pie de página
+        filas = conn.execute("SELECT id, remitente, asunto, resumen, adjuntos FROM correo_bandeja "
+                             "WHERE categoria='JUDICIAL'").fetchall()
+        for cid, rem, asu, res, adj in filas:
+            cat, mot = clasificar(rem or "", asu or "", res or "", [a for a in (adj or "").split("|") if a])
+            conn.execute("UPDATE correo_bandeja SET categoria=?, motivo=? WHERE id=?", (cat, mot, cid))
+        conn.execute("INSERT INTO correo_meta(clave, valor) VALUES ('judicial_v2', '1')")
+        conn.commit()
+    if not conn.execute("SELECT valor FROM correo_meta WHERE clave='propios_v1'").fetchone():
+        # Corrige los avisos de Shaki que ya se habían leído como «judiciales»: así sus alertas se cierran solas
+        conn.execute("UPDATE correo_bandeja SET categoria='OTRO', motivo='aviso enviado por el propio Shaki' "
+                     "WHERE categoria != 'OTRO' AND (asunto LIKE '%alertas críticas nuevas en Shaki%' "
+                     "OR asunto LIKE '%Alerta crítica:%' OR asunto LIKE 'Resumen de alertas%' "
+                     "OR remitente_nombre LIKE '%Shaki%')")
+        conn.execute("INSERT INTO correo_meta(clave, valor) VALUES ('propios_v1', '1')")
         conn.commit()
     conn.close()
 

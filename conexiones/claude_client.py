@@ -197,7 +197,7 @@ def llamar_claude(
         tokens_input=tokens_in,
         tokens_output=tokens_out,
     )
-    texto = respuesta.content[0].text
+    texto = "".join(getattr(b, "text", "") for b in respuesta.content if getattr(b, "type", "") == "text")
     if usar_cache:
         _cache_set(clave_cache, texto)
     return texto
