@@ -155,6 +155,19 @@ class Libro:
                 out[real] = self._cache[real]
         return out
 
+    def hoja_con(self, requeridas: tuple[str, ...], filas_max: int = 40) -> list[tuple] | None:
+        """Primera hoja que tenga una fila de encabezados con todas las palabras `requeridas` (sirve para
+        archivos exportados de World Office u otro programa, donde la hoja se llama distinto)."""
+        req = [norm(r) for r in requeridas]
+        for real in self.wb.sheetnames:
+            if real not in self._cache:
+                self._cache[real] = _filas_hoja(self.wb[real])
+            for f in self._cache[real][:filas_max]:
+                cab = [norm(x) for x in f]
+                if all(any(r == c or c.startswith(r) for c in cab) for r in req):
+                    return self._cache[real]
+        return None
+
     def tabla(self, nombre: str, requeridas: tuple[str, ...]) -> list[dict[str, Any]]:
         """Hoja tipo tabla: localiza la fila de encabezados que contiene `requeridas`."""
         filas = self.hoja(nombre) or []
@@ -179,16 +192,23 @@ class Libro:
 
     def prueba(self) -> dict[str, dict[str, float]]:
         """Balance de prueba: {cuenta: {saldo_anterior, debitos, creditos, nuevo_saldo, nombre}}."""
-        filas = self.hoja("Prueba") or []
+        filas = (self.hoja("Prueba") or self.hoja_con(("debitos", "creditos")) or self.hoja_con(("debito", "credito"))
+                 or self.hoja_con(("debe", "haber")) or [])
         out: dict[str, dict[str, float]] = {}
         icol = None
         for f in filas:
             cab = [norm(x) for x in f]
             if icol is None:
-                if "debitos" in cab and "creditos" in cab:
-                    icol = {k: cab.index(k) for k in ("debitos", "creditos")}
-                    icol["anterior"] = cab.index("saldo anterior") if "saldo anterior" in cab else icol["debitos"] - 1
-                    icol["nuevo"] = cab.index("nuevo saldo") if "nuevo saldo" in cab else icol["creditos"] + 1
+                def col(*opciones: str) -> int | None:
+                    return next((cab.index(o) for o in opciones if o in cab), None)
+                deb, cre = col("debitos", "debito", "debe", "movimiento debito"), col("creditos", "credito", "haber",
+                                                                                      "movimiento credito")
+                if deb is not None and cre is not None:
+                    icol = {"debitos": deb, "creditos": cre}
+                    ant = col("saldo anterior", "saldo inicial", "saldo ant")
+                    nue = col("nuevo saldo", "saldo final", "saldo actual", "saldo nuevo")
+                    icol["anterior"] = ant if ant is not None else deb - 1
+                    icol["nuevo"] = nue if nue is not None else cre + 1
                 continue
             # columnas típicas: nivel (número), cuenta (texto), descripción…
             cuenta = next((x.strip() for x in f[:3] if isinstance(x, str) and re.fullmatch(r"\d{1,12}", x.strip())), None)
@@ -202,13 +222,15 @@ class Libro:
                 v = f[i] if i < len(f) else 0
                 return float(v) if _es_num(v) else 0.0
             nombre = next((str(x) for x in f[:4] if isinstance(x, str) and not re.fullmatch(r"\d+", x.strip())), "")
+            if cuenta in out:  # algunas hojas repiten un bloque más abajo (otro corte): manda el primero
+                continue
             out[cuenta] = {"saldo_anterior": num(icol["anterior"]), "debitos": num(icol["debitos"]),
                            "creditos": num(icol["creditos"]), "nuevo_saldo": num(icol["nuevo"]), "nombre": nombre}
         return out
 
     def auxiliar(self, prefijos: tuple[str, ...]) -> list[dict[str, Any]]:
         """Movimientos del auxiliar de las cuentas que empiezan por `prefijos`."""
-        filas = self.hoja("Auxiliar") or []
+        filas = self.hoja("Auxiliar") or self.hoja_con(("cuenta", "fecha")) or []
         cab = None
         out = []
         for f in filas:

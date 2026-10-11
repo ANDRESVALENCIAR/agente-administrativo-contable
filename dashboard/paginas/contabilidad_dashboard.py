@@ -241,7 +241,7 @@ def _tab_balance(b: dict) -> None:
     fig.update_layout(barmode="relative", bargap=0.35)
     fig.update_xaxes(tickformat="~s", tickprefix="$")
     st.plotly_chart(_layout(fig, 320), width="stretch")
-    st.markdown(f'<div class="gd-c">Azul: lo que tiene · naranja: lo que debe · verde: lo de los socios'
+    st.markdown('<div class="gd-c">Azul: lo que tiene · naranja: lo que debe · verde: lo de los socios'
                 + (f' (ya descontada la pérdida del año de {_p(-b["resultado"])})' if b["resultado"] < 0 else "")
                 + '.</div>', unsafe_allow_html=True)
 

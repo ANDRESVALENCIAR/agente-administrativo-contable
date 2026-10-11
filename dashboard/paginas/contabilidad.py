@@ -15,12 +15,17 @@ from dashboard.utils.pestanas import abierta, pestanas
 def render() -> None:
     """Renderiza módulo contable."""
     st.markdown("## Contabilidad")
-    t_tab, t_inf = pestanas(["Tablero", "Informe y conciliación"], key="ct_tabs")
+    t_tab, t_rev, t_inf = pestanas(["Tablero", "Revisión contable", "Informe y conciliación"], key="ct_tabs")
     with t_tab:
         if abierta(t_tab):
             from dashboard.paginas import contabilidad_dashboard
 
             contabilidad_dashboard.render()
+    with t_rev:
+        if abierta(t_rev):
+            from dashboard.paginas import contabilidad_revision
+
+            contabilidad_revision.render()
     with t_inf:
         if abierta(t_inf):
             _herramientas()

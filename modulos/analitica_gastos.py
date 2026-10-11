@@ -40,7 +40,8 @@ def libros_disponibles() -> list[Path]:
     rutas: list[Path] = []
     for base in (CARPETA_SUBIDAS, RAIZ / "revisiones"):
         if base.exists():
-            rutas += [p for p in base.rglob("*") if p.suffix.lower() in (".xlsx", ".xlsm") and not p.name.startswith("~$")]
+            rutas += [p for p in base.rglob("*") if p.suffix.lower() in (".xlsx", ".xlsm") and not p.name.startswith("~$")
+                      and "revision_contable" not in p.parts and "revision" not in p.parent.name]
     return sorted(rutas, key=lambda p: p.stat().st_mtime, reverse=True)
 
 
