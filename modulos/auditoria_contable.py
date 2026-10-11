@@ -33,13 +33,13 @@ NIVELES = ["CRITICO", "ALTO", "MEDIO", "BAJO", "OK"]
 # Cada hallazgo resta un porcentaje de lo que queda (así muchos detalles menores no llevan la nota a cero)
 PESO = {"CRITICO": 0.20, "ALTO": 0.08, "MEDIO": 0.03, "BAJO": 0.01, "OK": 0.0}
 # Hallazgos que no son errores de registro sino riesgos de cumplimiento o de caja (no bajan la confiabilidad)
-RIESGO = {"D1", "D2", "E3", "C2", "F2", "T3"}
+RIESGO = {"D1", "D2", "E3", "C2", "F2", "T3", "K1"}
 MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre",
          "noviembre", "diciembre"]
 AREAS = {"A": "Integridad del balance", "B": "Naturaleza de los saldos", "C": "Cuentas transitorias y anticipos",
          "D": "Impuestos", "E": "Nómina y prestaciones", "F": "Activos fijos", "G": "Auxiliar contable",
          "H": "Estados financieros", "I": "Conciliación bancaria", "T": "Saldos por tercero",
-         "J": "Continuidad entre periodos"}
+         "J": "Continuidad entre periodos", "K": "Variaciones entre periodos"}
 
 # Cuentas que por definición tienen saldo contrario a su clase (no son error)
 CONTRARIAS = ("1592", "1597", "1598", "1399", "1499", "1299", "1699", "1798", "1899", "1999", "240802", "240810",
@@ -915,27 +915,44 @@ def revisar_eeff_libro(r: Revision, libro, pr: dict, corte: date | None) -> None
               [{"rubro": f["rotulo"][:60], "valor": f["valores"][1]} for f in neg])
 
 
-def continuidad(r: Revision, pr_mes: dict, pr_siguiente: dict, etiqueta: str) -> None:
-    """El saldo final de un mes debe ser el saldo inicial del mes siguiente."""
-    difs = [{"cuenta": c, "nombre": _nombre(pr_mes, c), "saldo_final_mes": _s(pr_mes, c),
-             "saldo_inicial_siguiente": _s(pr_siguiente, c, "saldo_anterior"),
-             "diferencia": _s(pr_siguiente, c, "saldo_anterior") - _s(pr_mes, c)}
-            for c in pr_mes if len(c) <= 4 and c in pr_siguiente
-            and abs(_s(pr_siguiente, c, "saldo_anterior") - _s(pr_mes, c)) > 1]
+def continuidad(r: Revision, pr_antes: dict, pr_despues: dict, antes: str, despues: str) -> None:
+    """El saldo final de un corte debe ser el saldo inicial del corte siguiente."""
+    difs = [{"cuenta": c, "nombre": _nombre(pr_antes, c), "saldo_final": _s(pr_antes, c),
+             "saldo_inicial_siguiente": _s(pr_despues, c, "saldo_anterior"),
+             "diferencia": _s(pr_despues, c, "saldo_anterior") - _s(pr_antes, c)}
+            for c in pr_antes if len(c) <= 4 and c in pr_despues
+            and abs(_s(pr_despues, c, "saldo_anterior") - _s(pr_antes, c)) > 1]
     if difs:
-        r.add("J", "J1", f"El saldo inicial de {etiqueta} no es el saldo final de este corte ({len(difs)} cuentas)", "ALTO",
-              "Después de cerrar el mes se modificaron registros (o el archivo siguiente es de otra versión): los "
-              "estados financieros entregados ya no coinciden con la contabilidad actual.", None, difs[:30],
+        r.add("J", "J1", f"El saldo inicial de {despues} no es el saldo final de {antes} ({len(difs)} cuentas)", "ALTO",
+              f"Después de cerrar {antes} se modificaron registros (o los archivos son de versiones distintas): los "
+              "informes de ese cierre ya no coinciden con la contabilidad actual.", None, difs[:30],
               "Preguntar al contador qué ajustes hizo después del cierre y reexpedir los estados si cambian.")
     else:
-        r.ok("J", "J1", f"El saldo inicial de {etiqueta} = saldo final de este corte")
+        r.ok("J", "J1", f"El saldo inicial de {despues} = saldo final de {antes}")
+
+
+def variaciones(r: Revision, pr_antes: dict, pr_despues: dict, antes: str, despues: str) -> None:
+    """Análisis horizontal: cuentas (4 dígitos) que cambiaron mucho entre los dos cortes."""
+    filas = []
+    for c in pr_despues:
+        if len(c) != 4 or c[0] not in "123":
+            continue
+        a, d = _s(pr_antes, c), _s(pr_despues, c)
+        if abs(d - a) >= 20e6 and (a == 0 or abs(d / a - 1) >= 0.3):
+            filas.append({"cuenta": c, "nombre": _nombre(pr_despues, c), "antes": a, "despues": d, "diferencia": d - a,
+                          "variacion": "nueva" if a == 0 else f"{(d / a - 1) * 100:+.0f}%"})
+    if filas:
+        filas.sort(key=lambda x: -abs(x["diferencia"]))
+        r.add("K", "K1", f"{len(filas)} cuentas del balance cambiaron más de 30 % entre {antes} y {despues}", "BAJO",
+              "No es un error: son los movimientos grandes que el contador debería poder explicar (análisis horizontal).",
+              None, filas[:25])
 
 
 # ───────────────────────── Orquestador ─────────────────────────
 
 def revisar(prueba: dict, auxiliar: pd.DataFrame | None = None, corte: date | None = None,
             eeff_libro=None, conciliacion: dict | None = None, empresa: str = "", fuentes: list[str] | None = None,
-            terceros: pd.DataFrame | None = None, siguiente: tuple[dict, str] | None = None) -> dict[str, Any]:
+            terceros: pd.DataFrame | None = None, siguiente: tuple | None = None) -> dict[str, Any]:
     r = Revision()
     mes = corte.month if corte else None
     if prueba:
@@ -954,8 +971,9 @@ def revisar(prueba: dict, auxiliar: pd.DataFrame | None = None, corte: date | No
         revisar_eeff_libro(r, eeff_libro, prueba or {}, corte)
     if conciliacion:
         _conciliacion(r, prueba or {}, conciliacion, corte)
-    if siguiente and prueba:
-        continuidad(r, prueba, siguiente[0], siguiente[1])
+    if siguiente:  # (balance anterior, balance posterior, «agosto», «septiembre»)
+        continuidad(r, *siguiente)
+        variaciones(r, *siguiente)
     for h in r.hallazgos:
         h["tipo"] = "riesgo" if h["codigo"] in RIESGO else "registro"
     cuenta = Counter(h["nivel"] for h in r.hallazgos)
@@ -1045,6 +1063,18 @@ def _corte_de(libro, ruta) -> date | None:
                         except ValueError:
                             pass
     m = _mes_en(ruta.stem)
+    if not m:  # p. ej. la liquidación del contador trae «Sep» en el encabezado de la hoja Prueba
+        for h in libro.hojas:
+            if "prueba" in h.lower():
+                for f in (libro.hoja(h) or [])[:6]:
+                    for x in f:
+                        if isinstance(x, str) and len(x.strip()) <= 12 and _mes_en(x):
+                            m = _mes_en(x)
+                            break
+                    if m:
+                        break
+            if m:
+                break
     if m:
         hoy = date.today()
         anio = hoy.year if m <= hoy.month else hoy.year - 1
@@ -1052,8 +1082,12 @@ def _corte_de(libro, ruta) -> date | None:
     return None
 
 
-def revisar_archivos(rutas: list, empresa: str = "EQUIPOS INDUSTRIALES FÉNIX S.A.S.", comparar_con_contador: bool = True
-                     ) -> dict[str, Any]:
+def _etiqueta(corte: date | None) -> str:
+    return f"{MESES[corte.month - 1]} {corte.year}" if corte else "el otro corte"
+
+
+def revisar_archivos(rutas: list, empresa: str = "EQUIPOS INDUSTRIALES FÉNIX S.A.S.", comparar_con_contador: bool = True,
+                     otro_balance=None) -> dict[str, Any]:
     """Detecta qué trae cada archivo (balance de prueba del mes, auxiliar, saldos por tercero, estados financieros,
     conciliación) y revisa todo junto."""
     from pathlib import Path
@@ -1081,16 +1115,7 @@ def revisar_archivos(rutas: list, empresa: str = "EQUIPOS INDUSTRIALES FÉNIX S.
                 eeff_libro = libro
                 que.append("estados financieros")
             # balance del mes: hoja «B.Prueba <Mes>» o «Prueba»; si el archivo de balance trae varias, la del mes
-            pr = {}
-            for h in libro.hojas:
-                nh = norm(h)
-                if re.search(r"prueba", nh) and not re.search(r"\d{4}|ene|2025|acum", nh.replace("prueba", "")):
-                    filas_h = libro.hoja(h)
-                    if filas_h:
-                        libro._cache["__prueba__"] = filas_h
-                        pr = _prueba_de_filas(libro, h)
-                        break
-            pr = pr or libro.prueba()
+            pr = _prueba_mes(libro)
             if pr and (not prueba or not es_eeff):  # el balance suelto manda sobre la copia dentro de los EEFF
                 prueba = pr
                 que.append("balance de prueba")
@@ -1111,12 +1136,24 @@ def revisar_archivos(rutas: list, empresa: str = "EQUIPOS INDUSTRIALES FÉNIX S.
         aux = aux[pd.to_datetime(aux["fecha"], errors="coerce") <= pd.Timestamp(corte)]
     # continuidad: si el libro del contador cargado en Shaki es del mes siguiente, su saldo inicial debe ser este cierre
     siguiente = None
-    if comparar_con_contador and prueba and corte:
+    if otro_balance and prueba:
+        lb = Libro(Path(otro_balance))
+        abiertos.append(lb)
+        otro = _prueba_mes(lb)
+        c_otro = _corte_de(lb, Path(otro_balance))
+        if otro:
+            fuentes.append(f"{Path(otro_balance).name} (balance de {_etiqueta(c_otro)}, para comparar)")
+            if c_otro and corte and c_otro < corte:
+                siguiente = (otro, prueba, _etiqueta(c_otro), _etiqueta(corte))
+            else:
+                siguiente = (prueba, otro, _etiqueta(corte), _etiqueta(c_otro))
+    if siguiente is None and comparar_con_contador and prueba and corte:
         try:
             from modulos import analitica_gastos as ag
             d = ag.cargar()
             if d and d.get("prueba") and d["mov"]["fecha"].max().month == (corte.month % 12) + 1:
-                siguiente = (d["prueba"], f"{MESES[corte.month % 12]} (libro del contador cargado en Shaki)")
+                siguiente = (prueba, d["prueba"], _etiqueta(corte),
+                             f"{MESES[corte.month % 12]} (libro del contador cargado en Shaki)")
         except Exception:  # noqa: BLE001
             pass
     try:
@@ -1124,6 +1161,19 @@ def revisar_archivos(rutas: list, empresa: str = "EQUIPOS INDUSTRIALES FÉNIX S.
     finally:
         for lb in abiertos:
             lb.cerrar()
+
+
+def _prueba_mes(libro) -> dict:
+    """Balance del mes: hoja «B.Prueba <Mes>» o «Prueba» (no las acumuladas ni las del año anterior)."""
+    from modulos.revision_lectores import norm
+    for h in libro.hojas:
+        nh = norm(h)
+        if re.search(r"prueba", nh) and not re.search(r"\d{4}|ene|acum", nh.replace("prueba", "")):
+            if libro.hoja(h):
+                pr = _prueba_de_filas(libro, h)
+                if pr:
+                    return pr
+    return libro.prueba()
 
 
 def _prueba_de_filas(libro, hoja: str) -> dict:

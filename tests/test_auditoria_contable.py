@@ -113,7 +113,7 @@ def test_terceros_y_continuidad():
                         {"cuenta": "220501", "nit": 2, "tercero": "P2", "saldo": -50e6 + 5e6}])
     sig = balance_sano()
     sig["1"]["saldo_anterior"] += 286000
-    r = au.revisar(pr, terceros=ter, siguiente=(sig, "septiembre"))
+    r = au.revisar(pr, terceros=ter, siguiente=(pr, sig, "agosto", "septiembre"))
     cod = codigos(r)
     assert cod["T1"] == "ALTO"   # 650 − 45 = 605 ≠ 600
     assert cod["J1"] == "ALTO"

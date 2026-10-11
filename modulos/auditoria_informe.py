@@ -22,10 +22,14 @@ ETIQUETAS = {"cuenta": "Cuenta", "nombre": "Nombre", "saldo": "Saldo", "saldo_an
              "ley": "% ley", "gasto_del_mes": "Gasto del mes", "provision_del_mes": "Provisión del mes",
              "debia_pagarse": "Debía pagarse", "pagos_del_mes": "Pagos del mes", "rubro": "Rubro",
              "estados_financieros": "Estados financieros", "balance_de_prueba": "Balance de prueba", "cuadra": "",
+             "saldo_final": "Saldo final", "saldo_inicial_siguiente": "Saldo inicial siguiente", "antes": "Antes",
+             "despues": "Después", "variacion": "Variación", "tercero": "Tercero", "suma_terceros": "Suma por tercero",
+             "explicacion": "Explicación", "hoja": "Hoja", "texto": "Texto", "error": "Error", "fila": "Fila",
              "digito": "Dígito", "observado": "Observado", "esperado": "Esperado (Benford)", "n": "Registros"}
 MONEDA = {"saldo", "saldo_anterior", "calculado", "reportado", "suma_subcuentas", "registrado_directo_en_la_mayor",
           "auxiliar", "balance", "diferencia", "valor", "causado_mes", "base", "gasto_del_mes", "provision_del_mes",
-          "pagos_del_mes", "estados_financieros", "balance_de_prueba"}
+          "pagos_del_mes", "estados_financieros", "balance_de_prueba", "saldo_final", "saldo_inicial_siguiente", "antes",
+          "despues", "suma_terceros"}
 
 CSS = CSS_BASE + """
 .score{display:flex;gap:22px;align-items:center;margin-top:16px}.ring{width:96px;height:96px;border-radius:50%;

@@ -26,8 +26,8 @@ border-radius:99px;margin-right:8px;text-transform:uppercase}
 
 
 @st.cache_data(show_spinner=False, max_entries=8)
-def _revisar(firma: str, rutas: tuple[str, ...]) -> dict:
-    return au.revisar_archivos(list(rutas))
+def _revisar(firma: str, rutas: tuple[str, ...], otro: str | None = None) -> dict:
+    return au.revisar_archivos(list(rutas), otro_balance=otro)
 
 
 def _guardar(archivos) -> list[Path]:
@@ -35,6 +35,8 @@ def _guardar(archivos) -> list[Path]:
     rutas = []
     for a in archivos:
         ruta = CARPETA / Path(a.name).name
+        if ruta.exists() and ruta.read_bytes() != a.getvalue():  # mismo nombre, otro contenido: no se pisa
+            ruta = CARPETA / f"{ruta.stem}_{hashlib.md5(a.getvalue()).hexdigest()[:6]}{ruta.suffix}"
         ruta.write_bytes(a.getvalue())
         rutas.append(ruta)
     return rutas
@@ -50,25 +52,36 @@ def _firma(rutas: list[Path]) -> str:
 
 def render() -> None:
     st.markdown(CSS, unsafe_allow_html=True)
-    st.markdown('<div class="gd-h">Revisión contable automática</div><div class="gd-c">Suba los archivos del cierre '
-                '(balance de prueba con auxiliar y terceros, estados financieros NIIF, conciliación bancaria). Shaki los '
-                'revisa con más de 30 reglas contables fijas —sin inteligencia artificial— y arma un informe '
-                'verificable cifra por cifra.</div>', unsafe_allow_html=True)
-    subidos = st.file_uploader("Archivos del cierre (Excel)", type=["xlsx", "xlsm"], accept_multiple_files=True,
-                               key="rc_up")
-    c1, c2 = st.columns([1, 2.4])
-    if subidos and c1.button("Revisar archivos", type="primary", width="stretch"):
-        st.session_state["rc_rutas"] = [str(r) for r in _guardar(subidos)]
-    previos = sorted(CARPETA.glob("*.xls*"), key=lambda p: p.stat().st_mtime, reverse=True) if CARPETA.exists() else []
-    if not st.session_state.get("rc_rutas") and previos:
-        c2.caption("Archivos guardados de la última revisión: " + ", ".join(p.name for p in previos[:4]))
-        if c1.button("Revisar los últimos archivos", width="stretch"):
-            st.session_state["rc_rutas"] = [str(p) for p in previos[:4]]
-    rutas = [Path(r) for r in st.session_state.get("rc_rutas", []) if Path(r).exists()]
-    if not rutas:
+    st.markdown('<div class="gd-h">Revisión contable automática</div><div class="gd-c">Suba los archivos del cierre en '
+                'su casilla y presione «Generar informe». Shaki los revisa con más de 40 reglas contables fijas —sin '
+                'inteligencia artificial— y arma un informe verificable cifra por cifra.</div>', unsafe_allow_html=True)
+    tipos = ["xlsx", "xlsm"]
+    c1, c2 = st.columns(2)
+    f_bal = c1.file_uploader("1 · Balance de prueba del mes (obligatorio)", type=tipos, key="rc_bal",
+                             help="El Excel de World Office con el balance del mes; si trae auxiliar y terceros, también "
+                                  "se revisan.")
+    f_eeff = c2.file_uploader("2 · Estados financieros NIIF (opcional)", type=tipos, key="rc_eeff")
+    c3, c4 = st.columns(2)
+    f_otro = c3.file_uploader("3 · Otro balance de prueba para comparar (opcional)", type=tipos, key="rc_otro",
+                              help="El del mes anterior o el siguiente: Shaki verifica que los saldos empalmen y muestra "
+                                   "las variaciones grandes.")
+    f_conc = c4.file_uploader("4 · Conciliación bancaria (opcional)", type=tipos, key="rc_conc")
+    b1, b2 = st.columns([1, 2.4])
+    if b1.button("Generar informe", type="primary", width="stretch", disabled=f_bal is None):
+        rol = {}
+        for clave, f in (("balance", f_bal), ("eeff", f_eeff), ("otro", f_otro), ("conciliacion", f_conc)):
+            if f is not None:
+                rol[clave] = str(_guardar([f])[0])
+        st.session_state["rc_roles"] = rol
+    if f_bal is None and not st.session_state.get("rc_roles"):
+        b2.caption("Suba al menos el balance de prueba para generar el informe.")
+    roles = {k: v for k, v in st.session_state.get("rc_roles", {}).items() if Path(v).exists()}
+    if "balance" not in roles:
         return
+    rutas = [Path(roles[k]) for k in ("balance", "eeff", "conciliacion") if k in roles]
+    otro = roles.get("otro")
     with st.spinner("Revisando cifra por cifra…"):
-        r = _revisar(_firma(rutas), tuple(str(x) for x in rutas))
+        r = _revisar(_firma(rutas + ([Path(otro)] if otro else [])), tuple(str(x) for x in rutas), otro)
 
     color = {"Confiable": "#4ADE80", "Confiable con salvedades": "#c98500"}.get(r["veredicto"], "#e66767")
     cn = r["conteo"]
