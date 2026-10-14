@@ -138,6 +138,23 @@ def render_comparador() -> None:
         '<div class="ca-step-h" style="color:#fff"><span class="ca-num" style="color:#FFAD03">03</span> Cruce, informe Excel y archivo mensual</div></div>',
         unsafe_allow_html=True,
     )
+    if st.button("⚡ Liquidar comisiones con estos dos archivos (todo de una)", type="primary",
+                 disabled=not (f_via and f_cont), key="btn_liquidar_todo",
+                 help="Carga VIA y Contabilidad, cruza por SFE, guarda en el histórico y avisa por correo."):
+        from modulos import comisiones_auto as ca
+        try:
+            r_via = ca.guardar_adjunto(f_via.name, f_via.getvalue())
+            r_cont = ca.guardar_adjunto(f_cont.name if ca.tipo_archivo(f_cont.name) == "cont"
+                                        else f"RECAUDO_CONTABILIDAD_{f_cont.name}", f_cont.getvalue())
+            per = ca.periodo_de(f_via.name) or ca.periodo_de(f_cont.name) or periodo
+            if r_via is None:
+                r_via = ca.guardar_adjunto(f"RECAUDO_VIA_{f_via.name}", f_via.getvalue())
+            res = ca.liquidar(r_via, r_cont, per, origen="manual")
+            (st.success if res["estado"] == "liquidado" else st.info)(res["mensaje"])
+        except Exception as e:
+            st.error(f"No pude liquidar: {e}")
+    _ultimas_auto()
+
     ready = st.session_state.cmp_via and st.session_state.cmp_cont
     b1, b2, b3 = st.columns(3)
     with b1:
@@ -220,6 +237,27 @@ def render_comparador() -> None:
                 incrustar.html(f.read(), height=900, scrolling=True)
         else:
             st.info("Use el flujo de arriba; el HTML standalone se genera en dashboard/static/.")
+
+
+def _ultimas_auto() -> None:
+    """Liquidaciones que Shaki hizo solo (correo «liquidar comisiones») o con el botón de arriba."""
+    try:
+        from modulos import comisiones_auto as ca
+        filas = ca.ultimas(4)
+    except Exception:
+        return
+    if not filas:
+        st.caption("Automático: cuando llegue el correo «liquidar comisiones» con RECAUDO_VIA y RECAUDO_CONTABILIDAD, "
+                   "Shaki las liquida solo y avisa.")
+        return
+    for f in filas:
+        r = f["resumen"]
+        st.markdown(
+            f'<div class="ca-step" style="padding:10px 14px"><b style="color:#3ddc97">✓ Liquidadas · '
+            f'{ca.nombre_periodo(f["periodo"]).capitalize()}</b> <span style="opacity:.7">· {str(f["fecha"])[:16]} · '
+            f'{f["origen"]}</span><br><span style="font-size:13px">Recaudo {ca._pesos(r.get("recaudo_total", 0))} · '
+            f'{r.get("recibos", 0)} recibos · {r.get("coincidencias", 0)} SFE cruzan · {r.get("solo_via", 0)} solo VIA · '
+            f'aviso: {f["aviso"]}</span></div>', unsafe_allow_html=True)
 
 
 def render_historial() -> None:

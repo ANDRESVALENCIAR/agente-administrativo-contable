@@ -481,8 +481,26 @@ def _guardar(b: dict[str, Any], uid: int, msg: email.message.Message) -> int:
     except Exception:
         fecha = datetime.now()
     cuerpo, adjuntos = _texto(msg)
+    try:
+        _comisiones_desde_correo(msg, rem, asunto, cuerpo, fecha)
+    except Exception as e:
+        logger.warning("Comisiones desde correo: %s", e)
     return guardar_correo(b["id"], uid, msg.get("Message-ID") or f"uid-{uid}", fecha, rem, nombre, asunto, cuerpo,
                           adjuntos)
+
+
+def _comisiones_desde_correo(msg: email.message.Message, rem: str, asunto: str, cuerpo: str, fecha: datetime) -> None:
+    """Guarda los adjuntos RECAUDO_VIA / RECAUDO_CONTABILIDAD y anota la orden «liquidar comisiones»."""
+    from modulos import comisiones_auto as ca
+
+    if es_de_shaki(rem, asunto, cuerpo) or not ca.remitente_autorizado(rem):
+        return
+    for parte in msg.walk():
+        nombre = _dec(parte.get_filename()) if parte.get_filename() else ""
+        if nombre and ca.tipo_archivo(nombre):
+            ca.guardar_adjunto(nombre, parte.get_payload(decode=True) or b"", fecha.date())
+    if ca.es_orden_liquidar(asunto, cuerpo):
+        ca.registrar_orden(rem, asunto, msg.get("Message-ID") or "")
 
 
 def guardar_correo(buzon_id: int, uid: int | None, message_id: str, fecha: datetime, remitente: str, nombre: str,
@@ -506,13 +524,19 @@ def leer_todos() -> dict[str, Any]:
     """Tarea programada: lee todos los buzones activos y re-escanea alertas si hubo correos nuevos."""
     res = [leer_buzon(b) for b in listar_buzones() if b["activo"]]
     total = sum(r["nuevos"] for r in res)
+    try:  # «liquidar comisiones»: si llegó la orden y están los dos archivos, liquida y avisa
+        from modulos import comisiones_auto
+        comisiones = comisiones_auto.procesar_pendientes()
+    except Exception as e:
+        logger.warning("Liquidación automática de comisiones: %s", e)
+        comisiones = []
     if total:
         try:
             from modulos import motor_alertas
             motor_alertas.escanear()
         except Exception as e:
             logger.warning("Alertas tras leer correos: %s", e)
-    return {"nuevos": total, "buzones": res}
+    return {"nuevos": total, "buzones": res, "comisiones": comisiones}
 
 
 # ───────────────────────── Niveles por categoría (los ajusta el usuario) ─────────────────────────

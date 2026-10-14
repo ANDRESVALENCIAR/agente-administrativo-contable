@@ -83,7 +83,14 @@ def chat_responder(mensaje_usuario: str, historial: list[dict[str, str]] | None 
             errores = [b["buzon"] for b in r["buzones"] if b.get("error")]
             respuesta = (f"Leí los buzones: {r['nuevos']} correo(s) nuevo(s)."
                          + (f" No pude leer: {', '.join(errores)}." if errores else "")
-                         + " Pregúnteme «correos importantes» para verlos.")
+                         + " Pregúnteme «correos importantes» para verlos."
+                         + "".join(" " + c["mensaje"] for c in r.get("comisiones") or []))
+        elif "liquid" in t and "comisi" in t:
+            from modulos import comisiones_auto
+            res = comisiones_auto.procesar_pendientes(solo_con_orden=False)
+            respuesta = (" ".join(c["mensaje"] for c in res) or
+                         "No tengo archivos nuevos para liquidar. Cuando lleguen RECAUDO_VIA y RECAUDO_CONTABILIDAD "
+                         "por correo (o los suba en Comisiones) los liquido.")
         else:
             from modulos import asistente
             respuesta = asistente.responder(mensaje_usuario, historial)

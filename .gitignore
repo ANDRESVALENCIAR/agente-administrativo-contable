@@ -30,3 +30,7 @@ data/analitica/
 
 # Interruptor de la IA (local de cada computador)
 data/ia_apagada.flag
+
+# Comisiones: archivos de recaudo e informes (datos reales)
+data/comisiones/
+documentos/comisiones/

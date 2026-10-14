@@ -75,6 +75,11 @@ class Config:
     PERFIL_TRIBUTARIO = os.getenv("PERFIL_TRIBUTARIO", "personas-juridicas")
     NOMBRE_EMPRESA = os.getenv("NOMBRE_EMPRESA", "EIF SAS")
     NOMBRE_USUARIA = os.getenv("SHAKI_USUARIA", "Sandra")  # la jefe: saludo de la portada
+    # Comisiones automáticas: a quién avisar «ya liquidé» y quién puede ordenar «liquidar comisiones» por correo
+    COMISIONES_AVISO_EMAILS = os.getenv("COMISIONES_AVISO_EMAILS")
+    COMISIONES_REMITENTES = os.getenv("COMISIONES_REMITENTES", "")
+    COMISIONES_DOMINIOS = os.getenv("COMISIONES_DOMINIOS", "viaindustrial.com")
+    COMISIONES_ENTRADA = os.getenv("COMISIONES_ENTRADA", "")
     NIT_EMPRESA = os.getenv("NIT_EMPRESA", "901146454-6")
     CIUDAD_EMPRESA = os.getenv("CIUDAD_EMPRESA", "Bogotá D.C.")
     DATABASE_PATH = os.getenv("DATABASE_PATH", "agente.db")
