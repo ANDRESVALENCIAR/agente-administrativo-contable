@@ -74,6 +74,7 @@ class Config:
     # Open data impuestos
     PERFIL_TRIBUTARIO = os.getenv("PERFIL_TRIBUTARIO", "personas-juridicas")
     NOMBRE_EMPRESA = os.getenv("NOMBRE_EMPRESA", "EIF SAS")
+    NOMBRE_USUARIA = os.getenv("SHAKI_USUARIA", "Sandra")  # la jefe: saludo de la portada
     NIT_EMPRESA = os.getenv("NIT_EMPRESA", "901146454-6")
     CIUDAD_EMPRESA = os.getenv("CIUDAD_EMPRESA", "Bogotá D.C.")
     DATABASE_PATH = os.getenv("DATABASE_PATH", "agente.db")

@@ -358,6 +358,8 @@ with col_dashboard:
         if c_btn.button("Pregúntale a Shaki", key="abrir_chat", width="stretch", icon=":material/chat:"):
             _chat_dialogo()
     PAGINAS[pagina]()
+    if st.session_state.pop("abrir_chat", False):  # «Seguir conversando» desde el buscador de la portada
+        _chat_dialogo()
 
 if col_chat is not None:
     with col_chat:

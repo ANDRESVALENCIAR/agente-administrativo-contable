@@ -33,89 +33,6 @@ def _resumen_pagos() -> dict:
         return {"vencidos": 0, "hoy": 0, "proximos_7d": 0, "total_pendiente": 0, "aprobados": 0}
 
 
-def _hero(w: dict, por_aprobar: int) -> None:
-    hoy = fecha_larga_es(datetime.now(), con_hora=False)
-    venc, hoy_n, prox, aprob = (int(w.get(k, 0) or 0) for k in ("vencidos", "hoy", "proximos_7d", "aprobados"))
-    total = max(venc + hoy_n + prox + aprob, 1)
-    seg = [
-        (venc, ACCENT, "VENCIDOS"),
-        (hoy_n + prox, "#E8E8EA", "HOY Y 7 DÍAS"),
-        (aprob, "#3F3F46", "APROBADOS"),
-    ]
-    barra = "".join(
-        f'<div style="flex:{max(n, 0)} 1 0;background:{c}"></div>' for n, c, _ in seg if n > 0
-    ) or '<div style="flex:1 1 0;background:#26272C"></div>'
-    leyenda = "".join(
-        f'<span style="color:{"#C4C4CC" if c == "#E8E8EA" else "#8B8B93"}">■ {lbl} {round(n * 100 / total)}%</span>'
-        for n, c, lbl in seg
-    )
-    st.markdown(
-        f"""
-        <div class="sk-hero">
-          <div class="sk-eyebrow">{escape(hoy)} · Pendiente por pagar</div>
-          <div class="sk-hero-num">${_miles(w.get("total_pendiente", 0) or 0)}</div>
-          <div class="sk-hero-sub">
-            <span><strong class="sk-acc">{_miles(venc)}</strong> vencidos</span>
-            <span><strong>{_miles(por_aprobar)}</strong> por aprobar</span>
-            <span><strong>{_miles(hoy_n)}</strong> vencen hoy</span>
-            <span><strong>{_miles(prox)}</strong> en 7 días</span>
-          </div>
-          <div class="sk-bar">{barra}</div>
-          <div class="sk-legend">{leyenda}</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-
-def _hero_control(r: dict) -> None:
-    """Hero cuando hay libro de Control de pagos cargado (cuotas, no saldos)."""
-    hoy = fecha_larga_es(datetime.now(), con_hora=False)
-    pct = r["al_dia_pct"]
-    principal = r["vencidos"] + r["hoy"]
-    if principal:
-        titulo, numero = "Pagos vencidos o para hoy", _miles(principal)
-    else:
-        titulo, numero = "Pagos pendientes este mes", _miles(r["mes_pendientes"])
-    valor = f' · ${_miles(r["valor_pendiente_mes"])} por pagar' if r["valor_pendiente_mes"] else ""
-    st.markdown(
-        f"""
-        <div class="sk-hero">
-          <div class="sk-eyebrow">{escape(hoy)} · {titulo}</div>
-          <div class="sk-hero-num">{numero}</div>
-          <div class="sk-hero-sub">
-            <span><strong class="{'sk-acc' if r['vencidos'] else ''}">{_miles(r['vencidos'])}</strong> vencidos</span>
-            <span><strong>{_miles(r['hoy'])}</strong> hoy</span>
-            <span><strong>{_miles(r['manana'])}</strong> mañana (alerta 24h)</span>
-            <span><strong>{_miles(r['semana'])}</strong> en 7 días{valor}</span>
-          </div>
-          <div class="sk-bar"><div style="flex:{max(pct, 1)} 1 0;background:#4ADE80"></div>
-            <div style="flex:{max(100 - pct, 0)} 1 0;background:#26272C"></div></div>
-          <div class="sk-legend"><span style="color:#4ADE80">■ MES AL DÍA {pct}%</span>
-            <span>■ {r['mes_pagados']} DE {r['mes_total']} CUOTAS PAGADAS</span></div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-
-def _kpis(stats: dict, alertas: list, n_tareas: int) -> None:
-    criticas = sum(1 for a in alertas if a[2] == "CRITICO")
-    items = [
-        ("Alertas", stats["alertas_activas"], f"{criticas} CRÍTICAS" if criticas else "SIN CRÍTICAS"),
-        ("Por aprobar", stats["pagos_pendientes"], "7 DÍAS"),
-        ("Correos", stats["correos_hoy"], "HOY"),
-        ("Tareas", n_tareas, "HOY"),
-        ("Costo IA", f"${stats['costo_hoy']}", f"MES ${stats['costo_mes']}"),
-    ]
-    html = "".join(
-        f'<div class="sk-kpi"><span class="sk-kpi-l">{l}</span>'
-        f'<span class="sk-kpi-v">{v}</span><span class="sk-kpi-f">{f}</span></div>'
-        for l, v, f in items
-    )
-    st.markdown(f'<div class="sk-kpis">{html}</div>', unsafe_allow_html=True)
-
-
 def _atencion(alertas: list) -> None:
     st.markdown(
         f'<div class="sk-card-h"><h4>Requiere tu atención</h4>'
@@ -175,6 +92,164 @@ def _calendario_tributario() -> None:
     st.markdown("".join(html), unsafe_allow_html=True)
 
 
+# ── Portada "Comando": saludo, buscador grande y 4 tarjetas ─────────────────────────────────────────────
+SUGERENCIAS = ["¿Cómo vamos?", "¿Cuánta plata hay en bancos?", "¿Me alcanza la plata?", "¿Qué tengo hoy?",
+               "¿Qué impuestos vienen?", "¿Cuánto nos deben los clientes?"]
+
+CSS_PORTADA = f"""
+<style>
+[data-testid="stMain"] {{
+  background-image: radial-gradient(rgba(255,255,255,.07) 1px, transparent 1px) !important;
+  background-size: 22px 22px !important;
+}}
+.st-key-chat_btn_box {{ display: none !important; }}
+.pt-top {{ display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; font-family:'Geist Mono',monospace;
+  font-size:11px; letter-spacing:.2em; color:#8B8E96; text-transform:uppercase; }}
+.pt-top b {{ color:{ACCENT}; font-weight:500; letter-spacing:.14em; }}
+.pt-hola {{ text-align:center; font-weight:300; font-size:clamp(38px,5.6vw,74px); line-height:1.02;
+  letter-spacing:-.035em; color:#F4F4F5; margin:42px 0 26px; }}
+.pt-hola span {{ color:{ACCENT}; font-weight:500; }}
+.st-key-buscador {{ max-width:860px; margin:0 auto; }}
+.st-key-buscador [data-testid="stForm"] {{ background:#111216; border:1px solid #2A2C33; border-radius:22px;
+  padding:8px 8px 8px 22px; box-shadow:0 0 0 1px {ACCENT}59, 0 0 60px {ACCENT}2E; transition:box-shadow .2s; }}
+.st-key-buscador [data-testid="stForm"]:focus-within {{ box-shadow:0 0 0 1px {ACCENT}, 0 0 56px {ACCENT}59; }}
+.st-key-buscador [data-testid="stHorizontalBlock"] {{ align-items:center; flex-wrap:nowrap !important; gap:10px; }}
+.st-key-buscador [data-testid="stColumn"] {{ min-width:0 !important; }}
+.st-key-buscador [data-baseweb="input"], .st-key-buscador [data-baseweb="base-input"] {{
+  background:transparent !important; border:0 !important; box-shadow:none !important; }}
+.st-key-buscador input {{ height:58px !important; font-size:20px !important; color:#F4F4F5 !important;
+  background:transparent !important; padding-left:4px !important; }}
+.st-key-buscador input::placeholder {{ color:#7C7F88 !important; }}
+.st-key-buscador [data-testid="stTextInputRootElement"], .st-key-buscador [data-testid="stTextInputRootElement"]:focus-within {{
+  border:0 !important; box-shadow:none !important; outline:none !important; background:transparent !important; }}
+.st-key-buscador [data-testid="InputInstructions"] {{ display:none !important; }}
+.st-key-buscador [data-testid="stColumn"]:last-child {{ flex:0 0 58px !important; width:58px !important; }}
+.st-key-buscador [data-testid="stColumn"]:first-child {{ flex:1 1 auto !important; }}
+.st-key-buscador button {{ height:54px !important; min-height:54px !important; min-width:54px !important; border-radius:15px !important;
+  background:{ACCENT} !important; border:0 !important; color:#0A0A0A !important; font-size:22px !important;
+  font-weight:600 !important; }}
+.st-key-sugerencias_inicio {{ max-width:860px; margin:14px auto 0; }}
+.st-key-sugerencias_inicio [data-testid="stButtonGroup"] {{ justify-content:center; }}
+.st-key-sugerencias_inicio [data-testid="stButtonGroup"] > div {{ justify-content:center; }}
+.st-key-sugerencias_inicio button {{ border-radius:99px !important; background:#0E0F13 !important;
+  border:1px solid #2A2C33 !important; color:#D4D4D8 !important; padding:6px 16px !important; }}
+.st-key-sugerencias_inicio button:hover {{ border-color:{ACCENT} !important; color:#fff !important; }}
+.st-key-respuesta_inicio {{ max-width:860px; margin:22px auto 0; background:rgba(17,18,22,.92);
+  border:1px solid #2A2C33; border-radius:20px; padding:20px 24px 14px; }}
+.pt-preg {{ font-family:'Geist Mono',monospace; font-size:11px; letter-spacing:.16em; color:#8B8E96;
+  text-transform:uppercase; display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; }}
+.pt-preg b {{ color:#D4D4D8; font-weight:500; letter-spacing:.04em; text-transform:none; font-family:'Geist',sans-serif;
+  font-size:14px; }}
+.pt-kpis {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin:44px 0 30px; }}
+.pt-kpi {{ border:1px solid #1F2127; background:rgba(17,18,22,.85); border-radius:18px; padding:20px 22px;
+  display:flex; flex-direction:column; gap:6px; min-width:0; }}
+.pt-kpi.alerta {{ border-color:#3A2414; background:rgba(30,16,8,.85); }}
+.pt-kpi small {{ font-family:'Geist Mono',monospace; font-size:10.5px; letter-spacing:.16em; color:#8B8E96;
+  text-transform:uppercase; }}
+.pt-kpi.alerta small {{ color:#FFB07A; }}
+.pt-kpi b {{ font-size:38px; font-weight:300; letter-spacing:-.02em; color:#F4F4F5; line-height:1.1; }}
+.pt-kpi.alerta b {{ color:{ACCENT}; }}
+.pt-kpi b i {{ font-style:normal; font-size:18px; color:#8B8E96; }}
+.pt-kpi span {{ font-size:13px; color:#A1A1AA; }}
+.pt-kpi.alerta span {{ color:#D4A383; }}
+@media (max-width: 640px) {{
+  .pt-hola {{ margin:22px 0 18px; }}
+  .st-key-buscador input {{ font-size:17px !important; height:50px !important; }}
+}}
+</style>
+"""
+
+
+def _saludo() -> str:
+    h = datetime.now().hour
+    return "Buenos días" if h < 12 else "Buenas tardes" if h < 19 else "Buenas noches"
+
+
+def _preguntar_desde_portada(texto: str) -> None:
+    """Responde en la portada y deja la conversación en el chat para seguirla."""
+    from dashboard.chat import chat_responder
+    from modulos import asistente as _as
+
+    st.session_state.setdefault("chat_historial", [])
+    st.session_state.setdefault("chat_mensajes_ui", [])
+    motor = _as.motor_para(texto, st.session_state.chat_historial)
+    with st.spinner("Shaki está analizando con IA…" if motor == "ia" else "Shaki está consultando…"):
+        r, st.session_state.chat_historial = chat_responder(texto, st.session_state.chat_historial)
+    st.session_state.chat_mensajes_ui += [{"rol": "user", "texto": texto}, {"rol": "agent", "texto": r}]
+    st.session_state["portada_resp"] = {"pregunta": texto, "respuesta": r, "motor": motor}
+
+
+def _portada(n_alertas: int, criticas: int) -> None:
+    from config import cfg
+
+    st.markdown(CSS_PORTADA, unsafe_allow_html=True)
+    hoy = fecha_larga_es(datetime.now(), con_hora=False)
+    aviso = (f"<b>● {n_alertas} alertas · {criticas} críticas</b>" if criticas else
+             f"<b>● {n_alertas} alertas abiertas</b>" if n_alertas else "<b>● Todo en orden</b>")
+    st.markdown(f'<div class="pt-top"><span>{escape(hoy)} · {escape(cfg.NOMBRE_EMPRESA)}</span>{aviso}</div>'
+                f'<div class="pt-hola">{_saludo()}, {escape(cfg.NOMBRE_USUARIA)}.<br><span>¿Qué quieres saber?</span></div>',
+                unsafe_allow_html=True)
+
+    with st.container(key="buscador"):
+        with st.form("form_buscador", clear_on_submit=True, border=False):
+            c1, c2 = st.columns([12, 1])
+            q = c1.text_input("Pregúntale a Shaki", label_visibility="collapsed",
+                              placeholder="Pregúntale a Shaki: pagos, cartera, impuestos, personas…")
+            enviar = c2.form_submit_button("→", help="Preguntar")
+        if enviar and q.strip():
+            _preguntar_desde_portada(q.strip())
+
+    with st.container(key="sugerencias_inicio"):
+        n = st.session_state.get("portada_sug_n", 0)
+        elegida = st.pills("Sugerencias", SUGERENCIAS, key=f"portada_sug_{n}", label_visibility="collapsed")
+        if elegida:
+            st.session_state.portada_sug_n = n + 1
+            _preguntar_desde_portada(elegida)
+            st.rerun()
+
+    resp = st.session_state.get("portada_resp")
+    if resp:
+        with st.container(key="respuesta_inicio"):
+            etiqueta = "IA · Claude" if resp["motor"] == "ia" else "Motor local · gratis"
+            st.markdown(f'<div class="pt-preg"><b>{escape(resp["pregunta"])}</b><span>{etiqueta}</span></div>',
+                        unsafe_allow_html=True)
+            st.markdown(str(resp["respuesta"]).replace("$", "\\$").replace("\n", "  \n"))
+            b1, b2, _ = st.columns([1.4, 1, 3])
+            if b1.button("Seguir conversando", key="portada_seguir", icon=":material/chat:"):
+                st.session_state["abrir_chat"] = True
+                st.rerun()
+            if b2.button("Cerrar", key="portada_cerrar", icon=":material/close:"):
+                st.session_state.pop("portada_resp", None)
+                st.rerun()
+
+
+def _tarjetas(stats: dict, alertas: list, n_tareas: int, control: dict | None) -> None:
+    criticas = sum(1 for a in alertas if a[2] == "CRITICO")
+    if control:
+        urg = control["vencidos"] + control["hoy"]
+        pagos = (("Vencidos o para hoy", _miles(urg), f"{control['manana']} mañana · {control['semana']} en 7 días")
+                 if urg else ("Pagos del mes", _miles(control["mes_pendientes"]),
+                              f"{control['manana']} mañana · {control['semana']} en 7 días"))
+        tercera = ("Cuotas pagadas", f"{control['mes_pagados']} <i>/ {control['mes_total']}</i>",
+                   f"Mes al día {control['al_dia_pct']} %")
+    else:
+        w = _resumen_pagos()
+        pagos = ("Pagos vencidos", _miles(w.get("vencidos", 0) or 0),
+                 f"{_miles(w.get('hoy', 0) or 0)} hoy · {_miles(w.get('proximos_7d', 0) or 0)} en 7 días")
+        tercera = ("Pendiente por pagar", f"${_miles(w.get('total_pendiente', 0) or 0)}",
+                   f"{_miles(stats['pagos_pendientes'])} por aprobar")
+    items = [
+        ("", *pagos),
+        ("alerta" if criticas else "", "Alertas", _miles(stats["alertas_activas"]),
+         f"{criticas} críticas por resolver" if criticas else "sin críticas"),
+        ("", *tercera),
+        ("", "Tareas hoy", _miles(n_tareas), f"Costo IA del mes ${stats['costo_mes']}"),
+    ]
+    st.markdown('<div class="pt-kpis">' + "".join(
+        f'<div class="pt-kpi {c}"><small>{l}</small><b>{v}</b><span>{escape(str(s))}</span></div>'
+        for c, l, v, s in items) + "</div>", unsafe_allow_html=True)
+
+
 def render() -> None:
     """Renderiza el panel principal."""
     stats = obtener_estadisticas_hoy()
@@ -184,14 +259,12 @@ def render() -> None:
     try:
         from modulos import control_pagos as cp
 
-        usar_control = cp.hay_datos()
+        control = cp.resumen() if cp.hay_datos() else None
     except Exception:
-        usar_control = False
-    if usar_control:
-        _hero_control(cp.resumen())
-    else:
-        _hero(_resumen_pagos(), stats["pagos_pendientes"])
-    _kpis(stats, alertas, len(df_hoy))
+        control = None
+    criticas = sum(1 for a in alertas if a[2] == "CRITICO")
+    _portada(len(alertas), criticas)
+    _tarjetas(stats, alertas, len(df_hoy), control)
 
     df_venc = tareas_vencidas()
     if not df_venc.empty:
